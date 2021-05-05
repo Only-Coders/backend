@@ -4,11 +4,7 @@
   xsi:noNamespaceSchemaLocation="http://www.liquigraph.org/schema/1.0/liquigraph.xsd"
 >
     <!-- Copy and paste this block to add new migrations -->
-    <changeset id="hello-world" author="Mariano Z.">
-        <query>CREATE (n:Test {text:'Hello Migrations World!'})</query>
-    </changeset>
-
-    <changeset id="person_id_inedx" author="Mariano Z.">
-        <query>CREATE INDEX ON :Person(id)</query>
-    </changeset>
+<!--    <changeset id="hello-world" author="Mariano Z.">-->
+<!--        <query>CREATE (n:Test {text:'Hello Migrations World!'})</query>-->
+<!--    </changeset>-->
 </changelog>
