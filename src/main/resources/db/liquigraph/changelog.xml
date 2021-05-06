@@ -4,7 +4,40 @@
   xsi:noNamespaceSchemaLocation="http://www.liquigraph.org/schema/1.0/liquigraph.xsd"
 >
     <!-- Copy and paste this block to add new migrations -->
-<!--    <changeset id="hello-world" author="Mariano Z.">-->
-<!--        <query>CREATE (n:Test {text:'Hello Migrations World!'})</query>-->
-<!--    </changeset>-->
+    <changeset id="person_index_id" author="Juan.">
+        <query>CREATE INDEX ON :Person(id)</query>
+    </changeset>
+    <changeset id="person_unique_email" author="Juan.">
+        <query>CREATE CONSTRAINT person_unique_email IF NOT EXISTS ON (p:Person) ASSERT p.email IS UNIQUE</query>
+    </changeset>
+    <changeset id="role_index_id" author="Juan.">
+        <query>CREATE INDEX ON :Role(id)</query>
+    </changeset>
+    <changeset id="skill_index_id" author="Juan.">
+        <query>CREATE INDEX ON :Skill(id)</query>
+    </changeset>
+    <changeset id="country_index_id" author="Juan.">
+        <query>CREATE INDEX ON :Country(code)</query>
+    </changeset>
+    <changeset id="organization_index_id" author="Juan.">
+        <query>CREATE INDEX ON :Organization(id)</query>
+    </changeset>
+    <changeset id="educationalorganization_index_id" author="Juan.">
+        <query>CREATE INDEX ON :EducationalOrganization(id)</query>
+    </changeset>
+    <changeset id="reporttype_index_id" author="Juan.">
+        <query>CREATE INDEX ON :ReportType(id)</query>
+    </changeset>
+    <changeset id="tag_index_id" author="Juan.">
+        <query>CREATE INDEX ON :Tag(name)</query>
+    </changeset>
+    <changeset id="tag_unique_email" author="Juan.">
+        <query>CREATE CONSTRAINT tag_unique_email IF NOT EXISTS ON (t:Tag) ASSERT t.canonicalName IS UNIQUE</query>
+    </changeset>
+    <changeset id="post_index_id" author="Juan.">
+        <query>CREATE INDEX ON :Post(id)</query>
+    </changeset>
+    <changeset id="reaction_index_id" author="Juan.">
+        <query>CREATE INDEX ON :Reaction(id)</query>
+    </changeset>
 </changelog>
