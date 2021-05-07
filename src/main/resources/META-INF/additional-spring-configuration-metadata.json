@@ -1,0 +1,14 @@
+{
+  "properties": [
+    {
+      "name": "only-coders.jwt.refresh-expires",
+      "type": "java.lang.Integer",
+      "description": "How long does the refresh token lives."
+    },
+    {
+      "name": "only-coders.jwt.access-expires",
+      "type": "java.lang.Integer",
+      "description": "How long does the access token lives."
+    }
+  ]
+}
