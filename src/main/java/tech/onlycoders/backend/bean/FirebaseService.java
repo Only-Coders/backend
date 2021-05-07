@@ -17,14 +17,14 @@ public class FirebaseService {
   }
 
   public String verifyFirebaseToken(String firebaseToken) throws ApiException {
-    FirebaseToken token;
     try {
-      token = firebaseAuth.verifyIdToken(firebaseToken);
+      FirebaseToken token = firebaseAuth.verifyIdToken(firebaseToken);
+      if (!token.isEmailVerified()) {
+        throw new ApiException(HttpStatus.FORBIDDEN, "Email not verified");
+      }
+      return token.getEmail();
     } catch (FirebaseAuthException e) {
-      throw new ApiException(HttpStatus.FORBIDDEN, " invalid Token");
+      throw new ApiException(HttpStatus.FORBIDDEN, "Invalid firebase token");
     }
-    var name = token.getName();
-    System.out.println(" Id: " + name);
-    return name;
   }
 }
