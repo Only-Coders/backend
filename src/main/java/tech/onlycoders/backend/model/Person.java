@@ -5,9 +5,6 @@ import java.util.Set;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-import org.neo4j.graphdb.config.Setting;
-import org.neo4j.values.storable.DateArray;
-import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.neo4j.core.schema.Node;
 import org.springframework.data.neo4j.core.schema.Relationship;
 import org.springframework.data.neo4j.core.support.DateLong;
@@ -25,7 +22,6 @@ public class Person extends BaseEntity {
   private String imageURI;
   private String canonicalName;
 
-  @LastModifiedDate
   @DateLong
   private Date deleteAt;
 
