@@ -57,7 +57,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
   @Override
   public void configure(WebSecurity web) {
-    web.ignoring().antMatchers("/api/auth", "/api/refresh", "/swagger-ui/**", "/api-docs/**");
+    web.ignoring().antMatchers("/api/auth/login", "/api/refresh", "/swagger-ui/**", "/api-docs/**");
   }
 
   @Bean

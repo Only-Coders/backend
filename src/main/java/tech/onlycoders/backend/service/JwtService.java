@@ -10,21 +10,16 @@ import tech.onlycoders.backend.bean.auth.UserDetails;
 import tech.onlycoders.backend.exception.ApiException;
 
 @Service
-public class JwtUtil {
+public class JwtService {
 
-  private final String SECRET_KEY;
-  private final Integer ACCESS_EXPIRATION;
-  private final Integer REFRESH_EXPIRATION;
+  @Value("${jwt.secret:DEFAULT_KEY_VALUE}")
+  private String SECRET_KEY;
 
-  public JwtUtil(
-    @Value("${jwt.secret:DEFAULT_KEY_VALUE}") String secretKey,
-    @Value("${only-coders.jwt.access-expires}") int accessExpiration,
-    @Value("${only-coders.jwt.refresh-expires}") int refreshExpiration
-  ) {
-    this.ACCESS_EXPIRATION = accessExpiration;
-    this.SECRET_KEY = secretKey;
-    this.REFRESH_EXPIRATION = refreshExpiration;
-  }
+  @Value("${only-coders.jwt.access-expires:500}")
+  private Integer ACCESS_EXPIRATION;
+
+  @Value("${only-coders.jwt.refresh-expires:500}")
+  private Integer REFRESH_EXPIRATION;
 
   public String createToken(HashMap<String, Object> claims, String subject) {
     claims.put("ttl", new Date(System.currentTimeMillis() + 1000L * this.REFRESH_EXPIRATION));

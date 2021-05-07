@@ -3,12 +3,17 @@
     {
       "name": "only-coders.jwt.refresh-expires",
       "type": "java.lang.Integer",
-      "description": "How long does the refresh token lives."
+      "description": "How long does the refresh token lives. IN SECONDS."
     },
     {
       "name": "only-coders.jwt.access-expires",
       "type": "java.lang.Integer",
-      "description": "How long does the access token lives."
+      "description": "How long does the access token lives. IN SECONDS."
+    },
+    {
+      "name": "only-coders.jwt.secret",
+      "type": "java.lang.String",
+      "description": "Secret key to sing jwts."
     }
   ]
 }

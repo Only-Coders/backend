@@ -1,0 +1,5 @@
+Dockerfile
+.gitignore
+node_modules
+.vscode
+.settings
