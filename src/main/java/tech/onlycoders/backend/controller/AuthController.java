@@ -20,7 +20,7 @@ import tech.onlycoders.backend.exception.ApiException;
 import tech.onlycoders.backend.service.AuthService;
 
 @RestController
-@RequestMapping("/api/auth")
+@RequestMapping("/auth")
 public class AuthController {
 
   private final AuthService authService;

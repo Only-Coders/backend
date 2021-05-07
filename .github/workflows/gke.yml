@@ -64,10 +64,10 @@ jobs:
           key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle') }}
           restore-keys: ${{ runner.os }}-gradle
 
-      - name: Build with Maven
+      - name: Build with Gradle
         run: |
           echo $FB_SECRET_KEY > src/main/resources/serviceAccount.json
-          gradle build
+          ./gradlew build
 
       - name: Build
         run: |-
