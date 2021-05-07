@@ -11,9 +11,9 @@ import org.springframework.data.neo4j.core.schema.Relationship;
 @Data
 @NoArgsConstructor
 public class ContactRequest extends BaseEntity {
-    private String message;
 
-    @Relationship(type = "TO", direction = Relationship.Direction.OUTGOING)
-    public Person receiver;
+  private String message;
 
+  @Relationship(type = "TO", direction = Relationship.Direction.OUTGOING)
+  public Person receiver;
 }

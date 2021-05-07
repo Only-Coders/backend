@@ -10,5 +10,6 @@ import org.springframework.data.neo4j.core.schema.Node;
 @Data
 @NoArgsConstructor
 public class Role extends BaseEntity {
-    private String Name;
+
+  private String Name;
 }

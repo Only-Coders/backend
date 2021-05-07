@@ -1,27 +1,26 @@
 package tech.onlycoders.backend.model;
 
+import java.util.Set;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import org.springframework.data.neo4j.core.schema.Node;
 import org.springframework.data.neo4j.core.schema.Relationship;
 
-import java.util.Set;
-
 @EqualsAndHashCode(callSuper = true)
 @Node
 @Data
 @NoArgsConstructor
-public class Report extends BaseEntity{
-    private String reason;
+public class Report extends BaseEntity {
 
-    @Relationship(type = "HAS", direction = Relationship.Direction.OUTGOING)
-    public ReportType type;
+  private String reason;
 
-    @Relationship(type = "FOR", direction = Relationship.Direction.OUTGOING)
-    public Post post;
+  @Relationship(type = "HAS", direction = Relationship.Direction.OUTGOING)
+  public ReportType type;
 
-    @Relationship(type = "CREATES", direction = Relationship.Direction.INCOMING)
-    public Person reporter;
+  @Relationship(type = "FOR", direction = Relationship.Direction.OUTGOING)
+  public Post post;
 
+  @Relationship(type = "CREATES", direction = Relationship.Direction.INCOMING)
+  public Person reporter;
 }

@@ -1,23 +1,23 @@
 package tech.onlycoders.backend.model;
 
+import java.util.Set;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import org.springframework.data.neo4j.core.schema.Node;
 import org.springframework.data.neo4j.core.schema.Relationship;
 
-import java.util.Set;
-
 @EqualsAndHashCode(callSuper = true)
 @Node
 @Data
 @NoArgsConstructor
-public class Comment extends BaseEntity{
-    private String message;
+public class Comment extends BaseEntity {
 
-    @Relationship(type = "WRITES", direction = Relationship.Direction.INCOMING)
-    public Person person;
+  private String message;
 
-    @Relationship(type = "TO", direction = Relationship.Direction.INCOMING)
-    public Set<Reaction> reactions;
+  @Relationship(type = "WRITES", direction = Relationship.Direction.INCOMING)
+  public Person person;
+
+  @Relationship(type = "TO", direction = Relationship.Direction.INCOMING)
+  public Set<Reaction> reactions;
 }

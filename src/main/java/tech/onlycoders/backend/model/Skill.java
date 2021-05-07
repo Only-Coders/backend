@@ -10,6 +10,7 @@ import org.springframework.data.neo4j.core.schema.Node;
 @Data
 @NoArgsConstructor
 public class Skill extends BaseEntity {
-    private String name;
-    private String cannonicalName;
+
+  private String name;
+  private String cannonicalName;
 }
