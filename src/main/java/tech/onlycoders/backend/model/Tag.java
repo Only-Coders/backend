@@ -1,6 +1,7 @@
 package tech.onlycoders.backend.model;
 
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Set;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -30,5 +31,5 @@ public class Tag {
   private Date createdAt;
 
   @Relationship(type = "HAS", direction = Relationship.Direction.INCOMING)
-  public Set<Post> posts;
+  public Set<Post> posts = new HashSet<>();
 }

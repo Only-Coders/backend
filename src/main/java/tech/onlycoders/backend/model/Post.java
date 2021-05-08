@@ -1,5 +1,6 @@
 package tech.onlycoders.backend.model;
 
+import java.util.HashSet;
 import java.util.Set;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -18,14 +19,14 @@ public class Post extends BaseEntity {
   private Boolean isPublic;
 
   @Relationship(type = "FOR", direction = Relationship.Direction.INCOMING)
-  public Set<Comment> comments;
+  public Set<Comment> comments = new HashSet<>();
 
   @Relationship(type = "TO", direction = Relationship.Direction.INCOMING)
-  public Set<Reaction> reactions;
+  public Set<Reaction> reactions = new HashSet<>();
 
   @Relationship(type = "MENTIONS", direction = Relationship.Direction.OUTGOING)
-  public Set<Person> mentions;
+  public Set<Person> mentions = new HashSet<>();
 
   @Relationship(type = "HAS", direction = Relationship.Direction.OUTGOING)
-  public Set<Tag> tags;
+  public Set<Tag> tags = new HashSet<>();
 }
