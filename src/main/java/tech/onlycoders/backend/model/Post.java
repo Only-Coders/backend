@@ -16,6 +16,7 @@ public class Post extends BaseEntity {
   private String message;
   private PostType type;
   private Boolean isPublic;
+  private String url;
 
   @Relationship(type = "FOR", direction = Relationship.Direction.INCOMING)
   public Set<Comment> comments;
@@ -28,4 +29,7 @@ public class Post extends BaseEntity {
 
   @Relationship(type = "HAS", direction = Relationship.Direction.OUTGOING)
   public Set<Tag> tags;
+
+  @Relationship(type = "PUBLISH", direction = Relationship.Direction.INCOMING)
+  public Person publisher;
 }

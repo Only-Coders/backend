@@ -31,4 +31,9 @@ public class Tag {
 
   @Relationship(type = "HAS", direction = Relationship.Direction.INCOMING)
   public Set<Post> posts;
+
+  public Tag(String canonicalName, String name) {
+    this.canonicalName = canonicalName;
+    this.name = name;
+  }
 }
