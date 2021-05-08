@@ -46,8 +46,8 @@ public class JwtServiceTest {
   public void ShouldReturnIssuerWhenValidTTL() throws ApiException {
     ReflectionTestUtils.setField(jwtService, "ACCESS_EXPIRATION", -100);
     var token = this.jwtService.createToken(new HashMap<>(), "subject");
-    var email = this.jwtService.verifyTTL(token);
-    assertEquals("subject", email);
+    var pair = this.jwtService.verifyTTL(token);
+    assertEquals("subject", pair.getFirst());
   }
 
   @Test
