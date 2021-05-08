@@ -13,7 +13,7 @@ import tech.onlycoders.backend.exception.ApiException;
 @Service
 public class JwtService {
 
-  @Value("${jwt.secret:DEFAULT_KEY_VALUE}")
+  @Value("${only-coders.jwt.secret:DEFAULT_KEY_VALUE}")
   private String SECRET_KEY;
 
   @Value("${only-coders.jwt.access-expires:500}")
