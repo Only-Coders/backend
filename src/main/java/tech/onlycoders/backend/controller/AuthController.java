@@ -23,10 +23,16 @@ public class AuthController {
   private final AuthService authService;
 
   private final int sessionAge;
+  private final String cookieDomain;
 
-  public AuthController(AuthService authService, @Value("${only-coders.jwt.refresh-expires}") Integer sessionAge) {
+  public AuthController(
+    AuthService authService,
+    @Value("${only-coders.jwt.refresh-expires}") Integer sessionAge,
+    @Value("${only-coders.cookie.domain}") String cookieDomain
+  ) {
     this.authService = authService;
     this.sessionAge = sessionAge;
+    this.cookieDomain = cookieDomain;
   }
 
   @PostMapping("/login")
@@ -111,6 +117,7 @@ public class AuthController {
     sessionCookie.setSecure(true);
     sessionCookie.setHttpOnly(true);
     sessionCookie.setMaxAge(sessionAge);
+    sessionCookie.setDomain(cookieDomain);
     response.addCookie(sessionCookie);
   }
 }
