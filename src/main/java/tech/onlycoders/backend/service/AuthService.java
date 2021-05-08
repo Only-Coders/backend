@@ -23,6 +23,15 @@ public class AuthService {
 
   public AuthResponseDto authenticate(AuthRequestDto authRequestDto) throws ApiException {
     var email = this.firebaseService.verifyFirebaseToken(authRequestDto.getFirebaseToken());
+    return getAuthResponseDto(email);
+  }
+
+  public AuthResponseDto refreshToken(String token) throws ApiException {
+    var email = this.jwtService.verifyTTL(token);
+    return getAuthResponseDto(email);
+  }
+
+  private AuthResponseDto getAuthResponseDto(String email) {
     var optionalPerson = this.personRepository.findByEmail(email);
     var claims = new HashMap<String, Object>();
     if (optionalPerson.isPresent()) {

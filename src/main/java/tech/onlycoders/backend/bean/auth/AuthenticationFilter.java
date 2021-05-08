@@ -62,7 +62,7 @@ public class AuthenticationFilter extends GenericFilterBean {
     var bearerToken = authorizationHeader.substring(7);
     var cookies = Optional.ofNullable(httpRequest.getCookies());
     if (cookies.isPresent()) {
-      var signature = Arrays.stream(cookies.get()).filter(cookie -> cookie.getName().equals("SESSION")).findFirst();
+      var signature = Arrays.stream(cookies.get()).filter(cookie -> cookie.getName().equals("JSESSION")).findFirst();
       if (signature.isPresent()) {
         bearerToken = bearerToken.concat(".").concat(signature.get().getValue());
       }
