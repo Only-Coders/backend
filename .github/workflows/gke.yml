@@ -23,7 +23,7 @@ env:
   PROJECT_ID: ${{ secrets.GKE_PROJECT }}
   GKE_CLUSTER: cluster-2 # TODO: update to cluster name
   GKE_ZONE: southamerica-east1-a # TODO: update to cluster zone
-  DEPLOYMENT_NAME: gke-test # TODO: update to deployment name
+  DEPLOYMENT_NAME: onlycoders-backend # TODO: update to deployment name
   IMAGE: backend
   FB_SECRET_KEY: ${{ secrets.FB_SECRET_KEY }}
 
