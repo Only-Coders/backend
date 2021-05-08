@@ -1,5 +1,6 @@
 package tech.onlycoders.backend.model;
 
+import java.util.HashSet;
 import java.util.Set;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -19,5 +20,5 @@ public class Comment extends BaseEntity {
   public Person person;
 
   @Relationship(type = "TO", direction = Relationship.Direction.INCOMING)
-  public Set<Reaction> reactions;
+  public Set<Reaction> reactions = new HashSet<>();
 }
