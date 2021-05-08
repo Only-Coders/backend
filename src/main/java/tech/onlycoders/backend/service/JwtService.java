@@ -27,7 +27,6 @@ public class JwtService {
     return Jwts
       .builder()
       .setClaims((claims))
-      .setId("asd")
       .setSubject(subject)
       .setIssuedAt(new Date(System.currentTimeMillis()))
       .setExpiration(new Date(System.currentTimeMillis() + 1000L * ACCESS_EXPIRATION))
