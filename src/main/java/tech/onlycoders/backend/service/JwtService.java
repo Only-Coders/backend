@@ -43,4 +43,22 @@ public class JwtService {
       throw new ApiException(HttpStatus.UNAUTHORIZED, "Unauthorized");
     }
   }
+
+  public String verifyTTL(String token) throws ApiException {
+    try {
+      var claims = Jwts.parser().setSigningKey(SECRET_KEY).parseClaimsJws(token).getBody();
+      return claims.getSubject();
+    } catch (ExpiredJwtException e) {
+      var ttl = e.getClaims().get("ttl");
+      var expirationDate = new Date((Long) ttl);
+      var today = new Date();
+      if (expirationDate.after(today)) {
+        return e.getClaims().getSubject();
+      } else {
+        throw new ApiException(HttpStatus.UNAUTHORIZED, "Unauthorized");
+      }
+    } catch (SignatureException | MalformedJwtException e) {
+      throw new ApiException(HttpStatus.UNAUTHORIZED, "Unauthorized");
+    }
+  }
 }
