@@ -2,6 +2,7 @@ package tech.onlycoders.backend.dto.post.request;
 
 import java.util.List;
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -14,13 +15,13 @@ import tech.onlycoders.backend.model.PostType;
 @NoArgsConstructor
 public class CreatePostDto {
 
-  @NotBlank(message = "Token is mandatory")
+  @NotBlank(message = "message is mandatory")
   private String message;
 
-  @NotBlank(message = "Token is mandatory")
+  @NotNull(message = "type is mandatory")
   private PostType type;
 
-  @NotBlank(message = "Token is mandatory")
+  @NotNull(message = "isPublic is mandatory")
   private Boolean isPublic;
 
   private String url;

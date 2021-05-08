@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 @Data
 public class UserDetails {
 
+  private String canonicalName;
   private String firstName;
   private String lastName;
   private String roles;

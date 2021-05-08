@@ -8,10 +8,13 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import tech.onlycoders.backend.bean.auth.UserDetails;
 import tech.onlycoders.backend.dto.ApiErrorResponse;
 import tech.onlycoders.backend.dto.post.request.CreatePostDto;
 import tech.onlycoders.backend.dto.post.response.ReadPostDto;
@@ -57,8 +60,8 @@ public class PostController {
   )
   ResponseEntity<ReadPostDto> newPost(HttpServletResponse response, @RequestBody @Valid CreatePostDto createPostDto)
     throws ApiException {
-    //FIXME obtener c_name de usuario de la sesion
-    var publisherCanonicalName = "";
+    var publisherCanonicalName =
+      ((UserDetails) SecurityContextHolder.getContext().getAuthentication().getDetails()).getCanonicalName();
     var createdPost = postService.createPost(publisherCanonicalName, createPostDto);
     return ResponseEntity.ok(createdPost);
   }
