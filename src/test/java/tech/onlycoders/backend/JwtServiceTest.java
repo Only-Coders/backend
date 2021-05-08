@@ -32,4 +32,27 @@ public class JwtServiceTest {
     assertEquals("subject", details.getFirstName());
     assertNotNull(token);
   }
+
+  @Test
+  public void ShouldRejectTokenWithExpiredTTL() {
+    ReflectionTestUtils.setField(jwtService, "REFRESH_EXPIRATION", -100);
+    ReflectionTestUtils.setField(jwtService, "ACCESS_EXPIRATION", -100);
+    var token = this.jwtService.createToken(new HashMap<>(), "subject");
+    assertThrows(ApiException.class, () -> this.jwtService.verifyTTL(token));
+    ReflectionTestUtils.setField(jwtService, "REFRESH_EXPIRATION", 5000);
+  }
+
+  @Test
+  public void ShouldReturnIssuerWhenValidTTL() throws ApiException {
+    ReflectionTestUtils.setField(jwtService, "ACCESS_EXPIRATION", -100);
+    var token = this.jwtService.createToken(new HashMap<>(), "subject");
+    var pair = this.jwtService.verifyTTL(token);
+    assertEquals("subject", pair.getFirst());
+  }
+
+  @Test
+  public void ShouldFailWhenMalFormedToken() {
+    assertThrows(ApiException.class, () -> this.jwtService.verifyTTL("invalidToken"));
+    assertThrows(ApiException.class, () -> this.jwtService.getUserDetails("invalidToken"));
+  }
 }
