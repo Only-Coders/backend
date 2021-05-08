@@ -25,6 +25,9 @@ public class Person extends BaseEntity {
   @DateLong
   private Date deleteAt;
 
+  @DateLong
+  private Date securityUpdate;
+
   private Boolean blocked;
 
   @Relationship("WORKS_AT")
