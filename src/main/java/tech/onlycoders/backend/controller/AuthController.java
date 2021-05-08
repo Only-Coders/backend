@@ -62,11 +62,13 @@ public class AuthController {
       )
     }
   )
-  ResponseEntity<AuthResponseDto> auth(HttpServletResponse response, @RequestBody @Valid AuthRequestDto authRequestDto)
-    throws ApiException {
+  ResponseEntity<AuthResponseDto> logout(
+    HttpServletResponse response,
+    @RequestBody @Valid AuthRequestDto authRequestDto
+  ) throws ApiException {
     var authResponse = this.authService.authenticate(authRequestDto);
     var tokenSections = authResponse.getToken().split("\\.");
-    setCookie(response, tokenSections);
+    setCookie(response, tokenSections, this.sessionAge);
     return ResponseEntity.ok(AuthResponseDto.builder().token(tokenSections[0] + "." + tokenSections[1]).build());
   }
 
@@ -108,11 +110,34 @@ public class AuthController {
     }
     var authResponse = this.authService.refreshToken(token);
     var tokenSections = authResponse.getToken().split("\\.");
-    setCookie(response, tokenSections);
+    setCookie(response, tokenSections, this.sessionAge);
     return ResponseEntity.ok(AuthResponseDto.builder().token(tokenSections[0] + "." + tokenSections[1]).build());
   }
 
-  private void setCookie(HttpServletResponse response, String[] tokenSections) {
+  @PostMapping("/logout")
+  @ApiResponses(
+    value = {
+      @ApiResponse(
+        responseCode = "200",
+        content = { @Content(mediaType = "application/json", schema = @Schema(implementation = AuthResponseDto.class)) }
+      ),
+      @ApiResponse(
+        responseCode = "401",
+        content = {
+          @Content(mediaType = "application/json", schema = @Schema(implementation = ApiErrorResponse.class))
+        }
+      )
+    }
+  )
+  ResponseEntity<?> logout(
+    HttpServletResponse response,
+    @CookieValue(value = "JSESSION", required = false) String signatureCookie
+  ) {
+    setCookie(response, null, 0);
+    return ResponseEntity.ok().build();
+  }
+
+  private void setCookie(HttpServletResponse response, String[] tokenSections, int sessionAge) {
     var sessionCookie = new Cookie("JSESSION", tokenSections[2]);
     sessionCookie.setSecure(true);
     sessionCookie.setHttpOnly(true);
