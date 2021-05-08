@@ -4,8 +4,11 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.anyString;
 
+import java.time.LocalDate;
+import java.util.Date;
 import java.util.Optional;
 import org.jeasy.random.EasyRandom;
+import org.joda.time.DateTime;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -70,5 +73,39 @@ public class AuthServiceTest {
     Mockito.when(this.firebaseService.verifyFirebaseToken(anyString())).thenReturn("some@email.com");
     var token = this.service.authenticate(authRequest);
     assertNotNull(token);
+  }
+
+  @Test
+  public void ShouldRefreshTokenWhenUserHasNotBeenRegistered() throws ApiException {
+    var authRequest = ezRandom.nextObject(AuthRequestDto.class);
+    Mockito.when(this.personRepository.findByEmail(anyString())).thenReturn(Optional.empty());
+    Mockito.when(this.firebaseService.verifyFirebaseToken(anyString())).thenReturn("some@email.com");
+    var authResponseDto = this.service.authenticate(authRequest);
+    this.service.refreshToken(authResponseDto.getToken());
+  }
+
+  @Test
+  public void ShouldRefreshTokenWhenUserHasBeenRegistered() throws ApiException {
+    var authRequest = ezRandom.nextObject(AuthRequestDto.class);
+    Mockito.when(this.personRepository.findByEmail(anyString())).thenReturn(Optional.of(new Person()));
+    Mockito.when(this.firebaseService.verifyFirebaseToken(anyString())).thenReturn("some@email.com");
+    var authResponseDto = this.service.authenticate(authRequest);
+    this.service.refreshToken(authResponseDto.getToken());
+  }
+
+  @Test
+  public void ShouldFailToRefreshTokenWhenUserHasDoneASecurityLogout() throws ApiException {
+    var authRequest = ezRandom.nextObject(AuthRequestDto.class);
+    var person = new Person();
+
+    Date dt = new Date();
+    DateTime dtOrg = new DateTime(dt);
+    DateTime dtPlusOne = dtOrg.plusDays(1);
+    person.setSecurityUpdate(dtPlusOne.toDate());
+
+    Mockito.when(this.personRepository.findByEmail(anyString())).thenReturn(Optional.of(person));
+    Mockito.when(this.firebaseService.verifyFirebaseToken(anyString())).thenReturn("some@email.com");
+    var authResponseDto = this.service.authenticate(authRequest);
+    assertThrows(ApiException.class, () -> this.service.refreshToken(authResponseDto.getToken()));
   }
 }

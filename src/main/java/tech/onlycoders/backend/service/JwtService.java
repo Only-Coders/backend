@@ -4,6 +4,7 @@ import io.jsonwebtoken.*;
 import java.util.Date;
 import java.util.HashMap;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.util.Pair;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import tech.onlycoders.backend.bean.auth.UserDetails;
@@ -44,16 +45,16 @@ public class JwtService {
     }
   }
 
-  public String verifyTTL(String token) throws ApiException {
+  public Pair<String, Date> verifyTTL(String token) throws ApiException {
     try {
       var claims = Jwts.parser().setSigningKey(SECRET_KEY).parseClaimsJws(token).getBody();
-      return claims.getSubject();
+      return Pair.of(claims.getSubject(), claims.getIssuedAt());
     } catch (ExpiredJwtException e) {
       var ttl = e.getClaims().get("ttl");
       var expirationDate = new Date((Long) ttl);
       var today = new Date();
       if (expirationDate.after(today)) {
-        return e.getClaims().getSubject();
+        return Pair.of(e.getClaims().getSubject(), e.getClaims().getIssuedAt());
       } else {
         throw new ApiException(HttpStatus.UNAUTHORIZED, "Unauthorized");
       }
