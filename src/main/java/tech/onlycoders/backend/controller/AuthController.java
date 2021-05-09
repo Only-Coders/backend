@@ -4,10 +4,12 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import javax.servlet.http.Cookie;
+import java.time.Duration;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import tech.onlycoders.backend.dto.ApiErrorResponse;
@@ -21,18 +23,23 @@ import tech.onlycoders.backend.service.AuthService;
 public class AuthController {
 
   private final AuthService authService;
-
   private final int sessionAge;
   private final String cookieDomain;
+  private final String cookieSameSite;
+  private final String cookieName;
 
   public AuthController(
     AuthService authService,
     @Value("${only-coders.jwt.refresh-expires}") Integer sessionAge,
-    @Value("${only-coders.cookie.domain}") String cookieDomain
+    @Value("${only-coders.cookie.domain}") String cookieDomain,
+    @Value("${only-coders.cookie.same-site}") String cookieSameSite,
+    @Value("${only-coders.cookie.name}") String cookieName
   ) {
     this.authService = authService;
     this.sessionAge = sessionAge;
     this.cookieDomain = cookieDomain;
+    this.cookieName = cookieName;
+    this.cookieSameSite = cookieSameSite;
   }
 
   @PostMapping("/login")
@@ -68,7 +75,7 @@ public class AuthController {
   ) throws ApiException {
     var authResponse = this.authService.authenticate(authRequestDto);
     var tokenSections = authResponse.getToken().split("\\.");
-    setCookie(response, tokenSections, this.sessionAge);
+    setCookie(response, tokenSections[2], this.sessionAge);
     return ResponseEntity.ok(AuthResponseDto.builder().token(tokenSections[0] + "." + tokenSections[1]).build());
   }
 
@@ -110,7 +117,7 @@ public class AuthController {
     }
     var authResponse = this.authService.refreshToken(token);
     var tokenSections = authResponse.getToken().split("\\.");
-    setCookie(response, tokenSections, this.sessionAge);
+    setCookie(response, tokenSections[2], this.sessionAge);
     return ResponseEntity.ok(AuthResponseDto.builder().token(tokenSections[0] + "." + tokenSections[1]).build());
   }
 
@@ -133,16 +140,20 @@ public class AuthController {
     HttpServletResponse response,
     @CookieValue(value = "JSESSION", required = false) String signatureCookie
   ) {
-    setCookie(response, null, 0);
+    setCookie(response, "", 0);
     return ResponseEntity.ok().build();
   }
 
-  private void setCookie(HttpServletResponse response, String[] tokenSections, int sessionAge) {
-    var sessionCookie = new Cookie("JSESSION", tokenSections[2]);
-    sessionCookie.setSecure(true);
-    sessionCookie.setHttpOnly(true);
-    sessionCookie.setMaxAge(sessionAge);
-    sessionCookie.setDomain(cookieDomain);
-    response.addCookie(sessionCookie);
+  private void setCookie(HttpServletResponse response, String tokenSignature, int sessionAge) {
+    ResponseCookie sessionCookie = ResponseCookie
+      .from(cookieName, tokenSignature)
+      .httpOnly(true)
+      .secure(true)
+      .sameSite(cookieSameSite)
+      .domain(cookieDomain)
+      .path("/")
+      .maxAge(Duration.ofSeconds(sessionAge))
+      .build();
+    response.addHeader(HttpHeaders.SET_COOKIE, sessionCookie.toString());
   }
 }

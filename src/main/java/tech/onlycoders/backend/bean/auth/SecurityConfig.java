@@ -1,8 +1,8 @@
 package tech.onlycoders.backend.bean.auth;
 
-import java.util.Collections;
 import javax.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
@@ -14,9 +14,6 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
-import org.springframework.web.cors.CorsConfiguration;
-import org.springframework.web.cors.CorsConfigurationSource;
-import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.servlet.HandlerExceptionResolver;
 
 @Configuration
@@ -26,6 +23,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
   private final TokenAuthenticationProvider tokenAuthenticationProvider;
   private final HandlerExceptionResolver resolver;
+
+  @Value("${only-coders.cookie.name}")
+  private String COOKIE_NAME;
 
   public SecurityConfig(
     TokenAuthenticationProvider tokenAuthenticationProvider,
@@ -52,23 +52,15 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
       .exceptionHandling()
       .authenticationEntryPoint(unauthorizedEntryPoint());
     http.cors();
-    http.addFilterBefore(new AuthenticationFilter(authenticationManager(), resolver), BasicAuthenticationFilter.class);
+    http.addFilterBefore(
+      new AuthenticationFilter(authenticationManager(), resolver, COOKIE_NAME),
+      BasicAuthenticationFilter.class
+    );
   }
 
   @Override
   public void configure(WebSecurity web) {
-    web.ignoring().antMatchers("/auth/login", "/swagger-ui/**", "/api-docs/**");
-  }
-
-  @Bean
-  CorsConfigurationSource corsConfigurationSource() {
-    CorsConfiguration configuration = new CorsConfiguration();
-    //    configuration.setAllowedOrigins(Collections.singletonList("*"));
-
-    configuration.setAllowedMethods(Collections.singletonList("*"));
-    UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-    source.registerCorsConfiguration("/**", configuration);
-    return source;
+    web.ignoring().antMatchers("/api/auth/login", "/swagger-ui/**", "/api-docs/**");
   }
 
   @Override

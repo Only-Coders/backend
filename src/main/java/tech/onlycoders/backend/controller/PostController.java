@@ -4,11 +4,10 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletResponse;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import javax.validation.Valid;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -23,6 +22,7 @@ import tech.onlycoders.backend.service.PostService;
 
 @RestController
 @RequestMapping("/api/posts")
+@SecurityRequirement(name = "bearerAuth")
 public class PostController {
 
   private final PostService postService;
@@ -58,11 +58,10 @@ public class PostController {
       )
     }
   )
-  ResponseEntity<ReadPostDto> newPost(HttpServletResponse response, @RequestBody @Valid CreatePostDto createPostDto)
-    throws ApiException {
-    var publisherCanonicalName =
-      ((UserDetails) SecurityContextHolder.getContext().getAuthentication().getDetails()).getCanonicalName();
-    var createdPost = postService.createPost(publisherCanonicalName, createPostDto);
+  @PreAuthorize("hasAuthority('USER')")
+  ResponseEntity<ReadPostDto> newPost(@RequestBody @Valid CreatePostDto createPostDto) throws ApiException {
+    var userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    var createdPost = postService.createPost(userDetails.getCanonicalName(), createPostDto);
     return ResponseEntity.ok(createdPost);
   }
 }

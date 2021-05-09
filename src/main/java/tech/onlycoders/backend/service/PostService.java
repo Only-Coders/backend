@@ -11,7 +11,6 @@ import tech.onlycoders.backend.dto.post.response.ReadPostDto;
 import tech.onlycoders.backend.exception.ApiException;
 import tech.onlycoders.backend.mapper.PostMapper;
 import tech.onlycoders.backend.model.Person;
-import tech.onlycoders.backend.model.Post;
 import tech.onlycoders.backend.model.Tag;
 import tech.onlycoders.backend.repository.PersonRepository;
 import tech.onlycoders.backend.repository.PostRepository;
@@ -20,10 +19,10 @@ import tech.onlycoders.backend.repository.TagRepository;
 @Service
 public class PostService {
 
-  private PersonRepository personRepository;
-  private PostRepository postRepository;
-  private TagRepository tagRepository;
-  private PostMapper postMapper;
+  private final PersonRepository personRepository;
+  private final PostRepository postRepository;
+  private final TagRepository tagRepository;
+  private final PostMapper postMapper;
 
   public PostService(
     PersonRepository personRepository,
@@ -38,11 +37,11 @@ public class PostService {
   }
 
   public ReadPostDto createPost(String publisherCanonicalName, CreatePostDto createPostDto) throws ApiException {
-    var optionalPublisher = personRepository.findByCanonicalName(publisherCanonicalName);
-    if (!optionalPublisher.isPresent()) {
-      throw new ApiException(HttpStatus.INTERNAL_SERVER_ERROR, "Couldn`t find Person [" + publisherCanonicalName + "]");
-    }
-    var publisher = optionalPublisher.get();
+    var publisher = personRepository
+      .findByCanonicalName(publisherCanonicalName)
+      .orElseThrow(
+        () -> new ApiException(HttpStatus.NOT_FOUND, "Couldn't find Person [" + publisherCanonicalName + "]")
+      );
 
     var mentions = getPersonList(createPostDto.getMentionCanonicalNames());
     var tags = getOrSaveTagList(createPostDto.getTagNames());
@@ -64,14 +63,16 @@ public class PostService {
     if (tagNames != null) {
       for (String name : tagNames) {
         var cName = getTagCanonicalName(name);
-        var optTag = tagRepository.findByCanonicalName(cName);
-        if (optTag.isPresent()) {
-          list.add(optTag.get());
-        } else {
-          var tag = new Tag(cName, name);
-          tag = tagRepository.save(tag);
-          list.add(tag);
-        }
+        var tag = tagRepository
+          .findByCanonicalName(cName)
+          .orElseGet(
+            () -> {
+              var newTag = new Tag(cName, name);
+              newTag = tagRepository.save(newTag);
+              return newTag;
+            }
+          );
+        list.add(tag);
       }
     }
     return list;
@@ -85,11 +86,10 @@ public class PostService {
     var list = new HashSet<Person>();
     if (canonicalNames != null) {
       for (String cName : canonicalNames) {
-        var optionalPerson = personRepository.findByCanonicalName(cName);
-        if (!optionalPerson.isPresent()) {
-          throw new ApiException(HttpStatus.BAD_REQUEST, "Couldn`t find Person [" + cName + "]");
-        }
-        list.add(optionalPerson.get());
+        var person = personRepository
+          .findByCanonicalName(cName)
+          .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Couldn't find Person [" + cName + "]"));
+        list.add(person);
       }
     }
     return list;

@@ -13,6 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.InternalAuthenticationServiceException;
@@ -27,18 +28,19 @@ import tech.onlycoders.backend.exception.ApiException;
 public class AuthenticationFilter extends GenericFilterBean {
 
   private static final Logger logger = LoggerFactory.getLogger(AuthenticationFilter.class);
-  public static final String TOKEN_SESSION_KEY = "token";
-  public static final String USER_SESSION_KEY = "user";
-  private final AuthenticationManager authenticationManager;
+  private final String COOKIE_NAME;
 
+  private final AuthenticationManager authenticationManager;
   private final HandlerExceptionResolver resolver;
 
   public AuthenticationFilter(
     AuthenticationManager authenticationManager,
-    @Qualifier("handlerExceptionResolver") HandlerExceptionResolver resolver
+    @Qualifier("handlerExceptionResolver") HandlerExceptionResolver resolver,
+    String cookieName
   ) {
     this.authenticationManager = authenticationManager;
     this.resolver = resolver;
+    this.COOKIE_NAME = cookieName;
   }
 
   @Override
@@ -62,7 +64,7 @@ public class AuthenticationFilter extends GenericFilterBean {
     var bearerToken = authorizationHeader.substring(7);
     var cookies = Optional.ofNullable(httpRequest.getCookies());
     if (cookies.isPresent()) {
-      var signature = Arrays.stream(cookies.get()).filter(cookie -> cookie.getName().equals("JSESSION")).findFirst();
+      var signature = Arrays.stream(cookies.get()).filter(cookie -> cookie.getName().equals(COOKIE_NAME)).findFirst();
       if (signature.isPresent()) {
         bearerToken = bearerToken.concat(".").concat(signature.get().getValue());
       }
@@ -85,9 +87,6 @@ public class AuthenticationFilter extends GenericFilterBean {
         new ApiException(HttpStatus.UNAUTHORIZED, "UNAUTHORIZED")
       );
       SecurityContextHolder.clearContext();
-    } finally {
-      MDC.remove(TOKEN_SESSION_KEY);
-      MDC.remove(USER_SESSION_KEY);
     }
   }
 

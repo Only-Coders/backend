@@ -19,6 +19,16 @@
       "name": "only-coders.cookie.domain",
       "type": "java.lang.String",
       "description": "Host to which the cookie will be sent."
+    },
+    {
+      "name": "only-coders.cookie.same-site",
+      "type": "java.lang.String",
+      "description": "Configuration for SameSite: NONE, Lax, Strict.\n Use none for development."
+    },
+    {
+      "name": "only-coders.cookie.name",
+      "type": "java.lang.String",
+      "description": "Cookie's name."
     }
   ]
 }

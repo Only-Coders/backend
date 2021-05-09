@@ -3,9 +3,7 @@ package tech.onlycoders.backend.model;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.springframework.data.neo4j.core.schema.Node;
 import org.springframework.data.neo4j.core.schema.Relationship;
 import org.springframework.data.neo4j.core.support.DateLong;
@@ -14,6 +12,8 @@ import org.springframework.data.neo4j.core.support.DateLong;
 @Node
 @Data
 @NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class Person extends BaseEntity {
 
   private String firstName;
@@ -43,9 +43,6 @@ public class Person extends BaseEntity {
 
   @Relationship(type = "IS_CONNECTED", direction = Relationship.Direction.OUTGOING)
   public Set<Person> contacts = new HashSet<>();
-
-  @Relationship(type = "PUBLISH", direction = Relationship.Direction.OUTGOING)
-  public Set<Post> posts = new HashSet<>();
 
   @Relationship(type = "IS_INTERESTED", direction = Relationship.Direction.OUTGOING)
   public Set<Tag> tags = new HashSet<>();

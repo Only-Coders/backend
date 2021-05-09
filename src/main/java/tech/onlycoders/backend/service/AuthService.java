@@ -28,7 +28,8 @@ public class AuthService {
     var claims = new HashMap<String, Object>();
     if (optionalPerson.isPresent()) {
       var person = optionalPerson.get();
-      claims.put("roles", person.getRole());
+      claims.put("roles", person.getRole().getName());
+      claims.put("canonicalName", person.getCanonicalName());
       claims.put("complete", true);
     } else {
       claims.put("complete", false);
