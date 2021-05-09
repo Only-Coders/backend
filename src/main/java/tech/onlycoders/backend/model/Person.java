@@ -22,6 +22,7 @@ public class Person extends BaseEntity {
   private String img;
   private String imageURI;
   private String canonicalName;
+  private Boolean defaultPrivacyIsPublic = false;
 
   @DateLong
   private Date deleteAt;

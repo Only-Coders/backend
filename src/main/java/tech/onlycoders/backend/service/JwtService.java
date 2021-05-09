@@ -38,7 +38,9 @@ public class JwtService {
     try {
       var claims = Jwts.parser().setSigningKey(SECRET_KEY).parseClaimsJws(token).getBody();
       var userName = claims.getSubject();
-      return UserDetails.builder().firstName(userName).roles((String) claims.get("roles")).build();
+      var canonicalName = (String) claims.get("canonicalName");
+      var roles = (String) claims.get("roles");
+      return UserDetails.builder().firstName(userName).canonicalName(canonicalName).roles(roles).build();
     } catch (SignatureException | ExpiredJwtException | MalformedJwtException e) {
       throw new ApiException(HttpStatus.UNAUTHORIZED, "Unauthorized");
     }

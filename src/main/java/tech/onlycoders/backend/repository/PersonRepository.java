@@ -8,4 +8,5 @@ import tech.onlycoders.backend.model.Person;
 @Repository
 public interface PersonRepository extends Neo4jRepository<Person, String> {
   Optional<Person> findByEmail(String email);
+  Optional<Person> findByCanonicalName(String canonicalName);
 }
