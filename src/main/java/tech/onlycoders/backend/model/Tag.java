@@ -30,9 +30,6 @@ public class Tag {
   @CreatedDate
   private Date createdAt;
 
-  @Relationship(type = "HAS", direction = Relationship.Direction.INCOMING)
-  public Set<Post> posts = new HashSet<>();
-
   public Tag(String canonicalName, String name) {
     this.canonicalName = canonicalName;
     this.name = name;
