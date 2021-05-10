@@ -70,6 +70,9 @@ dependencies {
     compile 'org.mapstruct:mapstruct:1.4.2.Final'
     compileOnly 'org.mapstruct:mapstruct-processor:1.4.2.Final'
 
+    implementation 'net.sargue:mailgun:1.10.0'
+    implementation 'org.glassfish.jersey.inject:jersey-hk2:2.32'
+
     compileOnly 'org.projectlombok:lombok:1.18.20'
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
     annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
@@ -101,6 +104,7 @@ jacocoTestCoverageVerification {
         rule {
             element = 'CLASS'
             includes = ['tech.onlycoders.backend.service.*']
+            excludes = ['tech.onlycoders.backend.service.MailService*']
 
             limit {
                 counter = 'LINE'
