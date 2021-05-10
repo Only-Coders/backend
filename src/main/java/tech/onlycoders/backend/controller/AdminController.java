@@ -59,7 +59,7 @@ public class AdminController {
     }
   )
   @PreAuthorize("hasAuthority('ADMIN')")
-  ResponseEntity<ReadAdminDto> newPost(@RequestBody @Valid CreateAdminDto createAdminDto) throws ApiException {
+  ResponseEntity<ReadAdminDto> createAdmin(@RequestBody @Valid CreateAdminDto createAdminDto) throws ApiException {
     return ResponseEntity.ok(adminService.createAdmin(createAdminDto));
   }
 }
