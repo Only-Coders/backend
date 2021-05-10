@@ -8,6 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import tech.onlycoders.backend.dto.post.request.CreatePostDto;
 import tech.onlycoders.backend.dto.post.response.ReadPostDto;
+import tech.onlycoders.backend.dto.tag.response.ReadTagNameDto;
 import tech.onlycoders.backend.exception.ApiException;
 import tech.onlycoders.backend.mapper.PostMapper;
 import tech.onlycoders.backend.model.Person;
@@ -15,6 +16,7 @@ import tech.onlycoders.backend.model.Tag;
 import tech.onlycoders.backend.repository.PersonRepository;
 import tech.onlycoders.backend.repository.PostRepository;
 import tech.onlycoders.backend.repository.TagRepository;
+import tech.onlycoders.backend.utils.ProcessingTagLists;
 
 @Service
 public class PostService {
@@ -49,37 +51,42 @@ public class PostService {
     var post = postMapper.createPostDtoToPost(createPostDto);
     post.setPublisher(publisher);
     post.setMentions(mentions);
-    post.setTags(tags);
+    post.setTags(tags.getPersitedTags());
     post = postRepository.save(post);
 
     publisher.setDefaultPrivacyIsPublic(post.getIsPublic());
     personRepository.save(publisher);
 
-    return postMapper.postToReadPersonDto(post);
+    var dto = postMapper.postToReadPersonDto(post);
+    dto.setTagNames(tags.getTagNames());
+    return dto;
   }
 
-  private Set<Tag> getOrSaveTagList(List<String> tagNames) {
-    var list = new HashSet<Tag>();
-    if (tagNames != null) {
-      for (String name : tagNames) {
-        var cName = getTagCanonicalName(name);
+  private ProcessingTagLists getOrSaveTagList(List<String> displayTagNames) {
+    var taglist = new ProcessingTagLists();
+    if (displayTagNames != null) {
+      for (String displayName : displayTagNames) {
+        var canonicalName = getTagCanonicalName(displayName);
         var tag = tagRepository
-          .findByCanonicalName(cName)
+          .findByCanonicalName(canonicalName)
           .orElseGet(
             () -> {
-              var newTag = new Tag(cName, name);
+              var newTag = Tag.builder().canonicalName(canonicalName).build();
               newTag = tagRepository.save(newTag);
               return newTag;
             }
           );
-        list.add(tag);
+        taglist.getPersitedTags().add(tag);
+        taglist
+          .getTagNames()
+          .add(ReadTagNameDto.builder().displayName(displayName).canonicalName(canonicalName).build());
       }
     }
-    return list;
+    return taglist;
   }
 
   private String getTagCanonicalName(String name) {
-    return Normalizer.normalize(name, Normalizer.Form.NFD).replaceAll("\\W", "").toLowerCase();
+    return Normalizer.normalize(name, Normalizer.Form.NFD).replaceAll("[^a-zA-Z0-9]", "").toLowerCase();
   }
 
   private Set<Person> getPersonList(List<String> canonicalNames) throws ApiException {
