@@ -1,6 +1,5 @@
 package tech.onlycoders.backend.model;
 
-import java.util.Set;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
