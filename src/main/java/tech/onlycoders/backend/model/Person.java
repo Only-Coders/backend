@@ -19,7 +19,6 @@ public class Person extends BaseEntity {
   private String firstName;
   private String lastName;
   private String email;
-  private String img;
   private String imageURI;
   private String canonicalName;
   private Boolean defaultPrivacyIsPublic = false;

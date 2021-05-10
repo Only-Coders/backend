@@ -9,10 +9,12 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class ReadPersonLiteDto {
+public class ReadPersonDto {
 
-  public String canonicalName;
-  public String firstName;
-  public String lastName;
-  public String imageURI;
+  private String firstName;
+  private String lastName;
+  private String email;
+  private String imageURI;
+  private String canonicalName;
+  private Boolean defaultPrivacyIsPublic;
 }
