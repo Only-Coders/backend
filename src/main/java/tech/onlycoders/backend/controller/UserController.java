@@ -6,36 +6,30 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
-import javax.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
-import tech.onlycoders.backend.bean.auth.UserDetails;
 import tech.onlycoders.backend.dto.ApiErrorResponse;
-import tech.onlycoders.backend.dto.auth.response.AuthResponseDto;
-import tech.onlycoders.backend.dto.person.response.ReadPersonDto;
-import tech.onlycoders.backend.dto.post.request.CreatePostDto;
-import tech.onlycoders.backend.dto.post.response.ReadPostDto;
+import tech.onlycoders.backend.dto.user.response.ReadUserDto;
 import tech.onlycoders.backend.exception.ApiException;
-import tech.onlycoders.backend.service.PersonService;
+import tech.onlycoders.backend.service.UserService;
 
 @RestController
-@RequestMapping("/api/people")
+@RequestMapping("/api/users")
 @SecurityRequirement(name = "bearerAuth")
-public class PeopleController {
+public class UserController {
 
-  private final PersonService personService;
+  private final UserService userService;
 
-  public PeopleController(PersonService personService) {
-    this.personService = personService;
+  public UserController(UserService userService) {
+    this.userService = userService;
   }
 
   @ApiResponses(
     value = {
       @ApiResponse(
         responseCode = "200",
-        content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ReadPersonDto.class)) }
+        content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ReadUserDto.class)) }
       ),
       @ApiResponse(
         responseCode = "400",
@@ -66,8 +60,8 @@ public class PeopleController {
   @PreAuthorize("hasAuthority('USER')")
   @GetMapping("/{canonicalName}")
   @Operation(summary = "Este endpoint obtiene una personas")
-  ResponseEntity<ReadPersonDto> getProfile(@PathVariable String canonicalName) throws ApiException {
-    var persistedPerson = this.personService.getProfile(canonicalName);
+  ResponseEntity<ReadUserDto> getProfile(@PathVariable String canonicalName) throws ApiException {
+    var persistedPerson = this.userService.getProfile(canonicalName);
     return ResponseEntity.ok(persistedPerson);
   }
 }

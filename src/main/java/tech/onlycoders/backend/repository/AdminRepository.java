@@ -3,9 +3,9 @@ package tech.onlycoders.backend.repository;
 import java.util.Optional;
 import org.springframework.data.neo4j.repository.Neo4jRepository;
 import org.springframework.stereotype.Repository;
-import tech.onlycoders.backend.model.Person;
+import tech.onlycoders.backend.model.Admin;
 
 @Repository
-public interface PersonRepository extends Neo4jRepository<Person, String> {
-  Optional<Person> findByEmail(String email);
+public interface AdminRepository extends Neo4jRepository<Admin, String> {
+  Optional<Admin> findByEmail(String email);
 }

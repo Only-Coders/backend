@@ -13,33 +13,33 @@ import tech.onlycoders.backend.exception.ApiException;
 import tech.onlycoders.backend.mapper.PostMapper;
 import tech.onlycoders.backend.model.Person;
 import tech.onlycoders.backend.model.Tag;
-import tech.onlycoders.backend.repository.PersonRepository;
 import tech.onlycoders.backend.repository.PostRepository;
 import tech.onlycoders.backend.repository.TagRepository;
+import tech.onlycoders.backend.repository.UserRepository;
 import tech.onlycoders.backend.utils.ProcessingTagLists;
 
 @Service
 public class PostService {
 
-  private final PersonRepository personRepository;
+  private final UserRepository userRepository;
   private final PostRepository postRepository;
   private final TagRepository tagRepository;
   private final PostMapper postMapper;
 
   public PostService(
-    PersonRepository personRepository,
+    UserRepository userRepository,
     PostRepository postRepository,
     TagRepository tagRepository,
     PostMapper postMapper
   ) {
-    this.personRepository = personRepository;
+    this.userRepository = userRepository;
     this.postRepository = postRepository;
     this.tagRepository = tagRepository;
     this.postMapper = postMapper;
   }
 
   public ReadPostDto createPost(String publisherCanonicalName, CreatePostDto createPostDto) throws ApiException {
-    var publisher = personRepository
+    var publisher = userRepository
       .findByCanonicalName(publisherCanonicalName)
       .orElseThrow(
         () -> new ApiException(HttpStatus.NOT_FOUND, "Couldn't find Person [" + publisherCanonicalName + "]")
@@ -55,7 +55,7 @@ public class PostService {
     post = postRepository.save(post);
 
     publisher.setDefaultPrivacyIsPublic(post.getIsPublic());
-    personRepository.save(publisher);
+    userRepository.save(publisher);
 
     var dto = postMapper.postToReadPersonDto(post);
     dto.setTagNames(tags.getTagNames());
@@ -63,7 +63,7 @@ public class PostService {
   }
 
   private ProcessingTagLists getOrSaveTagList(List<String> displayTagNames) {
-    var taglist = new ProcessingTagLists();
+    var titlist = new ProcessingTagLists();
     if (displayTagNames != null) {
       for (String displayName : displayTagNames) {
         var canonicalName = getTagCanonicalName(displayName);
@@ -76,13 +76,13 @@ public class PostService {
               return newTag;
             }
           );
-        taglist.getPersitedTags().add(tag);
-        taglist
+        titlist.getPersitedTags().add(tag);
+        titlist
           .getTagNames()
           .add(ReadTagNameDto.builder().displayName(displayName).canonicalName(canonicalName).build());
       }
     }
-    return taglist;
+    return titlist;
   }
 
   private String getTagCanonicalName(String name) {
@@ -93,7 +93,7 @@ public class PostService {
     var list = new HashSet<Person>();
     if (canonicalNames != null) {
       for (String cName : canonicalNames) {
-        var person = personRepository
+        var person = userRepository
           .findByCanonicalName(cName)
           .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Couldn't find Person [" + cName + "]"));
         list.add(person);

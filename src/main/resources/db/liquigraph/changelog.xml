@@ -149,8 +149,19 @@
             (:Country{code:"ZM", name:"Zambia"}), (:Country{code:"ZW", name:"Zimbabwe"})
         </query>
     </changeset>
+
     <changeset id="create_roles" author="Mariano Zunino.">
         <query>MERGE (:Role{name:"ADMIN"})</query>
         <query>MERGE (:Role{name:"USER"})</query>
+    </changeset>
+
+    <changeset id="create_admin_marianoz" author="Mariano Zunino.">
+        <query
+    >MERGE (:Admin:Person{email:"marianoz@zoho.com",firstName:"root", lastName:"root"})</query>
+        <query
+    >MATCH (admin:Admin:Person{email:"marianoz@zoho.com"}), (role:Role{name:"ADMIN"})
+               MERGE (admin)-[r:HAS]->(role)
+               RETURN admin;
+        </query>
     </changeset>
 </changelog>
