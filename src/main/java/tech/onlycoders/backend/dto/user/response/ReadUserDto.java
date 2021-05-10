@@ -1,4 +1,4 @@
-package tech.onlycoders.backend.dto.person.response;
+package tech.onlycoders.backend.dto.user.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class ReadPersonDto {
+public class ReadUserDto {
 
   private String firstName;
   private String lastName;

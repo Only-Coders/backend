@@ -5,8 +5,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import tech.onlycoders.backend.dto.person.response.ReadPersonLiteDto;
 import tech.onlycoders.backend.dto.tag.response.ReadTagNameDto;
+import tech.onlycoders.backend.dto.user.response.ReadUserLiteDto;
 import tech.onlycoders.backend.model.PostType;
 
 @Data
@@ -15,11 +15,11 @@ import tech.onlycoders.backend.model.PostType;
 @NoArgsConstructor
 public class ReadPostDto {
 
-  private ReadPersonLiteDto publisher;
+  private ReadUserLiteDto publisher;
   private String message;
   private PostType type;
   private Boolean isPublic;
   private String url;
-  private List<ReadPersonLiteDto> mentions;
+  private List<ReadUserLiteDto> mentions;
   private List<ReadTagNameDto> tagNames;
 }
