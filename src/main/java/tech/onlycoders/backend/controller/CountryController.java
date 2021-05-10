@@ -39,8 +39,8 @@ public class CountryController {
   @PreAuthorize("hasAnyAuthority('USER','ADMIN')")
   @GetMapping
   @Operation(summary = "Search/List countries")
-  ResponseEntity<List<ReadCountryDto>> getProfile(@RequestParam(defaultValue = "") String countryName) {
-    var persistedPerson = this.countryService.findCountries(countryName);
-    return ResponseEntity.ok(persistedPerson);
+  ResponseEntity<List<ReadCountryDto>> getCountries(@RequestParam(defaultValue = "") String countryName) {
+    var countries = this.countryService.findCountries(countryName);
+    return ResponseEntity.ok(countries);
   }
 }
