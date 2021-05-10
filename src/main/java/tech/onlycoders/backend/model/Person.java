@@ -1,7 +1,10 @@
 package tech.onlycoders.backend.model;
 
 import java.util.Date;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 import org.springframework.data.neo4j.core.schema.Relationship;
 import org.springframework.data.neo4j.core.support.DateLong;
 
