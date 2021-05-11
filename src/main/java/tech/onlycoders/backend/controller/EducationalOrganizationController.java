@@ -74,4 +74,47 @@ public class EducationalOrganizationController {
     var pagination = this.organizationService.listEducationalOrganizations(organizationName, page, size);
     return ResponseEntity.ok(pagination);
   }
+
+  @PreAuthorize("hasAuthority('USER')")
+  @ApiResponses(
+    value = {
+      @ApiResponse(
+        responseCode = "200",
+        content = {
+          @Content(
+            mediaType = "application/json",
+            schema = @Schema(implementation = ReadEducationalOrganizationDto.class)
+          )
+        }
+      ),
+      @ApiResponse(
+        responseCode = "400",
+        content = {
+          @Content(mediaType = "application/json", schema = @Schema(implementation = ApiErrorResponse.class))
+        }
+      ),
+      @ApiResponse(
+        responseCode = "401",
+        content = {
+          @Content(mediaType = "application/json", schema = @Schema(implementation = ApiErrorResponse.class))
+        }
+      ),
+      @ApiResponse(
+        responseCode = "403",
+        content = {
+          @Content(mediaType = "application/json", schema = @Schema(implementation = ApiErrorResponse.class))
+        }
+      )
+    }
+  )
+  @PostMapping
+  @Operation(summary = "Create an Organization")
+  ResponseEntity<ReadEducationalOrganizationDto> createOrganization(
+    @RequestBody CreateEducationalOrganizationDto createEducationalOrganization
+  ) {
+    var organization = this.organizationService.createEducationalOrganization(createEducationalOrganization);
+    return ResponseEntity.ok(organization);
+  }
+}
+
 class PaginatedEducationalOrganizations extends PaginateDto<ReadEducationalOrganizationDto> {}

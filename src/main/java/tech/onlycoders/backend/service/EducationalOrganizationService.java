@@ -45,4 +45,13 @@ public class EducationalOrganizationService {
     pagination.setTotalElements(paginatedOrganizations.getNumberOfElements());
     return pagination;
   }
+
+  public ReadEducationalOrganizationDto createEducationalOrganization(
+    CreateEducationalOrganizationDto createOrganizationDto
+  ) {
+    var organization = new EducationalOrganization();
+    organization.setName(createOrganizationDto.getName());
+    this.organizationRepository.save(organization);
+    return this.organizationMapper.educationalOrganizationsReadToEducationalOrganizationDto(organization);
+  }
 }

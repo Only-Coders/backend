@@ -50,3 +50,14 @@ public class EducationalOrganizationServiceTest {
     var result = this.service.listEducationalOrganizations("asd", 1, 1);
     assertEquals(10, result.getTotalElements());
   }
+
+  @Test
+  public void ShouldCreateNewOrganization() {
+    var createOrganizationDto = ezRandom.nextObject(CreateEducationalOrganizationDto.class);
+    var org = new EducationalOrganization();
+    org.setName(createOrganizationDto.getName());
+    Mockito.when(this.organizationRepository.save(any(EducationalOrganization.class))).thenReturn(org);
+    var result = this.service.createEducationalOrganization(createOrganizationDto);
+    assertEquals(createOrganizationDto.getName(), result.getName());
+  }
+}
