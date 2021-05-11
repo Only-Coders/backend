@@ -16,14 +16,13 @@ import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.test.util.ReflectionTestUtils;
 import tech.onlycoders.backend.dto.user.request.CreateUserDto;
+import tech.onlycoders.backend.dto.user.request.WorkExperienceDto;
 import tech.onlycoders.backend.exception.ApiException;
 import tech.onlycoders.backend.mapper.UserMapper;
 import tech.onlycoders.backend.model.GitPlatform;
+import tech.onlycoders.backend.model.Organization;
 import tech.onlycoders.backend.model.User;
-import tech.onlycoders.backend.repository.GitPlatformRepository;
-import tech.onlycoders.backend.repository.GitProfileRepository;
-import tech.onlycoders.backend.repository.PersonRepository;
-import tech.onlycoders.backend.repository.UserRepository;
+import tech.onlycoders.backend.repository.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class UserServiceTest {
@@ -36,6 +35,9 @@ public class UserServiceTest {
 
   @Mock
   private PersonRepository personRepository;
+
+  @Mock
+  private OrganizationRepository organizationRepository;
 
   @Mock
   private GitPlatformRepository gitPlatformRepository;
@@ -93,5 +95,43 @@ public class UserServiceTest {
     var email = ezRandom.nextObject(String.class);
     Mockito.when(this.personRepository.findByEmail(anyString())).thenReturn(Optional.of(new User()));
     assertThrows(ApiException.class, () -> this.service.createUser(email, createUserDto));
+  }
+
+  @Test
+  public void ShouldAddWorkingExperience() throws ApiException {
+    var user = ezRandom.nextObject(User.class);
+    var organization = ezRandom.nextObject(Organization.class);
+    var createUserDto = ezRandom.nextObject(WorkExperienceDto.class);
+    var email = ezRandom.nextObject(String.class);
+    var organizationId = ezRandom.nextObject(String.class);
+
+    Mockito.when(this.userRepository.findByEmail(email)).thenReturn(Optional.of(user));
+    Mockito.when(this.organizationRepository.findById(organizationId)).thenReturn(Optional.of(organization));
+
+    this.service.addWork(email, organizationId, createUserDto);
+  }
+
+  @Test
+  public void ShouldFailToAddWorkingExperienceWhenOrganizationNotFound() {
+    var createUserDto = ezRandom.nextObject(WorkExperienceDto.class);
+    var email = ezRandom.nextObject(String.class);
+    var organizationId = ezRandom.nextObject(String.class);
+
+    Mockito.when(this.organizationRepository.findById(organizationId)).thenReturn(Optional.empty());
+
+    assertThrows(ApiException.class, () -> this.service.addWork(email, organizationId, createUserDto));
+  }
+
+  @Test
+  public void ShouldFailToAddWorkingExperienceWhenUserNotFound() {
+    var organization = ezRandom.nextObject(Organization.class);
+    var createUserDto = ezRandom.nextObject(WorkExperienceDto.class);
+    var email = ezRandom.nextObject(String.class);
+    var organizationId = ezRandom.nextObject(String.class);
+
+    Mockito.when(this.organizationRepository.findById(organizationId)).thenReturn(Optional.of(organization));
+    Mockito.when(this.userRepository.findByEmail(email)).thenReturn(Optional.empty());
+
+    assertThrows(ApiException.class, () -> this.service.addWork(email, organizationId, createUserDto));
   }
 }
