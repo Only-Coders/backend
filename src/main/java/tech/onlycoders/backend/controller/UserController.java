@@ -147,7 +147,7 @@ public class UserController {
   )
   @PreAuthorize("hasAuthority('USER')")
   @PostMapping("/works/{organizationId}")
-  @Operation(summary = "Creates a user")
+  @Operation(summary = "Adds a working experience.")
   ResponseEntity<?> addWorkingExperience(
     @PathVariable @NotBlank String organizationId,
     @RequestBody @Valid WorkExperienceDto workExperienceDto
