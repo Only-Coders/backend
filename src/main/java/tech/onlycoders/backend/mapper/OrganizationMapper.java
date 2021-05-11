@@ -9,4 +9,5 @@ import tech.onlycoders.backend.model.Organization;
 @Mapper(componentModel = "spring", injectionStrategy = InjectionStrategy.CONSTRUCTOR)
 public interface OrganizationMapper {
   List<ReadOrganizationDto> listOrganizationsToListReadOrganizationDto(List<Organization> organizations);
+  ReadOrganizationDto organizationsReadOrganizationDto(Organization organization);
 }

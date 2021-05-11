@@ -3,8 +3,10 @@ package tech.onlycoders.backend.service;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import tech.onlycoders.backend.dto.PaginateDto;
+import tech.onlycoders.backend.dto.organization.request.CreateOrganizationDto;
 import tech.onlycoders.backend.dto.organization.response.ReadOrganizationDto;
 import tech.onlycoders.backend.mapper.OrganizationMapper;
+import tech.onlycoders.backend.model.Organization;
 import tech.onlycoders.backend.repository.OrganizationRepository;
 
 @Service
@@ -31,5 +33,11 @@ public class OrganizationService {
     pagination.setTotalPages(paginatedOrganizations.getTotalPages());
     pagination.setTotalElements(paginatedOrganizations.getNumberOfElements());
     return pagination;
+  }
+
+  public ReadOrganizationDto createOrganization(CreateOrganizationDto createOrganizationDto) {
+    var organization = Organization.builder().name(createOrganizationDto.getName()).build();
+    this.organizationRepository.save(organization);
+    return this.organizationMapper.organizationsReadOrganizationDto(organization);
   }
 }
