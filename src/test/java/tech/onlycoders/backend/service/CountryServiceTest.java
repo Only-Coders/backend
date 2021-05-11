@@ -1,4 +1,4 @@
-package tech.onlycoders.backend;
+package tech.onlycoders.backend.service;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -15,7 +15,6 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.test.util.ReflectionTestUtils;
 import tech.onlycoders.backend.mapper.CountryMapper;
 import tech.onlycoders.backend.repository.CountryRepository;
-import tech.onlycoders.backend.service.CountryService;
 
 @RunWith(MockitoJUnitRunner.class)
 public class CountryServiceTest {

@@ -1,6 +1,7 @@
-package tech.onlycoders.backend;
+package tech.onlycoders.backend.service;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.anyString;
 
 import java.util.Optional;
@@ -21,7 +22,6 @@ import tech.onlycoders.backend.mapper.AdminMapper;
 import tech.onlycoders.backend.model.Admin;
 import tech.onlycoders.backend.repository.AdminRepository;
 import tech.onlycoders.backend.repository.PersonRepository;
-import tech.onlycoders.backend.service.AdminService;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AdminServiceTest {

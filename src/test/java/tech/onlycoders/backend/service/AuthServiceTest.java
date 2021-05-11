@@ -1,4 +1,4 @@
-package tech.onlycoders.backend;
+package tech.onlycoders.backend.service;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -19,13 +19,9 @@ import org.springframework.test.util.ReflectionTestUtils;
 import tech.onlycoders.backend.bean.FirebaseService;
 import tech.onlycoders.backend.dto.auth.request.AuthRequestDto;
 import tech.onlycoders.backend.exception.ApiException;
-import tech.onlycoders.backend.model.Person;
 import tech.onlycoders.backend.model.Role;
 import tech.onlycoders.backend.model.User;
 import tech.onlycoders.backend.repository.PersonRepository;
-import tech.onlycoders.backend.repository.UserRepository;
-import tech.onlycoders.backend.service.AuthService;
-import tech.onlycoders.backend.service.JwtService;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AuthServiceTest {

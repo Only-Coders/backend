@@ -1,4 +1,4 @@
-package tech.onlycoders.backend;
+package tech.onlycoders.backend.service;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -10,7 +10,6 @@ import org.mockito.InjectMocks;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.test.util.ReflectionTestUtils;
 import tech.onlycoders.backend.exception.ApiException;
-import tech.onlycoders.backend.service.JwtService;
 
 @RunWith(MockitoJUnitRunner.class)
 public class JwtServiceTest {

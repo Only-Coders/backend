@@ -1,4 +1,4 @@
-package tech.onlycoders.backend;
+package tech.onlycoders.backend.service;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -20,14 +20,12 @@ import org.springframework.test.util.ReflectionTestUtils;
 import tech.onlycoders.backend.dto.post.request.CreatePostDto;
 import tech.onlycoders.backend.exception.ApiException;
 import tech.onlycoders.backend.mapper.PostMapper;
-import tech.onlycoders.backend.model.Person;
 import tech.onlycoders.backend.model.Post;
 import tech.onlycoders.backend.model.Tag;
 import tech.onlycoders.backend.model.User;
 import tech.onlycoders.backend.repository.PostRepository;
 import tech.onlycoders.backend.repository.TagRepository;
 import tech.onlycoders.backend.repository.UserRepository;
-import tech.onlycoders.backend.service.PostService;
 
 @RunWith(MockitoJUnitRunner.class)
 public class PostServiceTest {

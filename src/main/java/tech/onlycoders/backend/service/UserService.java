@@ -2,7 +2,6 @@ package tech.onlycoders.backend.service;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import tech.onlycoders.backend.dto.user.GitPlatform;
 import tech.onlycoders.backend.dto.user.request.CreateUserDto;
 import tech.onlycoders.backend.dto.user.response.ReadUserDto;
 import tech.onlycoders.backend.exception.ApiException;
@@ -50,7 +49,9 @@ public class UserService {
     } else {
       var user = userMapper.createUserDtoToUser(createUserDto);
       user.setEmail(email);
-      var gitPlatform = gitPlatformRepository.findById(createUserDto.getGitPlatform().toString()).get();
+      var gitPlatform = gitPlatformRepository
+        .findById(createUserDto.getGitPlatform().toString())
+        .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Git platform not found"));
       var gitUser = GitProfile.builder().username(createUserDto.getGitProfileURI()).platform(gitPlatform).build();
       user.setGitProfile(gitUser);
       gitProfileRepository.save(gitUser);

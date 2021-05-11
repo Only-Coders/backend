@@ -1,6 +1,7 @@
-package tech.onlycoders.backend;
+package tech.onlycoders.backend.service;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.anyString;
 
 import java.util.Optional;
@@ -17,10 +18,12 @@ import org.springframework.test.util.ReflectionTestUtils;
 import tech.onlycoders.backend.dto.user.request.CreateUserDto;
 import tech.onlycoders.backend.exception.ApiException;
 import tech.onlycoders.backend.mapper.UserMapper;
+import tech.onlycoders.backend.model.GitPlatform;
 import tech.onlycoders.backend.model.User;
+import tech.onlycoders.backend.repository.GitPlatformRepository;
+import tech.onlycoders.backend.repository.GitProfileRepository;
 import tech.onlycoders.backend.repository.PersonRepository;
 import tech.onlycoders.backend.repository.UserRepository;
-import tech.onlycoders.backend.service.UserService;
 
 @RunWith(MockitoJUnitRunner.class)
 public class UserServiceTest {
@@ -33,6 +36,12 @@ public class UserServiceTest {
 
   @Mock
   private PersonRepository personRepository;
+
+  @Mock
+  private GitPlatformRepository gitPlatformRepository;
+
+  @Mock
+  private GitProfileRepository gitProfileRepository;
 
   private final EasyRandom ezRandom = new EasyRandom();
 
@@ -64,11 +73,22 @@ public class UserServiceTest {
     var createUserDto = ezRandom.nextObject(CreateUserDto.class);
     var email = ezRandom.nextObject(String.class);
     Mockito.when(this.personRepository.findByEmail(anyString())).thenReturn(Optional.empty());
+    Mockito
+      .when(this.gitPlatformRepository.findById(anyString()))
+      .thenReturn(Optional.of(ezRandom.nextObject(GitPlatform.class)));
     this.service.createUser(email, createUserDto);
   }
 
   @Test
   public void ShouldFailToCreateNewUser() throws ApiException {
+    var createUserDto = ezRandom.nextObject(CreateUserDto.class);
+    var email = ezRandom.nextObject(String.class);
+    Mockito.when(this.personRepository.findByEmail(anyString())).thenReturn(Optional.of(new User()));
+    assertThrows(ApiException.class, () -> this.service.createUser(email, createUserDto));
+  }
+
+  @Test
+  public void ShouldFailToCreateNewUserWhenGitPlatformDoesNotExist() {
     var createUserDto = ezRandom.nextObject(CreateUserDto.class);
     var email = ezRandom.nextObject(String.class);
     Mockito.when(this.personRepository.findByEmail(anyString())).thenReturn(Optional.of(new User()));
