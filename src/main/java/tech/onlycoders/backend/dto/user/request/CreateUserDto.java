@@ -6,6 +6,7 @@ import javax.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import tech.onlycoders.backend.dto.user.GitPlatform;
 
 @Data
 @AllArgsConstructor
@@ -14,6 +15,7 @@ public class CreateUserDto {
 
   private Date birthDate;
   private String gitProfileURI;
+  private GitPlatform gitPlatform;
   private String description;
 
   @NotBlank(message = "Firstname is required")
