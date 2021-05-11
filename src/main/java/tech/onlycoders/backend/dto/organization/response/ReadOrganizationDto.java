@@ -11,5 +11,6 @@ import lombok.NoArgsConstructor;
 @Builder
 public class ReadOrganizationDto {
 
+  private String id;
   private String name;
 }
