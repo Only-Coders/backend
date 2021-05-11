@@ -16,7 +16,7 @@ public class WorksAt {
   private Organization organization;
 
   @DateLong
-  private Date from;
+  private Date since;
 
   @DateLong
   private Date until;
