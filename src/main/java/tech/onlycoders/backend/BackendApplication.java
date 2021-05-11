@@ -10,8 +10,6 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.data.neo4j.config.EnableNeo4jAuditing;
 import tech.onlycoders.backend.bean.FirebaseService;
-import tech.onlycoders.backend.repository.CountryRepository;
-import tech.onlycoders.backend.service.CountryService;
 
 @SpringBootApplication
 @OpenAPIDefinition(
@@ -30,10 +28,7 @@ public class BackendApplication {
   }
 
   @Bean
-  CommandLineRunner runner(CountryService ser) {
-    return args -> {
-      var x = ser.findCountries("");
-      System.out.println(x);
-    };
+  CommandLineRunner runner(FirebaseService firebaseService) {
+    return args -> {};
   }
 }

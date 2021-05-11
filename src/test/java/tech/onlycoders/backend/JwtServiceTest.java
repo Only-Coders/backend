@@ -29,7 +29,7 @@ public class JwtServiceTest {
   public void ShouldSignToken() throws ApiException {
     var token = this.jwtService.createToken(new HashMap<>(), "subject");
     var details = this.jwtService.getUserDetails(token);
-    assertEquals("subject", details.getFirstName());
+    assertEquals("subject", details.getEmail());
     assertNotNull(token);
   }
 

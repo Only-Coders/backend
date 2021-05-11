@@ -1,7 +1,6 @@
 package tech.onlycoders.backend;
 
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyString;
 
 import java.util.Optional;
@@ -15,12 +14,11 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.test.util.ReflectionTestUtils;
-import tech.onlycoders.backend.bean.FirebaseService;
-import tech.onlycoders.backend.dto.admin.request.CreateAdminDto;
+import tech.onlycoders.backend.dto.user.request.CreateUserDto;
 import tech.onlycoders.backend.exception.ApiException;
 import tech.onlycoders.backend.mapper.UserMapper;
-import tech.onlycoders.backend.model.Admin;
 import tech.onlycoders.backend.model.User;
+import tech.onlycoders.backend.repository.PersonRepository;
 import tech.onlycoders.backend.repository.UserRepository;
 import tech.onlycoders.backend.service.UserService;
 
@@ -32,6 +30,9 @@ public class UserServiceTest {
 
   @Mock
   private UserRepository userRepository;
+
+  @Mock
+  private PersonRepository personRepository;
 
   private final EasyRandom ezRandom = new EasyRandom();
 
@@ -56,5 +57,21 @@ public class UserServiceTest {
       .thenReturn(Optional.of(ezRandom.nextObject(User.class)));
     var profile = this.service.getProfile(canonicalName);
     assertNotNull(profile);
+  }
+
+  @Test
+  public void ShouldCreateNewUser() throws ApiException {
+    var createUserDto = ezRandom.nextObject(CreateUserDto.class);
+    var email = ezRandom.nextObject(String.class);
+    Mockito.when(this.personRepository.findByEmail(anyString())).thenReturn(Optional.empty());
+    this.service.createUser(email, createUserDto);
+  }
+
+  @Test
+  public void ShouldFailToCreateNewUser() throws ApiException {
+    var createUserDto = ezRandom.nextObject(CreateUserDto.class);
+    var email = ezRandom.nextObject(String.class);
+    Mockito.when(this.personRepository.findByEmail(anyString())).thenReturn(Optional.of(new User()));
+    assertThrows(ApiException.class, () -> this.service.createUser(email, createUserDto));
   }
 }
