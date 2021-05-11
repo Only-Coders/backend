@@ -39,6 +39,9 @@
     <changeset id="reaction_index_id" author="Juan.">
         <query>CREATE INDEX ON :Reaction(id)</query>
     </changeset>
+    <changeset id="git_platform_index_id" author="Martin.">
+        <query>CREATE INDEX ON :GitPlatform(id)</query>
+    </changeset>
 
     <changeset id="create_countries" author="Mariano Zunino.">
         <query>
@@ -163,5 +166,11 @@
                MERGE (admin)-[r:HAS]->(role)
                RETURN admin;
         </query>
+    </changeset>
+
+    <changeset id="create_git_platforms" author="Martin.">
+        <query>MERGE (:GitPlatform{id: "GITHUB", name:"GitHub"})</query>
+        <query>MERGE (:GitPlatform{id: "GITLAB", name:"GitLab"})</query>
+        <query>MERGE (:GitPlatform{id: "GITBUCKET", name:"GitBucket"})</query>
     </changeset>
 </changelog>

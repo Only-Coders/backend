@@ -6,23 +6,24 @@ import lombok.*;
 import org.springframework.data.neo4j.core.schema.Node;
 import org.springframework.data.neo4j.core.schema.Relationship;
 
-@Builder
 @EqualsAndHashCode(callSuper = true)
 @Node({ "User", "Person" })
 @Data
 @NoArgsConstructor
-@AllArgsConstructor
 public class User extends Person {
 
   private Boolean defaultPrivacyIsPublic = false;
 
-  private Boolean blocked;
+  private Boolean blocked = false;
 
   @Relationship("WORKS_AT")
   private Set<WorksAt> workingPlaces = new HashSet<>();
 
   @Relationship("STUDIES_AT")
   private Set<StudiesAt> schools = new HashSet<>();
+
+  @Relationship("USES")
+  private GitProfile gitProfile;
 
   @Relationship(type = "FOLLOWS", direction = Relationship.Direction.OUTGOING)
   public Set<User> followed = new HashSet<>();

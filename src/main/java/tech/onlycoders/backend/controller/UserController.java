@@ -100,7 +100,7 @@ public class UserController {
       )
     }
   )
-  @PreAuthorize("hasAuthority('USER')")
+  //@PreAuthorize("hasAuthority('USER')")
   @PostMapping
   @Operation(summary = "Creates a user")
   ResponseEntity<ReadUserDto> registerUser(@RequestBody CreateUserDto createUserDto) throws ApiException {
