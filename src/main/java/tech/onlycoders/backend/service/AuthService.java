@@ -1,12 +1,28 @@
 package tech.onlycoders.backend.service;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import java.util.HashMap;
+import javax.validation.Valid;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import tech.onlycoders.backend.bean.FirebaseService;
+import tech.onlycoders.backend.bean.auth.UserDetails;
+import tech.onlycoders.backend.dto.ApiErrorResponse;
 import tech.onlycoders.backend.dto.auth.request.AuthRequestDto;
 import tech.onlycoders.backend.dto.auth.response.AuthResponseDto;
+import tech.onlycoders.backend.dto.user.request.CreateUserDto;
+import tech.onlycoders.backend.dto.user.response.ReadUserDto;
 import tech.onlycoders.backend.exception.ApiException;
+import tech.onlycoders.backend.model.User;
 import tech.onlycoders.backend.repository.PersonRepository;
 
 @Service
@@ -48,11 +64,21 @@ public class AuthService {
         throw new ApiException(HttpStatus.UNAUTHORIZED, "Unauthorized");
       }
       claims.put("roles", person.getRole());
+      claims.put("canonicalName", person.getCanonicalName());
       claims.put("complete", true);
     } else {
       claims.put("complete", false);
     }
     var newToken = this.jwtService.createToken(claims, pairEmailIAT.getFirst());
+    return AuthResponseDto.builder().token(newToken).build();
+  }
+
+  public AuthResponseDto postCreateUser(User person) {
+    var claims = new HashMap<String, Object>();
+    claims.put("roles", person.getRole());
+    claims.put("canonicalName", person.getCanonicalName());
+    claims.put("complete", true);
+    var newToken = this.jwtService.createToken(claims, person.getEmail());
     return AuthResponseDto.builder().token(newToken).build();
   }
 }

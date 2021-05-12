@@ -41,7 +41,6 @@ public class CountryController {
       )
     }
   )
-  @PreAuthorize("hasAnyAuthority('USER','ADMIN')")
   @GetMapping
   @Operation(summary = "Search/List countries")
   ResponseEntity<List<ReadCountryDto>> getCountries(@RequestParam(defaultValue = "") String countryName) {

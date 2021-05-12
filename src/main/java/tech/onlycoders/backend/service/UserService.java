@@ -2,6 +2,7 @@ package tech.onlycoders.backend.service;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import tech.onlycoders.backend.dto.auth.response.AuthResponseDto;
 import tech.onlycoders.backend.dto.user.request.CreateUserDto;
 import tech.onlycoders.backend.dto.user.request.EducationExperienceDto;
 import tech.onlycoders.backend.dto.user.request.WorkExperienceDto;
@@ -25,6 +26,8 @@ public class UserService {
   private final EducationalOrganizationRepository educationalOrganizationRepository;
   private final CountryRepository countryRepository;
 
+  private final AuthService authService;
+
   private final UserMapper userMapper;
 
   public UserService(
@@ -35,7 +38,8 @@ public class UserService {
     GitProfileRepository gitProfileRepository,
     OrganizationRepository organizationRepository,
     EducationalOrganizationRepository educationalOrganizationRepository,
-    CountryRepository countryRepository
+    CountryRepository countryRepository,
+    AuthService authService
   ) {
     this.userRepository = userRepository;
     this.personRepository = personRepository;
@@ -45,6 +49,7 @@ public class UserService {
     this.organizationRepository = organizationRepository;
     this.educationalOrganizationRepository = educationalOrganizationRepository;
     this.countryRepository = countryRepository;
+    this.authService = authService;
   }
 
   public ReadUserDto getProfile(String canonicalName) throws ApiException {
@@ -54,7 +59,7 @@ public class UserService {
     return userMapper.userToReadPersonDto(user);
   }
 
-  public ReadUserDto createUser(String email, CreateUserDto createUserDto) throws ApiException {
+  public AuthResponseDto createUser(String email, CreateUserDto createUserDto) throws ApiException {
     var optionalPerson = this.personRepository.findByEmail(email);
     if (optionalPerson.isPresent()) {
       throw new ApiException(HttpStatus.CONFLICT, "Email already taken");
@@ -79,7 +84,7 @@ public class UserService {
       }
       user.setRole(Role.builder().name("USER").build());
       userRepository.save(user);
-      return userMapper.userToReadPersonDto(user);
+      return this.authService.postCreateUser(user);
     }
   }
 
