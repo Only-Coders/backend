@@ -6,6 +6,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import javax.validation.Valid;
 import javax.validation.constraints.Min;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -13,20 +14,54 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import tech.onlycoders.backend.dto.ApiErrorResponse;
 import tech.onlycoders.backend.dto.PaginateDto;
-import tech.onlycoders.backend.dto.organization.request.CreateOrganizationDto;
-import tech.onlycoders.backend.dto.organization.response.ReadOrganizationDto;
-import tech.onlycoders.backend.service.OrganizationService;
+import tech.onlycoders.backend.dto.skill.request.CreateSkillDto;
+import tech.onlycoders.backend.dto.skill.response.ReadSkillDto;
+import tech.onlycoders.backend.service.SkillService;
 
 @RestController
-@RequestMapping("/api/organizations")
+@RequestMapping("/api/skills")
 @SecurityRequirement(name = "bearerAuth")
 @Validated
-public class OrganizationController {
+public class SkillController {
 
-  private final OrganizationService organizationService;
+  private final SkillService skillService;
 
-  public OrganizationController(OrganizationService organizationService) {
-    this.organizationService = organizationService;
+  public SkillController(SkillService skillService) {
+    this.skillService = skillService;
+  }
+
+  @PreAuthorize("hasAuthority('USER')")
+  @ApiResponses(
+    value = {
+      @ApiResponse(
+        responseCode = "200",
+        content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ReadSkillDto.class)) }
+      ),
+      @ApiResponse(
+        responseCode = "400",
+        content = {
+          @Content(mediaType = "application/json", schema = @Schema(implementation = ApiErrorResponse.class))
+        }
+      ),
+      @ApiResponse(
+        responseCode = "401",
+        content = {
+          @Content(mediaType = "application/json", schema = @Schema(implementation = ApiErrorResponse.class))
+        }
+      ),
+      @ApiResponse(
+        responseCode = "403",
+        content = {
+          @Content(mediaType = "application/json", schema = @Schema(implementation = ApiErrorResponse.class))
+        }
+      )
+    }
+  )
+  @PostMapping
+  @Operation(summary = "Create a Skill")
+  ResponseEntity<ReadSkillDto> createSkill(@RequestBody @Valid CreateSkillDto createSkillDto) {
+    var skill = this.skillService.createSkill(createSkillDto);
+    return ResponseEntity.ok(skill);
   }
 
   @PreAuthorize("hasAuthority('USER')")
@@ -35,7 +70,7 @@ public class OrganizationController {
       @ApiResponse(
         responseCode = "200",
         content = {
-          @Content(mediaType = "application/json", schema = @Schema(implementation = PaginatedOrganizations.class))
+          @Content(mediaType = "application/json", schema = @Schema(implementation = PaginatedSkillsDto.class))
         }
       ),
       @ApiResponse(
@@ -59,51 +94,15 @@ public class OrganizationController {
     }
   )
   @GetMapping
-  @Operation(summary = "Search Organizations by name")
-  ResponseEntity<PaginateDto<ReadOrganizationDto>> getOrganizations(
-    @RequestParam(defaultValue = "", required = false) String organizationName,
+  @Operation(summary = "Search skills by name")
+  ResponseEntity<PaginateDto<ReadSkillDto>> getSkills(
+    @RequestParam(defaultValue = "", required = false) String skillName,
     @RequestParam(defaultValue = "0", required = false) @Min(0) Integer page,
     @RequestParam(defaultValue = "20", required = false) @Min(1) Integer size
   ) {
-    var pagination = this.organizationService.listOrganizations(organizationName, page, size);
+    var pagination = this.skillService.listSkills(skillName, page, size);
     return ResponseEntity.ok(pagination);
-  }
-
-  @PreAuthorize("hasAuthority('USER')")
-  @ApiResponses(
-    value = {
-      @ApiResponse(
-        responseCode = "200",
-        content = {
-          @Content(mediaType = "application/json", schema = @Schema(implementation = ReadOrganizationDto.class))
-        }
-      ),
-      @ApiResponse(
-        responseCode = "400",
-        content = {
-          @Content(mediaType = "application/json", schema = @Schema(implementation = ApiErrorResponse.class))
-        }
-      ),
-      @ApiResponse(
-        responseCode = "401",
-        content = {
-          @Content(mediaType = "application/json", schema = @Schema(implementation = ApiErrorResponse.class))
-        }
-      ),
-      @ApiResponse(
-        responseCode = "403",
-        content = {
-          @Content(mediaType = "application/json", schema = @Schema(implementation = ApiErrorResponse.class))
-        }
-      )
-    }
-  )
-  @PostMapping
-  @Operation(summary = "Create an Organization")
-  ResponseEntity<ReadOrganizationDto> createOrganization(@RequestBody CreateOrganizationDto createOrganization) {
-    var organization = this.organizationService.createOrganization(createOrganization);
-    return ResponseEntity.ok(organization);
   }
 }
 
-class PaginatedOrganizations extends PaginateDto<ReadOrganizationDto> {}
+class PaginatedSkillsDto extends PaginateDto<ReadSkillDto> {}

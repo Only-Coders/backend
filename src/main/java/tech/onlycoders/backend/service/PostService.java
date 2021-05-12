@@ -1,6 +1,5 @@
 package tech.onlycoders.backend.service;
 
-import java.text.Normalizer;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -16,6 +15,7 @@ import tech.onlycoders.backend.model.Tag;
 import tech.onlycoders.backend.repository.PostRepository;
 import tech.onlycoders.backend.repository.TagRepository;
 import tech.onlycoders.backend.repository.UserRepository;
+import tech.onlycoders.backend.utils.CanonicalFactory;
 import tech.onlycoders.backend.utils.ProcessingTagLists;
 
 @Service
@@ -66,7 +66,7 @@ public class PostService {
     var titlist = new ProcessingTagLists();
     if (displayTagNames != null) {
       for (String displayName : displayTagNames) {
-        var canonicalName = getTagCanonicalName(displayName);
+        var canonicalName = CanonicalFactory.getCanonicalName(displayName);
         var tag = tagRepository
           .findByCanonicalName(canonicalName)
           .orElseGet(
@@ -83,10 +83,6 @@ public class PostService {
       }
     }
     return titlist;
-  }
-
-  private String getTagCanonicalName(String name) {
-    return Normalizer.normalize(name, Normalizer.Form.NFD).replaceAll("[^a-zA-Z0-9]", "").toLowerCase();
   }
 
   private Set<Person> getPersonList(List<String> canonicalNames) throws ApiException {
