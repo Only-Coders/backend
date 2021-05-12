@@ -1,6 +1,8 @@
 package tech.onlycoders.backend.model;
 
 import java.util.Date;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
@@ -12,6 +14,8 @@ import org.springframework.data.neo4j.core.support.DateLong;
 @Node
 @Data
 @NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class Skill {
 
   @Id

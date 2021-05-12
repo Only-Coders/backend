@@ -55,6 +55,9 @@ public class UserServiceTest {
   @Mock
   private CountryRepository countryRepository;
 
+  @Mock
+  private SkillRepository skillRepository;
+
   private final EasyRandom ezRandom = new EasyRandom();
 
   @Before
@@ -192,5 +195,24 @@ public class UserServiceTest {
     Mockito.when(this.userRepository.findByEmail(email)).thenReturn(Optional.empty());
 
     assertThrows(ApiException.class, () -> this.service.addSchool(email, organizationId, createUserDto));
+  }
+
+  @Test
+  public void ShouldAddSkill() throws ApiException {
+    var user = ezRandom.nextObject(User.class);
+    var skill = ezRandom.nextObject(Skill.class);
+    var email = ezRandom.nextObject(String.class);
+
+    Mockito.when(this.userRepository.findByEmail(email)).thenReturn(Optional.of(user));
+    Mockito.when(this.skillRepository.findById(skill.getCanonicalName())).thenReturn(Optional.of(skill));
+
+    this.service.addSkill(email, skill.getCanonicalName());
+  }
+
+  @Test
+  public void ShouldFailToAddSchoolWhenSkillNotFound() {
+    var skill = ezRandom.nextObject(Skill.class);
+    var email = ezRandom.nextObject(String.class);
+    assertThrows(ApiException.class, () -> this.service.addSkill(email, skill.getCanonicalName()));
   }
 }
