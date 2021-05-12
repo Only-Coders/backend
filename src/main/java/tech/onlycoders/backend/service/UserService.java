@@ -58,13 +58,19 @@ public class UserService {
     } else {
       var user = userMapper.createUserDtoToUser(createUserDto);
       user.setEmail(email);
-      var gitPlatform = gitPlatformRepository
-        .findById(createUserDto.getGitPlatform().toString())
-        .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Git platform not found"));
-      var gitUser = GitProfile.builder().username(createUserDto.getGitProfileURI()).platform(gitPlatform).build();
-      user.setGitProfile(gitUser);
+      if (createUserDto.getGitProfile() != null) {
+        var gitPlatform = gitPlatformRepository
+          .findById(createUserDto.getGitProfile().getPlatform().toString())
+          .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Git platform not found"));
+        var gitUser = GitProfile
+          .builder()
+          .username(createUserDto.getGitProfile().getUserName())
+          .platform(gitPlatform)
+          .build();
+        user.setGitProfile(gitUser);
+        gitProfileRepository.save(gitUser);
+      }
       user.setRole(Role.builder().name("USER").build());
-      gitProfileRepository.save(gitUser);
       userRepository.save(user);
       return userMapper.userToReadPersonDto(user);
     }

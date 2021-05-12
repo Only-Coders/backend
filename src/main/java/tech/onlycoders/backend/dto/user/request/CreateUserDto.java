@@ -7,6 +7,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import tech.onlycoders.backend.dto.user.GitPlatform;
+import tech.onlycoders.backend.dto.user.GitProfileDto;
 
 @Data
 @AllArgsConstructor
@@ -14,9 +15,8 @@ import tech.onlycoders.backend.dto.user.GitPlatform;
 public class CreateUserDto {
 
   private Date birthDate;
-  private String gitProfileURI;
-  private GitPlatform gitPlatform;
   private String description;
+  private GitProfileDto gitProfile;
 
   @NotBlank(message = "Firstname is required")
   @NotNull(message = "Firstname is required")
