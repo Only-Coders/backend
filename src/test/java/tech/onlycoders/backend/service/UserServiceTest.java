@@ -20,10 +20,7 @@ import tech.onlycoders.backend.dto.user.request.EducationExperienceDto;
 import tech.onlycoders.backend.dto.user.request.WorkExperienceDto;
 import tech.onlycoders.backend.exception.ApiException;
 import tech.onlycoders.backend.mapper.UserMapper;
-import tech.onlycoders.backend.model.EducationalOrganization;
-import tech.onlycoders.backend.model.GitPlatform;
-import tech.onlycoders.backend.model.Organization;
-import tech.onlycoders.backend.model.User;
+import tech.onlycoders.backend.model.*;
 import tech.onlycoders.backend.repository.*;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -49,6 +46,9 @@ public class UserServiceTest {
 
   @Mock
   private GitProfileRepository gitProfileRepository;
+
+  @Mock
+  private CountryRepository countryRepository;
 
   private final EasyRandom ezRandom = new EasyRandom();
 
@@ -78,8 +78,10 @@ public class UserServiceTest {
   @Test
   public void ShouldCreateNewUser() throws ApiException {
     var createUserDto = ezRandom.nextObject(CreateUserDto.class);
+    var country = ezRandom.nextObject(Country.class);
     var email = ezRandom.nextObject(String.class);
     Mockito.when(this.personRepository.findByEmail(anyString())).thenReturn(Optional.empty());
+    Mockito.when(this.countryRepository.findById(anyString())).thenReturn(Optional.of(country));
     Mockito
       .when(this.gitPlatformRepository.findById(anyString()))
       .thenReturn(Optional.of(ezRandom.nextObject(GitPlatform.class)));
@@ -87,7 +89,7 @@ public class UserServiceTest {
   }
 
   @Test
-  public void ShouldFailToCreateNewUser() throws ApiException {
+  public void ShouldFailToCreateNewUser() {
     var createUserDto = ezRandom.nextObject(CreateUserDto.class);
     var email = ezRandom.nextObject(String.class);
     Mockito.when(this.personRepository.findByEmail(anyString())).thenReturn(Optional.of(new User()));
@@ -99,6 +101,14 @@ public class UserServiceTest {
     var createUserDto = ezRandom.nextObject(CreateUserDto.class);
     var email = ezRandom.nextObject(String.class);
     Mockito.when(this.personRepository.findByEmail(anyString())).thenReturn(Optional.of(new User()));
+    assertThrows(ApiException.class, () -> this.service.createUser(email, createUserDto));
+  }
+
+  @Test
+  public void ShouldFailToCreateNewUserWhenCountryNotFound() {
+    var createUserDto = ezRandom.nextObject(CreateUserDto.class);
+    var email = ezRandom.nextObject(String.class);
+
     assertThrows(ApiException.class, () -> this.service.createUser(email, createUserDto));
   }
 

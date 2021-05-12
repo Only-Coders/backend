@@ -1,12 +1,13 @@
 package tech.onlycoders.backend.dto.user.request;
 
 import java.util.Date;
+import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import tech.onlycoders.backend.dto.user.GitPlatform;
+import org.springframework.validation.annotation.Validated;
 import tech.onlycoders.backend.dto.user.GitProfileDto;
 
 @Data
@@ -24,4 +25,7 @@ public class CreateUserDto {
 
   private String lastName;
   private String imageURI;
+
+  @Valid
+  private CreateCountryDto country;
 }

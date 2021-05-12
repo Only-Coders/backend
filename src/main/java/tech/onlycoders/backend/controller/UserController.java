@@ -104,10 +104,10 @@ public class UserController {
       )
     }
   )
-  //@PreAuthorize("hasAuthority('USER')")
+  @PreAuthorize("!hasAnyAuthority('USER','ADMIN')")
   @PostMapping
   @Operation(summary = "Creates a user")
-  ResponseEntity<ReadUserDto> registerUser(@RequestBody CreateUserDto createUserDto) throws ApiException {
+  ResponseEntity<ReadUserDto> registerUser(@RequestBody @Valid CreateUserDto createUserDto) throws ApiException {
     var userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     var email = userDetails.getEmail();
     var persistedPerson = this.userService.createUser(email, createUserDto);

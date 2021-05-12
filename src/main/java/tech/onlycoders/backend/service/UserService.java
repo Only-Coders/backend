@@ -23,6 +23,7 @@ public class UserService {
   private final GitProfileRepository gitProfileRepository;
   private final OrganizationRepository organizationRepository;
   private final EducationalOrganizationRepository educationalOrganizationRepository;
+  private final CountryRepository countryRepository;
 
   private final UserMapper userMapper;
 
@@ -33,7 +34,8 @@ public class UserService {
     GitPlatformRepository gitPlatformRepository,
     GitProfileRepository gitProfileRepository,
     OrganizationRepository organizationRepository,
-    EducationalOrganizationRepository educationalOrganizationRepository
+    EducationalOrganizationRepository educationalOrganizationRepository,
+    CountryRepository countryRepository
   ) {
     this.userRepository = userRepository;
     this.personRepository = personRepository;
@@ -42,6 +44,7 @@ public class UserService {
     this.gitProfileRepository = gitProfileRepository;
     this.organizationRepository = organizationRepository;
     this.educationalOrganizationRepository = educationalOrganizationRepository;
+    this.countryRepository = countryRepository;
   }
 
   public ReadUserDto getProfile(String canonicalName) throws ApiException {
@@ -57,6 +60,10 @@ public class UserService {
       throw new ApiException(HttpStatus.CONFLICT, "Email already taken");
     } else {
       var user = userMapper.createUserDtoToUser(createUserDto);
+      user.country =
+        countryRepository
+          .findById(createUserDto.getCountry().getCode())
+          .orElseThrow(() -> new ApiException(HttpStatus.CONFLICT, "Country not found"));
       user.setEmail(email);
       if (createUserDto.getGitProfile() != null) {
         var gitPlatform = gitPlatformRepository
