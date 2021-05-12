@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import tech.onlycoders.backend.dto.user.GitProfileDto;
 
 @Data
 @Builder
@@ -17,4 +18,5 @@ public class ReadUserDto {
   private String imageURI;
   private String canonicalName;
   private Boolean defaultPrivacyIsPublic;
+  private GitProfileDto gitProfile;
 }
