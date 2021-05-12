@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import tech.onlycoders.backend.bean.auth.UserDetails;
 import tech.onlycoders.backend.dto.ApiErrorResponse;
 import tech.onlycoders.backend.dto.user.request.CreateUserDto;
+import tech.onlycoders.backend.dto.user.request.EducationExperienceDto;
 import tech.onlycoders.backend.dto.user.request.WorkExperienceDto;
 import tech.onlycoders.backend.dto.user.response.ReadUserDto;
 import tech.onlycoders.backend.exception.ApiException;
@@ -155,6 +156,51 @@ public class UserController {
     var userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     var email = userDetails.getEmail();
     this.userService.addWork(email, organizationId, workExperienceDto);
+    return ResponseEntity.ok().build();
+  }
+
+  @ApiResponses(
+    value = {
+      @ApiResponse(
+        responseCode = "200",
+        content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ReadUserDto.class)) }
+      ),
+      @ApiResponse(
+        responseCode = "400",
+        content = {
+          @Content(mediaType = "application/json", schema = @Schema(implementation = ApiErrorResponse.class))
+        }
+      ),
+      @ApiResponse(
+        responseCode = "401",
+        content = {
+          @Content(mediaType = "application/json", schema = @Schema(implementation = ApiErrorResponse.class))
+        }
+      ),
+      @ApiResponse(
+        responseCode = "403",
+        content = {
+          @Content(mediaType = "application/json", schema = @Schema(implementation = ApiErrorResponse.class))
+        }
+      ),
+      @ApiResponse(
+        responseCode = "404",
+        content = {
+          @Content(mediaType = "application/json", schema = @Schema(implementation = ApiErrorResponse.class))
+        }
+      )
+    }
+  )
+  @PreAuthorize("hasAuthority('USER')")
+  @PostMapping("/schools/{organizationId}")
+  @Operation(summary = "Adds a school.")
+  ResponseEntity<?> addEducationExperience(
+    @PathVariable @NotBlank String organizationId,
+    @RequestBody @Valid EducationExperienceDto educationExperienceDto
+  ) throws ApiException {
+    var userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    var email = userDetails.getEmail();
+    this.userService.addSchool(email, organizationId, educationExperienceDto);
     return ResponseEntity.ok().build();
   }
 }

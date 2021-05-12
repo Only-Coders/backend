@@ -16,7 +16,7 @@ public class StudiesAt {
   private EducationalOrganization organization;
 
   @DateLong
-  private Date from;
+  private Date since;
 
   @DateLong
   private Date until;

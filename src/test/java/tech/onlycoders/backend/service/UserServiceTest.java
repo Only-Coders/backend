@@ -16,9 +16,11 @@ import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.test.util.ReflectionTestUtils;
 import tech.onlycoders.backend.dto.user.request.CreateUserDto;
+import tech.onlycoders.backend.dto.user.request.EducationExperienceDto;
 import tech.onlycoders.backend.dto.user.request.WorkExperienceDto;
 import tech.onlycoders.backend.exception.ApiException;
 import tech.onlycoders.backend.mapper.UserMapper;
+import tech.onlycoders.backend.model.EducationalOrganization;
 import tech.onlycoders.backend.model.GitPlatform;
 import tech.onlycoders.backend.model.Organization;
 import tech.onlycoders.backend.model.User;
@@ -38,6 +40,9 @@ public class UserServiceTest {
 
   @Mock
   private OrganizationRepository organizationRepository;
+
+  @Mock
+  private EducationalOrganizationRepository educationalOrganizationRepository;
 
   @Mock
   private GitPlatformRepository gitPlatformRepository;
@@ -133,5 +138,43 @@ public class UserServiceTest {
     Mockito.when(this.userRepository.findByEmail(email)).thenReturn(Optional.empty());
 
     assertThrows(ApiException.class, () -> this.service.addWork(email, organizationId, createUserDto));
+  }
+
+  @Test
+  public void ShouldAddSchool() throws ApiException {
+    var user = ezRandom.nextObject(User.class);
+    var organization = ezRandom.nextObject(EducationalOrganization.class);
+    var createUserDto = ezRandom.nextObject(EducationExperienceDto.class);
+    var email = ezRandom.nextObject(String.class);
+    var organizationId = ezRandom.nextObject(String.class);
+
+    Mockito.when(this.userRepository.findByEmail(email)).thenReturn(Optional.of(user));
+    Mockito.when(this.educationalOrganizationRepository.findById(organizationId)).thenReturn(Optional.of(organization));
+
+    this.service.addSchool(email, organizationId, createUserDto);
+  }
+
+  @Test
+  public void ShouldFailToAddSchoolWhenOrganizationNotFound() {
+    var createUserDto = ezRandom.nextObject(EducationExperienceDto.class);
+    var email = ezRandom.nextObject(String.class);
+    var organizationId = ezRandom.nextObject(String.class);
+
+    Mockito.when(this.educationalOrganizationRepository.findById(organizationId)).thenReturn(Optional.empty());
+
+    assertThrows(ApiException.class, () -> this.service.addSchool(email, organizationId, createUserDto));
+  }
+
+  @Test
+  public void ShouldFailToAddSchoolWhenUserNotFound() {
+    var organization = ezRandom.nextObject(EducationalOrganization.class);
+    var createUserDto = ezRandom.nextObject(EducationExperienceDto.class);
+    var email = ezRandom.nextObject(String.class);
+    var organizationId = ezRandom.nextObject(String.class);
+
+    Mockito.when(this.educationalOrganizationRepository.findById(organizationId)).thenReturn(Optional.of(organization));
+    Mockito.when(this.userRepository.findByEmail(email)).thenReturn(Optional.empty());
+
+    assertThrows(ApiException.class, () -> this.service.addSchool(email, organizationId, createUserDto));
   }
 }

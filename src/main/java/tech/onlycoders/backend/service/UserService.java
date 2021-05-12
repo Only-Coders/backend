@@ -3,12 +3,14 @@ package tech.onlycoders.backend.service;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import tech.onlycoders.backend.dto.user.request.CreateUserDto;
+import tech.onlycoders.backend.dto.user.request.EducationExperienceDto;
 import tech.onlycoders.backend.dto.user.request.WorkExperienceDto;
 import tech.onlycoders.backend.dto.user.response.ReadUserDto;
 import tech.onlycoders.backend.exception.ApiException;
 import tech.onlycoders.backend.mapper.UserMapper;
 import tech.onlycoders.backend.model.GitProfile;
 import tech.onlycoders.backend.model.Role;
+import tech.onlycoders.backend.model.StudiesAt;
 import tech.onlycoders.backend.model.WorksAt;
 import tech.onlycoders.backend.repository.*;
 
@@ -20,6 +22,7 @@ public class UserService {
   private final GitPlatformRepository gitPlatformRepository;
   private final GitProfileRepository gitProfileRepository;
   private final OrganizationRepository organizationRepository;
+  private final EducationalOrganizationRepository educationalOrganizationRepository;
 
   private final UserMapper userMapper;
 
@@ -29,7 +32,8 @@ public class UserService {
     UserMapper userMapper,
     GitPlatformRepository gitPlatformRepository,
     GitProfileRepository gitProfileRepository,
-    OrganizationRepository organizationRepository
+    OrganizationRepository organizationRepository,
+    EducationalOrganizationRepository educationalOrganizationRepository
   ) {
     this.userRepository = userRepository;
     this.personRepository = personRepository;
@@ -37,6 +41,7 @@ public class UserService {
     this.gitPlatformRepository = gitPlatformRepository;
     this.gitProfileRepository = gitProfileRepository;
     this.organizationRepository = organizationRepository;
+    this.educationalOrganizationRepository = educationalOrganizationRepository;
   }
 
   public ReadUserDto getProfile(String canonicalName) throws ApiException {
@@ -77,6 +82,23 @@ public class UserService {
     worksAt.setSince(workExperienceDto.getSince());
     worksAt.setUntil(workExperienceDto.getUntil());
     user.getWorkingPlaces().add(worksAt);
+    this.userRepository.save(user);
+  }
+
+  public void addSchool(String email, String organizationId, EducationExperienceDto educationExperienceDto)
+    throws ApiException {
+    var organization =
+      this.educationalOrganizationRepository.findById(organizationId)
+        .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Organization not found"));
+    var user =
+      this.userRepository.findByEmail(email)
+        .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "User not found"));
+    var studiesAt = new StudiesAt();
+    studiesAt.setOrganization(organization);
+    studiesAt.setSince(educationExperienceDto.getSince());
+    studiesAt.setUntil(educationExperienceDto.getUntil());
+    studiesAt.setDegree(educationExperienceDto.getDegree());
+    user.getSchools().add(studiesAt);
     this.userRepository.save(user);
   }
 }
