@@ -2,6 +2,7 @@ package tech.onlycoders.backend.service;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 
 import java.util.Optional;
@@ -15,6 +16,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.test.util.ReflectionTestUtils;
+import tech.onlycoders.backend.dto.auth.response.AuthResponseDto;
 import tech.onlycoders.backend.dto.user.request.CreateUserDto;
 import tech.onlycoders.backend.dto.user.request.EducationExperienceDto;
 import tech.onlycoders.backend.dto.user.request.WorkExperienceDto;
@@ -28,6 +30,9 @@ public class UserServiceTest {
 
   @InjectMocks
   private UserService service;
+
+  @Mock
+  private AuthService authService;
 
   @Mock
   private UserRepository userRepository;
@@ -80,6 +85,7 @@ public class UserServiceTest {
     var createUserDto = ezRandom.nextObject(CreateUserDto.class);
     var country = ezRandom.nextObject(Country.class);
     var email = ezRandom.nextObject(String.class);
+    Mockito.when(this.authService.postCreateUser(any(User.class))).thenReturn(new AuthResponseDto());
     Mockito.when(this.personRepository.findByEmail(anyString())).thenReturn(Optional.empty());
     Mockito.when(this.countryRepository.findById(anyString())).thenReturn(Optional.of(country));
     Mockito

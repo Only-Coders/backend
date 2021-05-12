@@ -67,6 +67,13 @@ public class AuthServiceTest {
   }
 
   @Test
+  public void ShouldReturnAnAccessTokenAfterCreatedUser() throws ApiException {
+    var user = ezRandom.nextObject(User.class);
+    var token = this.service.postCreateUser(user);
+    assertNotNull(token);
+  }
+
+  @Test
   public void ShouldReturnAnAccessTokenWhenEmailIsVerifiedAndUserIsNotRegistered() throws ApiException {
     var authRequest = ezRandom.nextObject(AuthRequestDto.class);
     Mockito.when(this.personRepository.findByEmail(anyString())).thenReturn(Optional.empty());
