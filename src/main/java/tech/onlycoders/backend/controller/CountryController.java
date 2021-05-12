@@ -1,6 +1,7 @@
 package tech.onlycoders.backend.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -14,7 +15,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import tech.onlycoders.backend.dto.country.response.ReadCountryDto;
-import tech.onlycoders.backend.dto.user.response.ReadUserDto;
 import tech.onlycoders.backend.service.CountryService;
 
 @RestController
@@ -32,7 +32,12 @@ public class CountryController {
     value = {
       @ApiResponse(
         responseCode = "200",
-        content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ReadUserDto.class)) }
+        content = {
+          @Content(
+            mediaType = "application/json",
+            array = @ArraySchema(schema = @Schema(implementation = ReadCountryDto.class))
+          )
+        }
       )
     }
   )
