@@ -21,6 +21,8 @@ public class Tag {
   @Id
   private String canonicalName;
 
+  private String name;
+
   @LastModifiedDate
   @DateLong
   private Date updatedAt;
