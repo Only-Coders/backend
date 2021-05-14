@@ -14,10 +14,12 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import tech.onlycoders.backend.bean.auth.UserDetails;
 import tech.onlycoders.backend.dto.ApiErrorResponse;
+import tech.onlycoders.backend.dto.organization.request.CreateOrganizationDto;
 import tech.onlycoders.backend.dto.user.request.EducationExperienceDto;
 import tech.onlycoders.backend.dto.user.request.WorkExperienceDto;
 import tech.onlycoders.backend.dto.user.response.ReadUserDto;
 import tech.onlycoders.backend.exception.ApiException;
+import tech.onlycoders.backend.service.OrganizationService;
 import tech.onlycoders.backend.service.UserService;
 
 @RestController
@@ -26,9 +28,11 @@ import tech.onlycoders.backend.service.UserService;
 public class UserController {
 
   private final UserService userService;
+  private final OrganizationService organizationService;
 
-  public UserController(UserService userService) {
+  public UserController(UserService userService, OrganizationService organizationService) {
     this.userService = userService;
+    this.organizationService = organizationService;
   }
 
   @ApiResponses(
@@ -104,15 +108,19 @@ public class UserController {
     }
   )
   @PreAuthorize("hasAuthority('USER')")
-  @PostMapping("/works/{organizationId}")
+  @PostMapping("/works")
   @Operation(summary = "Adds a working experience.")
-  ResponseEntity<?> addWorkingExperience(
-    @PathVariable @NotBlank String organizationId,
-    @RequestBody @Valid WorkExperienceDto workExperienceDto
-  ) throws ApiException {
+  ResponseEntity<?> addWorkingExperience(@RequestBody @Valid WorkExperienceDto workExperienceDto) throws ApiException {
+    if (workExperienceDto.getId() == null) {
+      var newOrganization =
+        this.organizationService.createOrganization(
+            CreateOrganizationDto.builder().name(workExperienceDto.getName()).build()
+          );
+      workExperienceDto.setId(newOrganization.getId());
+    }
     var userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     var email = userDetails.getEmail();
-    this.userService.addWork(email, organizationId, workExperienceDto);
+    this.userService.addWork(email, workExperienceDto);
     return ResponseEntity.ok().build();
   }
 

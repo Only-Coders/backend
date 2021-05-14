@@ -94,9 +94,9 @@ public class UserService {
     }
   }
 
-  public void addWork(String email, String organizationId, WorkExperienceDto workExperienceDto) throws ApiException {
+  public void addWork(String email, WorkExperienceDto workExperienceDto) throws ApiException {
     var organization =
-      this.organizationRepository.findById(organizationId)
+      this.organizationRepository.findById(workExperienceDto.getId())
         .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Organization not found"));
     var user =
       this.userRepository.findByEmail(email)
