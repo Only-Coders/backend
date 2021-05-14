@@ -3,16 +3,14 @@ package tech.onlycoders.backend.service;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import tech.onlycoders.backend.dto.auth.response.AuthResponseDto;
+import tech.onlycoders.backend.dto.contactrequest.request.CreateContactRequestDto;
 import tech.onlycoders.backend.dto.user.request.CreateUserDto;
 import tech.onlycoders.backend.dto.user.request.EducationExperienceDto;
 import tech.onlycoders.backend.dto.user.request.WorkExperienceDto;
 import tech.onlycoders.backend.dto.user.response.ReadUserDto;
 import tech.onlycoders.backend.exception.ApiException;
 import tech.onlycoders.backend.mapper.UserMapper;
-import tech.onlycoders.backend.model.GitProfile;
-import tech.onlycoders.backend.model.Role;
-import tech.onlycoders.backend.model.StudiesAt;
-import tech.onlycoders.backend.model.WorksAt;
+import tech.onlycoders.backend.model.*;
 import tech.onlycoders.backend.repository.*;
 
 @Service
@@ -146,5 +144,17 @@ public class UserService {
         .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "User not found"));
     user.getTags().add(tag);
     this.userRepository.save(user);
+  }
+
+  public void sendContactRequest(String email, CreateContactRequestDto contactRequestDto) throws ApiException {
+    var user =
+      this.userRepository.findByEmail(email)
+        .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "User not found"));
+    var contact =
+      this.userRepository.findByCanonicalName(contactRequestDto.getCanonicalName())
+        .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "User not found"));
+    var contactRequest = ContactRequest.builder().message(contactRequestDto.getMessage()).receiver(contact).build();
+    user.getRequests().add(contactRequest);
+    userRepository.save(user);
   }
 }
