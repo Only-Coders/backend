@@ -22,8 +22,8 @@ public class TagService {
   }
 
   public ReadTagDto createTag(CreateTagDto createTagDto) {
-    var canonicalName = CanonicalFactory.getCanonicalName(createTagDto.getName());
-    var tag = Tag.builder().canonicalName(canonicalName).name(createTagDto.getName()).build();
+    var canonicalName = CanonicalFactory.getCanonicalName(createTagDto.getCanonicalName());
+    var tag = Tag.builder().canonicalName(canonicalName).build();
     tagRepository.save(tag);
     return this.tagMapper.tagToReadTagDto(tag);
   }

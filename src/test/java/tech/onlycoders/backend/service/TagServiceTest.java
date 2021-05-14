@@ -16,13 +16,9 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.test.util.ReflectionTestUtils;
-import tech.onlycoders.backend.dto.skill.request.CreateSkillDto;
 import tech.onlycoders.backend.dto.tag.request.CreateTagDto;
-import tech.onlycoders.backend.mapper.SkillMapper;
 import tech.onlycoders.backend.mapper.TagMapper;
-import tech.onlycoders.backend.model.Skill;
 import tech.onlycoders.backend.model.Tag;
-import tech.onlycoders.backend.repository.SkillRepository;
 import tech.onlycoders.backend.repository.TagRepository;
 import tech.onlycoders.backend.utils.CanonicalFactory;
 
@@ -59,13 +55,9 @@ public class TagServiceTest {
     Mockito
       .when(this.tagRepository.save(any(Tag.class)))
       .thenReturn(
-        Tag
-          .builder()
-          .name(createTagDto.getName())
-          .canonicalName(CanonicalFactory.getCanonicalName(createTagDto.getName()))
-          .build()
+        Tag.builder().canonicalName(CanonicalFactory.getCanonicalName(createTagDto.getCanonicalName())).build()
       );
     var result = this.service.createTag(createTagDto);
-    assertEquals(createTagDto.getName(), result.getName());
+    assertEquals(CanonicalFactory.getCanonicalName(createTagDto.getCanonicalName()), result.getCanonicalName());
   }
 }

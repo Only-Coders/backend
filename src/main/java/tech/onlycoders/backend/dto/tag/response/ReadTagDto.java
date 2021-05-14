@@ -11,6 +11,5 @@ import lombok.NoArgsConstructor;
 @Builder
 public class ReadTagDto {
 
-  private String name;
   private String canonicalName;
 }
