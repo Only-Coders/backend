@@ -11,5 +11,5 @@ import tech.onlycoders.backend.model.Tag;
 public interface TagRepository extends Neo4jRepository<Tag, String> {
   Optional<Tag> findByCanonicalName(String canonicalName);
 
-  Page<Tag> findByNameContainingIgnoreCase(String tagName, PageRequest pageRequest);
+  Page<Tag> findByCanonicalNameContainingIgnoreCase(String tagName, PageRequest pageRequest);
 }

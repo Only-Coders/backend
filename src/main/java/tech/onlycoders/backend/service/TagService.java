@@ -30,7 +30,7 @@ public class TagService {
 
   public PaginateDto<ReadTagDto> listTags(String tagName, Integer page, Integer size) {
     var pageRequest = PageRequest.of(page, size);
-    var paginatedTags = this.tagRepository.findByNameContainingIgnoreCase(tagName, pageRequest);
+    var paginatedTags = this.tagRepository.findByCanonicalNameContainingIgnoreCase(tagName, pageRequest);
     var tags = tagMapper.listTagsToListReadTagDto(paginatedTags.getContent());
     var pagination = new PaginateDto<ReadTagDto>();
     pagination.setContent(tags);

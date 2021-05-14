@@ -44,7 +44,7 @@ public class TagServiceTest {
     var tags = ezRandom.objects(Tag.class, 10).collect(Collectors.toList());
     var pages = new PageImpl<>(tags);
     var page = PageRequest.of(1, 1);
-    Mockito.when(this.tagRepository.findByNameContainingIgnoreCase(anyString(), eq(page))).thenReturn(pages);
+    Mockito.when(this.tagRepository.findByCanonicalNameContainingIgnoreCase(anyString(), eq(page))).thenReturn(pages);
     var result = this.service.listTags("asd", 1, 1);
     assertEquals(10, result.getTotalElements());
   }
