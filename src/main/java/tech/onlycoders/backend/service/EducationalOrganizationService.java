@@ -4,14 +4,10 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import tech.onlycoders.backend.dto.PaginateDto;
 import tech.onlycoders.backend.dto.organization.request.CreateEducationalOrganizationDto;
-import tech.onlycoders.backend.dto.organization.request.CreateOrganizationDto;
 import tech.onlycoders.backend.dto.organization.response.ReadEducationalOrganizationDto;
-import tech.onlycoders.backend.dto.organization.response.ReadOrganizationDto;
 import tech.onlycoders.backend.mapper.OrganizationMapper;
 import tech.onlycoders.backend.model.EducationalOrganization;
-import tech.onlycoders.backend.model.Organization;
 import tech.onlycoders.backend.repository.EducationalOrganizationRepository;
-import tech.onlycoders.backend.repository.OrganizationRepository;
 
 @Service
 public class EducationalOrganizationService {

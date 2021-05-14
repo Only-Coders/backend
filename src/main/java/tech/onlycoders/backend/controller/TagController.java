@@ -13,20 +13,20 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import tech.onlycoders.backend.dto.ApiErrorResponse;
 import tech.onlycoders.backend.dto.PaginateDto;
-import tech.onlycoders.backend.dto.organization.request.CreateOrganizationDto;
-import tech.onlycoders.backend.dto.organization.response.ReadOrganizationDto;
-import tech.onlycoders.backend.service.OrganizationService;
+import tech.onlycoders.backend.dto.tag.request.CreateTagDto;
+import tech.onlycoders.backend.dto.tag.response.ReadTagDto;
+import tech.onlycoders.backend.service.TagService;
 
 @RestController
-@RequestMapping("/api/organizations")
+@RequestMapping("/api/tags")
 @SecurityRequirement(name = "bearerAuth")
 @Validated
-public class OrganizationController {
+public class TagController {
 
-  private final OrganizationService organizationService;
+  private final TagService tagService;
 
-  public OrganizationController(OrganizationService organizationService) {
-    this.organizationService = organizationService;
+  public TagController(TagService tagService) {
+    this.tagService = tagService;
   }
 
   @PreAuthorize("hasAuthority('USER')")
@@ -34,9 +34,7 @@ public class OrganizationController {
     value = {
       @ApiResponse(
         responseCode = "200",
-        content = {
-          @Content(mediaType = "application/json", schema = @Schema(implementation = PaginatedOrganizations.class))
-        }
+        content = { @Content(mediaType = "application/json", schema = @Schema(implementation = PaginatedTags.class)) }
       ),
       @ApiResponse(
         responseCode = "400",
@@ -59,13 +57,13 @@ public class OrganizationController {
     }
   )
   @GetMapping
-  @Operation(summary = "Search Organizations by name")
-  ResponseEntity<PaginateDto<ReadOrganizationDto>> getOrganizations(
-    @RequestParam(defaultValue = "", required = false) String organizationName,
-    @RequestParam(defaultValue = "0", required = false) @Min(0) Integer page,
-    @RequestParam(defaultValue = "20", required = false) @Min(1) Integer size
+  @Operation(summary = "Search tags by name")
+  ResponseEntity<PaginateDto<ReadTagDto>> getTags(
+    @RequestParam String tagName,
+    @RequestParam(defaultValue = "0") @Min(0) Integer page,
+    @RequestParam(defaultValue = "20") @Min(1) Integer size
   ) {
-    var pagination = this.organizationService.listOrganizations(organizationName, page, size);
+    var pagination = this.tagService.listTags(tagName, page, size);
     return ResponseEntity.ok(pagination);
   }
 
@@ -74,9 +72,7 @@ public class OrganizationController {
     value = {
       @ApiResponse(
         responseCode = "200",
-        content = {
-          @Content(mediaType = "application/json", schema = @Schema(implementation = ReadOrganizationDto.class))
-        }
+        content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ReadTagDto.class)) }
       ),
       @ApiResponse(
         responseCode = "400",
@@ -99,11 +95,11 @@ public class OrganizationController {
     }
   )
   @PostMapping
-  @Operation(summary = "Create an Organization")
-  ResponseEntity<ReadOrganizationDto> createOrganization(@RequestBody CreateOrganizationDto createOrganization) {
-    var organization = this.organizationService.createOrganization(createOrganization);
-    return ResponseEntity.ok(organization);
+  @Operation(summary = "Create a Tag")
+  ResponseEntity<ReadTagDto> createTag(@RequestBody CreateTagDto createTag) {
+    var tag = this.tagService.createTag(createTag);
+    return ResponseEntity.ok(tag);
   }
 }
 
-class PaginatedOrganizations extends PaginateDto<ReadOrganizationDto> {}
+class PaginatedTags extends PaginateDto<ReadTagDto> {}

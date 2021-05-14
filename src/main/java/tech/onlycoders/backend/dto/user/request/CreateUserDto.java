@@ -7,7 +7,6 @@ import javax.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.validation.annotation.Validated;
 import tech.onlycoders.backend.dto.user.GitProfileDto;
 
 @Data

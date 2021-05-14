@@ -14,11 +14,8 @@ import org.springframework.web.bind.annotation.*;
 import tech.onlycoders.backend.dto.ApiErrorResponse;
 import tech.onlycoders.backend.dto.PaginateDto;
 import tech.onlycoders.backend.dto.organization.request.CreateEducationalOrganizationDto;
-import tech.onlycoders.backend.dto.organization.request.CreateOrganizationDto;
 import tech.onlycoders.backend.dto.organization.response.ReadEducationalOrganizationDto;
-import tech.onlycoders.backend.dto.organization.response.ReadOrganizationDto;
 import tech.onlycoders.backend.service.EducationalOrganizationService;
-import tech.onlycoders.backend.service.OrganizationService;
 
 @RestController
 @RequestMapping("/api/educational-organizations")
@@ -67,9 +64,9 @@ public class EducationalOrganizationController {
   @GetMapping
   @Operation(summary = "Search Organizations by name")
   ResponseEntity<PaginateDto<ReadEducationalOrganizationDto>> getOrganizations(
-    @RequestParam String organizationName,
-    @RequestParam(defaultValue = "0") @Min(0) Integer page,
-    @RequestParam(defaultValue = "20") @Min(1) Integer size
+    @RequestParam(defaultValue = "", required = false) String organizationName,
+    @RequestParam(defaultValue = "0", required = false) @Min(0) Integer page,
+    @RequestParam(defaultValue = "20", required = false) @Min(1) Integer size
   ) {
     var pagination = this.organizationService.listEducationalOrganizations(organizationName, page, size);
     return ResponseEntity.ok(pagination);

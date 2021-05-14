@@ -31,10 +31,12 @@ public class UserService {
   private final OrganizationRepository organizationRepository;
   private final EducationalOrganizationRepository educationalOrganizationRepository;
   private final CountryRepository countryRepository;
+  private final SkillRepository skillRepository;
 
   private final AuthService authService;
 
   private final UserMapper userMapper;
+  private final TagRepository tagRepository;
 
   public UserService(
     UserRepository userRepository,
@@ -45,7 +47,9 @@ public class UserService {
     OrganizationRepository organizationRepository,
     EducationalOrganizationRepository educationalOrganizationRepository,
     CountryRepository countryRepository,
-    AuthService authService
+    SkillRepository skillRepository,
+    AuthService authService,
+    TagRepository tagRepository
   ) {
     this.userRepository = userRepository;
     this.personRepository = personRepository;
@@ -55,7 +59,9 @@ public class UserService {
     this.organizationRepository = organizationRepository;
     this.educationalOrganizationRepository = educationalOrganizationRepository;
     this.countryRepository = countryRepository;
+    this.skillRepository = skillRepository;
     this.authService = authService;
+    this.tagRepository = tagRepository;
   }
 
   public ReadUserDto getProfile(String canonicalName) throws ApiException {
@@ -126,9 +132,32 @@ public class UserService {
     this.userRepository.save(user);
   }
 
+
   public List<ReadUserLiteDto> getSuggestedUsers(String email, Integer size) {
     var users = userRepository.findSuggestedUsers(email, size);
 
     return userMapper.listUserToListReadUserLiteDto(users);
+
+  public void addSkill(String email, String canonicalName) throws ApiException {
+    var skill =
+      this.skillRepository.findById(canonicalName)
+        .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Skill not found"));
+    var user =
+      this.userRepository.findByEmail(email)
+        .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "User not found"));
+    user.getSkills().add(skill);
+    this.userRepository.save(user);
+  }
+
+  public void addTag(String email, String canonicalName) throws ApiException {
+    var tag =
+      this.tagRepository.findById(canonicalName)
+        .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Tag not found"));
+    var user =
+      this.userRepository.findByEmail(email)
+        .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "User not found"));
+    user.getTags().add(tag);
+    this.userRepository.save(user);
+
   }
 }
