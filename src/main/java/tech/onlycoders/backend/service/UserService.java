@@ -147,4 +147,15 @@ public class UserService {
     user.getTags().add(tag);
     this.userRepository.save(user);
   }
+
+  public void followUser(String email, String canonicalName) throws ApiException {
+    var user =
+      this.userRepository.findByEmail(email)
+        .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "User not found"));
+    var followed =
+      this.userRepository.findByCanonicalName(canonicalName)
+        .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "User not found"));
+    user.getFollowed().add(followed);
+    userRepository.save(user);
+  }
 }
