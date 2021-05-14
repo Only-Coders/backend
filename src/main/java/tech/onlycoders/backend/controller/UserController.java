@@ -14,11 +14,13 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import tech.onlycoders.backend.bean.auth.UserDetails;
 import tech.onlycoders.backend.dto.ApiErrorResponse;
+import tech.onlycoders.backend.dto.organization.request.CreateEducationalOrganizationDto;
 import tech.onlycoders.backend.dto.organization.request.CreateOrganizationDto;
 import tech.onlycoders.backend.dto.user.request.EducationExperienceDto;
 import tech.onlycoders.backend.dto.user.request.WorkExperienceDto;
 import tech.onlycoders.backend.dto.user.response.ReadUserDto;
 import tech.onlycoders.backend.exception.ApiException;
+import tech.onlycoders.backend.service.EducationalOrganizationService;
 import tech.onlycoders.backend.service.OrganizationService;
 import tech.onlycoders.backend.service.UserService;
 
@@ -29,10 +31,16 @@ public class UserController {
 
   private final UserService userService;
   private final OrganizationService organizationService;
+  private final EducationalOrganizationService educationalOrganizationService;
 
-  public UserController(UserService userService, OrganizationService organizationService) {
+  public UserController(
+    UserService userService,
+    OrganizationService organizationService,
+    EducationalOrganizationService educationalOrganizationService
+  ) {
     this.userService = userService;
     this.organizationService = organizationService;
+    this.educationalOrganizationService = educationalOrganizationService;
   }
 
   @ApiResponses(
@@ -154,15 +162,20 @@ public class UserController {
     }
   )
   @PreAuthorize("hasAuthority('USER')")
-  @PostMapping("/schools/{organizationId}")
+  @PostMapping("/schools")
   @Operation(summary = "Adds a school.")
-  ResponseEntity<?> addEducationExperience(
-    @PathVariable @NotBlank String organizationId,
-    @RequestBody @Valid EducationExperienceDto educationExperienceDto
-  ) throws ApiException {
+  ResponseEntity<?> addEducationExperience(@RequestBody @Valid EducationExperienceDto educationExperienceDto)
+    throws ApiException {
+    if (educationExperienceDto.getId() == null) {
+      var newOrganization =
+        this.educationalOrganizationService.createEducationalOrganization(
+            CreateEducationalOrganizationDto.builder().name(educationExperienceDto.getName()).build()
+          );
+      educationExperienceDto.setId(newOrganization.getId());
+    }
     var userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     var email = userDetails.getEmail();
-    this.userService.addSchool(email, organizationId, educationExperienceDto);
+    this.userService.addSchool(email, educationExperienceDto);
     return ResponseEntity.ok().build();
   }
 

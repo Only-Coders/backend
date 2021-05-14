@@ -109,10 +109,9 @@ public class UserService {
     this.userRepository.save(user);
   }
 
-  public void addSchool(String email, String organizationId, EducationExperienceDto educationExperienceDto)
-    throws ApiException {
+  public void addSchool(String email, EducationExperienceDto educationExperienceDto) throws ApiException {
     var organization =
-      this.educationalOrganizationRepository.findById(organizationId)
+      this.educationalOrganizationRepository.findById(educationExperienceDto.getId())
         .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Organization not found"));
     var user =
       this.userRepository.findByEmail(email)
