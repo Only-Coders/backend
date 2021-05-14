@@ -16,15 +16,15 @@ public interface UserRepository extends Neo4jRepository<User, String> {
   Optional<User> findByCanonicalName(String canonicalName);
 
   @Query(
-    "CALL {MATCH (p:User)-[:IS_INTERESTED]->(t:Tag)<-[:IS_INTERESTED]-(me:User{email:\"{0}\"})-[:LIVES]->(c:Country)\n" +
+    "CALL {MATCH (p:User)-[:IS_INTERESTED]->(t:Tag)<-[:IS_INTERESTED]-(me:User{email:$email})-[:LIVES]->(c:Country)\n" +
     "            WHERE (p)-[:LIVES]->(c)\n" +
     "            RETURN p , count(t) AS quantity\n" +
     "    UNION\n" +
     "\n" +
-    "    MATCH (me:User{email:\"{0}\"})-[:LIVES]->(c:Country)<-[:LIVES]-(p)\n" +
+    "    MATCH (me:User{email:$email})-[:LIVES]->(c:Country)<-[:LIVES]-(p)\n" +
     "            RETURN p, 0 AS quantity\n" +
     "    \n" +
-    "} RETURN p ORDER BY quantity DESC LIMIT 5;"
+    "} RETURN p ORDER BY quantity DESC LIMIT $size;"
   )
   List<User> findSuggestedUsers(String email, Integer size);
 }
