@@ -196,4 +196,43 @@ public class UserController {
     this.userService.addSkill(email, canonicalName);
     return ResponseEntity.ok().build();
   }
+
+  @ApiResponses(
+    value = {
+      @ApiResponse(responseCode = "200", content = { @Content(mediaType = "application/json") }),
+      @ApiResponse(
+        responseCode = "400",
+        content = {
+          @Content(mediaType = "application/json", schema = @Schema(implementation = ApiErrorResponse.class))
+        }
+      ),
+      @ApiResponse(
+        responseCode = "401",
+        content = {
+          @Content(mediaType = "application/json", schema = @Schema(implementation = ApiErrorResponse.class))
+        }
+      ),
+      @ApiResponse(
+        responseCode = "403",
+        content = {
+          @Content(mediaType = "application/json", schema = @Schema(implementation = ApiErrorResponse.class))
+        }
+      ),
+      @ApiResponse(
+        responseCode = "404",
+        content = {
+          @Content(mediaType = "application/json", schema = @Schema(implementation = ApiErrorResponse.class))
+        }
+      )
+    }
+  )
+  @PreAuthorize("hasAuthority('USER')")
+  @PostMapping("/tags/{canonicalName}")
+  @Operation(summary = "Adds a tag to the user.")
+  ResponseEntity<?> addTag(@PathVariable @NotBlank String canonicalName) throws ApiException {
+    var userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    var email = userDetails.getEmail();
+    this.userService.addTag(email, canonicalName);
+    return ResponseEntity.ok().build();
+  }
 }

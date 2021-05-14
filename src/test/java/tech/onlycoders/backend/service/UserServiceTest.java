@@ -60,6 +60,9 @@ public class UserServiceTest {
 
   private final EasyRandom ezRandom = new EasyRandom();
 
+  @Mock
+  private TagRepository tagRepository;
+
   @Before
   public void setUp() {
     var userMapper = Mappers.getMapper(UserMapper.class);
@@ -214,5 +217,33 @@ public class UserServiceTest {
     var skill = ezRandom.nextObject(Skill.class);
     var email = ezRandom.nextObject(String.class);
     assertThrows(ApiException.class, () -> this.service.addSkill(email, skill.getCanonicalName()));
+  }
+
+  @Test
+  public void ShouldAddTag() throws ApiException {
+    var user = ezRandom.nextObject(User.class);
+    var tag = ezRandom.nextObject(Tag.class);
+    var email = ezRandom.nextObject(String.class);
+
+    Mockito.when(this.userRepository.findByEmail(email)).thenReturn(Optional.of(user));
+    Mockito.when(this.tagRepository.findById(tag.getCanonicalName())).thenReturn(Optional.of(tag));
+
+    this.service.addTag(email, tag.getCanonicalName());
+  }
+
+  @Test
+  public void ShouldFailToAddTagWhenTagNotFound() {
+    var tag = ezRandom.nextObject(Tag.class);
+    var email = ezRandom.nextObject(String.class);
+    assertThrows(ApiException.class, () -> this.service.addTag(email, tag.getCanonicalName()));
+  }
+
+  @Test
+  public void ShouldFailToAddTagWhenUserNotFound() {
+    var tag = ezRandom.nextObject(Tag.class);
+    var email = ezRandom.nextObject(String.class);
+    Mockito.when(this.tagRepository.findById(tag.getCanonicalName())).thenReturn(Optional.of(tag));
+
+    assertThrows(ApiException.class, () -> this.service.addTag(email, tag.getCanonicalName()));
   }
 }

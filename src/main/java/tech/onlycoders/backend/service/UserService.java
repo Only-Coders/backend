@@ -30,6 +30,7 @@ public class UserService {
   private final AuthService authService;
 
   private final UserMapper userMapper;
+  private final TagRepository tagRepository;
 
   public UserService(
     UserRepository userRepository,
@@ -41,7 +42,8 @@ public class UserService {
     EducationalOrganizationRepository educationalOrganizationRepository,
     CountryRepository countryRepository,
     SkillRepository skillRepository,
-    AuthService authService
+    AuthService authService,
+    TagRepository tagRepository
   ) {
     this.userRepository = userRepository;
     this.personRepository = personRepository;
@@ -53,6 +55,7 @@ public class UserService {
     this.countryRepository = countryRepository;
     this.skillRepository = skillRepository;
     this.authService = authService;
+    this.tagRepository = tagRepository;
   }
 
   public ReadUserDto getProfile(String canonicalName) throws ApiException {
@@ -131,6 +134,17 @@ public class UserService {
       this.userRepository.findByEmail(email)
         .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "User not found"));
     user.getSkills().add(skill);
+    this.userRepository.save(user);
+  }
+
+  public void addTag(String email, String canonicalName) throws ApiException {
+    var tag =
+      this.tagRepository.findById(canonicalName)
+        .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Tag not found"));
+    var user =
+      this.userRepository.findByEmail(email)
+        .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "User not found"));
+    user.getTags().add(tag);
     this.userRepository.save(user);
   }
 }

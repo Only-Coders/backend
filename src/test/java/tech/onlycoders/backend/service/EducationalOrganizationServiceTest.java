@@ -17,12 +17,9 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.test.util.ReflectionTestUtils;
 import tech.onlycoders.backend.dto.organization.request.CreateEducationalOrganizationDto;
-import tech.onlycoders.backend.dto.organization.request.CreateOrganizationDto;
 import tech.onlycoders.backend.mapper.OrganizationMapper;
 import tech.onlycoders.backend.model.EducationalOrganization;
-import tech.onlycoders.backend.model.Organization;
 import tech.onlycoders.backend.repository.EducationalOrganizationRepository;
-import tech.onlycoders.backend.repository.OrganizationRepository;
 
 @RunWith(MockitoJUnitRunner.class)
 public class EducationalOrganizationServiceTest {
