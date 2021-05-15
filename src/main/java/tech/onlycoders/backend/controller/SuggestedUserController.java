@@ -56,5 +56,3 @@ public class SuggestedUserController {
     return ResponseEntity.ok(users);
   }
 }
-
-class PaginatedUsersLite extends PaginateDto<ReadUserLiteDto> {}
