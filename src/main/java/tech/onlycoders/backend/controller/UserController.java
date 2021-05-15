@@ -292,7 +292,7 @@ public class UserController {
   )
   @PreAuthorize("hasAuthority('USER')")
   @PostMapping("/contact-request")
-  @Operation(summary = "Adds a tag to the user.")
+  @Operation(summary = "sends a contact request.")
   ResponseEntity<?> sendContactRequest(@RequestBody CreateContactRequestDto contactRequestDto) throws ApiException {
     var userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     var email = userDetails.getEmail();
@@ -331,11 +331,50 @@ public class UserController {
   )
   @PreAuthorize("hasAuthority('USER')")
   @PostMapping("/following/{canonicalName}")
-  @Operation(summary = "Adds a tag to the user.")
+  @Operation(summary = "Follows a user.")
   ResponseEntity<?> followUser(@PathVariable @NotBlank String canonicalName) throws ApiException {
     var userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     var email = userDetails.getEmail();
     this.userService.followUser(email, canonicalName);
+    return ResponseEntity.ok().build();
+  }
+
+  @ApiResponses(
+    value = {
+      @ApiResponse(responseCode = "200", content = { @Content(mediaType = "application/json") }),
+      @ApiResponse(
+        responseCode = "400",
+        content = {
+          @Content(mediaType = "application/json", schema = @Schema(implementation = ApiErrorResponse.class))
+        }
+      ),
+      @ApiResponse(
+        responseCode = "401",
+        content = {
+          @Content(mediaType = "application/json", schema = @Schema(implementation = ApiErrorResponse.class))
+        }
+      ),
+      @ApiResponse(
+        responseCode = "403",
+        content = {
+          @Content(mediaType = "application/json", schema = @Schema(implementation = ApiErrorResponse.class))
+        }
+      ),
+      @ApiResponse(
+        responseCode = "404",
+        content = {
+          @Content(mediaType = "application/json", schema = @Schema(implementation = ApiErrorResponse.class))
+        }
+      )
+    }
+  )
+  @PreAuthorize("hasAuthority('USER')")
+  @PostMapping("/favorite-posts/{postId}")
+  @Operation(summary = "Saves a favorite post to the user.")
+  ResponseEntity<?> saveFavoritePost(@PathVariable @NotBlank String postId) throws ApiException {
+    var userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    var email = userDetails.getEmail();
+    this.userService.addFavoritePost(email, postId);
     return ResponseEntity.ok().build();
   }
 }

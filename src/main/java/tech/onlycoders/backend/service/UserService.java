@@ -30,11 +30,12 @@ public class UserService {
   private final EducationalOrganizationRepository educationalOrganizationRepository;
   private final CountryRepository countryRepository;
   private final SkillRepository skillRepository;
+  private final PostRepository postRepository;
+  private final TagRepository tagRepository;
 
   private final AuthService authService;
 
   private final UserMapper userMapper;
-  private final TagRepository tagRepository;
 
   public UserService(
     UserRepository userRepository,
@@ -47,7 +48,8 @@ public class UserService {
     CountryRepository countryRepository,
     SkillRepository skillRepository,
     AuthService authService,
-    TagRepository tagRepository
+    TagRepository tagRepository,
+    PostRepository postRepository
   ) {
     this.userRepository = userRepository;
     this.personRepository = personRepository;
@@ -60,6 +62,7 @@ public class UserService {
     this.skillRepository = skillRepository;
     this.authService = authService;
     this.tagRepository = tagRepository;
+    this.postRepository = postRepository;
   }
 
   public ReadUserDto getProfile(String canonicalName) throws ApiException {
@@ -181,5 +184,16 @@ public class UserService {
         .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "User not found"));
     user.getFollowed().add(followed);
     userRepository.save(user);
+  }
+
+  public void addFavoritePost(String email, String postId) throws ApiException {
+    var user =
+      this.userRepository.findByEmail(email)
+        .orElseThrow(() -> new ApiException(HttpStatus.INTERNAL_SERVER_ERROR, "User not found"));
+    var post =
+      this.postRepository.findById(postId).orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Post not found"));
+
+    post.getUserFavorites().add(user);
+    postRepository.save(post);
   }
 }
