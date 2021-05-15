@@ -1,12 +1,18 @@
 package tech.onlycoders.backend.service;
 
+import java.util.List;
+import javax.validation.constraints.Min;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import tech.onlycoders.backend.dto.PaginateDto;
 import tech.onlycoders.backend.dto.auth.response.AuthResponseDto;
+import tech.onlycoders.backend.dto.organization.response.ReadOrganizationDto;
 import tech.onlycoders.backend.dto.user.request.CreateUserDto;
 import tech.onlycoders.backend.dto.user.request.EducationExperienceDto;
 import tech.onlycoders.backend.dto.user.request.WorkExperienceDto;
 import tech.onlycoders.backend.dto.user.response.ReadUserDto;
+import tech.onlycoders.backend.dto.user.response.ReadUserLiteDto;
 import tech.onlycoders.backend.exception.ApiException;
 import tech.onlycoders.backend.mapper.UserMapper;
 import tech.onlycoders.backend.model.GitProfile;
@@ -127,6 +133,11 @@ public class UserService {
     user.getSchools().add(studiesAt);
     this.userRepository.save(user);
     return educationExperienceDto;
+  }
+
+  public List<ReadUserLiteDto> getSuggestedUsers(String email, Integer size) {
+    var users = userRepository.findSuggestedUsers(email, size);
+    return userMapper.listUserToListReadUserLiteDto(users);
   }
 
   public void addSkill(String email, String canonicalName) throws ApiException {

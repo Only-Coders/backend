@@ -27,6 +27,7 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-jdbc'
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-jetty'
+    implementation 'com.github.javafaker:javafaker:0.12'
 
     compile 'org.springdoc:springdoc-openapi-ui:1.5.8'
 
