@@ -63,6 +63,9 @@ public class UserServiceTest {
   @Mock
   private TagRepository tagRepository;
 
+  @Mock
+  private PostRepository postRepository;
+
   @Spy
   private final UserMapper userMapper = Mappers.getMapper(UserMapper.class);
 
@@ -322,5 +325,40 @@ public class UserServiceTest {
     Mockito.when(this.userRepository.findByCanonicalName(reqDto.getCanonicalName())).thenReturn(Optional.empty());
 
     assertThrows(ApiException.class, () -> this.service.sendContactRequest(email, reqDto));
+  }
+
+  @Test
+  public void ShouldAddFavoritePost() throws ApiException {
+    var user1 = ezRandom.nextObject(User.class);
+    var post = new Post();
+    var email = ezRandom.nextObject(String.class);
+    var postId = ezRandom.nextObject(String.class);
+
+    Mockito.when(this.userRepository.findByEmail(email)).thenReturn(Optional.of(user1));
+    Mockito.when(this.postRepository.findById(postId)).thenReturn(Optional.of(post));
+
+    this.service.addFavoritePost(email, postId);
+  }
+
+  @Test
+  public void ShouldFailAddFavoritePostWhenWrongEmail() throws ApiException {
+    var email = ezRandom.nextObject(String.class);
+    var postId = ezRandom.nextObject(String.class);
+
+    Mockito.when(this.userRepository.findByEmail(email)).thenReturn(Optional.empty());
+
+    assertThrows(ApiException.class, () -> this.service.addFavoritePost(email, postId));
+  }
+
+  @Test
+  public void ShouldFailAddFavoritePostWhenWrongPostId() throws ApiException {
+    var user1 = ezRandom.nextObject(User.class);
+    var email = ezRandom.nextObject(String.class);
+    var postId = ezRandom.nextObject(String.class);
+
+    Mockito.when(this.userRepository.findByEmail(email)).thenReturn(Optional.of(user1));
+    Mockito.when(this.postRepository.findById(postId)).thenReturn(Optional.empty());
+
+    assertThrows(ApiException.class, () -> this.service.addFavoritePost(email, postId));
   }
 }
