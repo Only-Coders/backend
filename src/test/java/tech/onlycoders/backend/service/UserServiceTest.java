@@ -246,4 +246,39 @@ public class UserServiceTest {
 
     assertThrows(ApiException.class, () -> this.service.addTag(email, tag.getCanonicalName()));
   }
+
+  @Test
+  public void ShouldFollowUser() throws ApiException {
+    var user1 = ezRandom.nextObject(User.class);
+    var user2 = ezRandom.nextObject(User.class);
+    var email = ezRandom.nextObject(String.class);
+    var cName = ezRandom.nextObject(String.class);
+
+    Mockito.when(this.userRepository.findByEmail(email)).thenReturn(Optional.of(user1));
+    Mockito.when(this.userRepository.findByCanonicalName(cName)).thenReturn(Optional.of(user2));
+
+    this.service.followUser(email, cName);
+  }
+
+  @Test
+  public void ShouldFailFollowUserWhenWrongEmail() throws ApiException {
+    var email = ezRandom.nextObject(String.class);
+    var cName = ezRandom.nextObject(String.class);
+
+    Mockito.when(this.userRepository.findByEmail(email)).thenReturn(Optional.empty());
+
+    assertThrows(ApiException.class, () -> this.service.followUser(email, cName));
+  }
+
+  @Test
+  public void ShouldFailFollowUserWhenWrongCanonicalName() throws ApiException {
+    var user1 = ezRandom.nextObject(User.class);
+    var email = ezRandom.nextObject(String.class);
+    var cName = ezRandom.nextObject(String.class);
+
+    Mockito.when(this.userRepository.findByEmail(email)).thenReturn(Optional.of(user1));
+    Mockito.when(this.userRepository.findByCanonicalName(cName)).thenReturn(Optional.empty());
+
+    assertThrows(ApiException.class, () -> this.service.followUser(email, cName));
+  }
 }
