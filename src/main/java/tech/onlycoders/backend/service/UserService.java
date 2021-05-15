@@ -132,11 +132,10 @@ public class UserService {
     this.userRepository.save(user);
   }
 
-
   public List<ReadUserLiteDto> getSuggestedUsers(String email, Integer size) {
     var users = userRepository.findSuggestedUsers(email, size);
-
     return userMapper.listUserToListReadUserLiteDto(users);
+  }
 
   public void addSkill(String email, String canonicalName) throws ApiException {
     var skill =
@@ -158,6 +157,5 @@ public class UserService {
         .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "User not found"));
     user.getTags().add(tag);
     this.userRepository.save(user);
-
   }
 }
