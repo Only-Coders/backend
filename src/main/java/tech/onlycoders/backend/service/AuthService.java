@@ -29,6 +29,7 @@ public class AuthService {
     var claims = new HashMap<String, Object>();
     if (optionalPerson.isPresent()) {
       var person = optionalPerson.get();
+      claims.put("id", person.getId());
       claims.put("roles", person.getRole().getName());
       claims.put("canonicalName", person.getCanonicalName());
       claims.put("complete", true);
@@ -48,7 +49,8 @@ public class AuthService {
       if (person.getSecurityUpdate() != null && person.getSecurityUpdate().after(pairEmailIAT.getSecond())) {
         throw new ApiException(HttpStatus.UNAUTHORIZED, "Unauthorized");
       }
-      claims.put("roles", person.getRole());
+      claims.put("id", person.getId());
+      claims.put("roles", person.getRole().getName());
       claims.put("canonicalName", person.getCanonicalName());
       claims.put("complete", true);
     } else {
@@ -60,7 +62,8 @@ public class AuthService {
 
   public AuthResponseDto postCreateUser(User person) {
     var claims = new HashMap<String, Object>();
-    claims.put("roles", person.getRole());
+    claims.put("id", person.getId());
+    claims.put("roles", person.getRole().getName());
     claims.put("canonicalName", person.getCanonicalName());
     claims.put("complete", true);
     var newToken = this.jwtService.createToken(claims, person.getEmail());

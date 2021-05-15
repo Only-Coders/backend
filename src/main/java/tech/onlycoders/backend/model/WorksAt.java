@@ -8,7 +8,6 @@ import org.springframework.data.neo4j.core.schema.Id;
 import org.springframework.data.neo4j.core.schema.RelationshipProperties;
 import org.springframework.data.neo4j.core.schema.TargetNode;
 import org.springframework.data.neo4j.core.support.DateLong;
-import org.springframework.data.neo4j.core.support.UUIDStringGenerator;
 
 @RelationshipProperties
 @Data
@@ -16,8 +15,8 @@ import org.springframework.data.neo4j.core.support.UUIDStringGenerator;
 public class WorksAt {
 
   @Id
-  @GeneratedValue(UUIDStringGenerator.class)
-  private String id;
+  @GeneratedValue
+  private Long id;
 
   @TargetNode
   private Organization organization;

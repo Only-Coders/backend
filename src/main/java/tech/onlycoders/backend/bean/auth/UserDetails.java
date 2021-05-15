@@ -16,4 +16,5 @@ public class UserDetails {
   private String lastName;
   private String roles;
   private String email;
+  private String id;
 }
