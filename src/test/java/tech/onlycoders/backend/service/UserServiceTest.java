@@ -2,9 +2,9 @@ package tech.onlycoders.backend.service;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.*;
 
+import java.util.ArrayList;
 import java.util.Optional;
 import org.jeasy.random.EasyRandom;
 import org.junit.Before;
@@ -245,5 +245,15 @@ public class UserServiceTest {
     Mockito.when(this.tagRepository.findById(tag.getCanonicalName())).thenReturn(Optional.of(tag));
 
     assertThrows(ApiException.class, () -> this.service.addTag(email, tag.getCanonicalName()));
+  }
+
+  @Test
+  public void ShouldReturnSuggestedUsers() throws ApiException {
+    var email = ezRandom.nextObject(String.class);
+    var list = new ArrayList<User>();
+    list.add(ezRandom.nextObject(User.class));
+    Mockito.when(this.userRepository.findSuggestedUsers(anyString(), anyInt())).thenReturn(list);
+    var listdto = this.service.getSuggestedUsers(email, 1);
+    assertNotNull(listdto);
   }
 }
