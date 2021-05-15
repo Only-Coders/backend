@@ -151,7 +151,7 @@ public class UserService {
   public void followUser(String email, String canonicalName) throws ApiException {
     var user =
       this.userRepository.findByEmail(email)
-        .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "User not found"));
+        .orElseThrow(() -> new ApiException(HttpStatus.INTERNAL_SERVER_ERROR, "User not found"));
     var followed =
       this.userRepository.findByCanonicalName(canonicalName)
         .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "User not found"));
