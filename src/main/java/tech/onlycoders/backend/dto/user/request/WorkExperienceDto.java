@@ -18,6 +18,8 @@ public class WorkExperienceDto {
 
   private String id;
 
+  private String position;
+
   @NotNull
   private Date since;
 

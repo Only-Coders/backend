@@ -87,7 +87,9 @@ public class UserController {
     value = {
       @ApiResponse(
         responseCode = "200",
-        content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ReadUserDto.class)) }
+        content = {
+          @Content(mediaType = "application/json", schema = @Schema(implementation = WorkExperienceDto.class))
+        }
       ),
       @ApiResponse(
         responseCode = "400",
@@ -118,7 +120,8 @@ public class UserController {
   @PreAuthorize("hasAuthority('USER')")
   @PostMapping("/works")
   @Operation(summary = "Adds a working experience.")
-  ResponseEntity<?> addWorkingExperience(@RequestBody @Valid WorkExperienceDto workExperienceDto) throws ApiException {
+  ResponseEntity<WorkExperienceDto> addWorkingExperience(@RequestBody @Valid WorkExperienceDto workExperienceDto)
+    throws ApiException {
     if (workExperienceDto.getId() == null) {
       var newOrganization =
         this.organizationService.createOrganization(
@@ -128,8 +131,8 @@ public class UserController {
     }
     var userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     var email = userDetails.getEmail();
-    this.userService.addWork(email, workExperienceDto);
-    return ResponseEntity.ok().build();
+    var result = this.userService.addWork(email, workExperienceDto);
+    return ResponseEntity.ok(result);
   }
 
   @ApiResponses(
@@ -175,8 +178,8 @@ public class UserController {
     }
     var userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     var email = userDetails.getEmail();
-    this.userService.addSchool(email, educationExperienceDto);
-    return ResponseEntity.ok().build();
+    var result = this.userService.addSchool(email, educationExperienceDto);
+    return ResponseEntity.ok(result);
   }
 
   @ApiResponses(

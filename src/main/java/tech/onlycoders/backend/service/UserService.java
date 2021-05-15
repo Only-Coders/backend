@@ -94,7 +94,7 @@ public class UserService {
     }
   }
 
-  public void addWork(String email, WorkExperienceDto workExperienceDto) throws ApiException {
+  public WorkExperienceDto addWork(String email, WorkExperienceDto workExperienceDto) throws ApiException {
     var organization =
       this.organizationRepository.findById(workExperienceDto.getId())
         .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Organization not found"));
@@ -105,11 +105,14 @@ public class UserService {
     worksAt.setOrganization(organization);
     worksAt.setSince(workExperienceDto.getSince());
     worksAt.setUntil(workExperienceDto.getUntil());
+    worksAt.setPosition(workExperienceDto.getPosition());
     user.getWorkingPlaces().add(worksAt);
     this.userRepository.save(user);
+    return workExperienceDto;
   }
 
-  public void addSchool(String email, EducationExperienceDto educationExperienceDto) throws ApiException {
+  public EducationExperienceDto addSchool(String email, EducationExperienceDto educationExperienceDto)
+    throws ApiException {
     var organization =
       this.educationalOrganizationRepository.findById(educationExperienceDto.getId())
         .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Organization not found"));
@@ -123,6 +126,7 @@ public class UserService {
     studiesAt.setDegree(educationExperienceDto.getDegree());
     user.getSchools().add(studiesAt);
     this.userRepository.save(user);
+    return educationExperienceDto;
   }
 
   public void addSkill(String email, String canonicalName) throws ApiException {
