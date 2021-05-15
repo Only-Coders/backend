@@ -160,7 +160,6 @@ public class UserService {
     this.userRepository.save(user);
   }
 
-
   public void sendContactRequest(String email, CreateContactRequestDto contactRequestDto) throws ApiException {
     var user =
       this.userRepository.findByEmail(email)
@@ -172,6 +171,7 @@ public class UserService {
     user.getRequests().add(contactRequest);
     userRepository.save(user);
   }
+
   public void followUser(String email, String canonicalName) throws ApiException {
     var user =
       this.userRepository.findByEmail(email)

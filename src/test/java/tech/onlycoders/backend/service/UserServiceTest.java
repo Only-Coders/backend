@@ -17,6 +17,7 @@ import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.test.util.ReflectionTestUtils;
 import tech.onlycoders.backend.dto.auth.response.AuthResponseDto;
+import tech.onlycoders.backend.dto.contactrequest.request.CreateContactRequestDto;
 import tech.onlycoders.backend.dto.user.request.CreateUserDto;
 import tech.onlycoders.backend.dto.user.request.EducationExperienceDto;
 import tech.onlycoders.backend.dto.user.request.WorkExperienceDto;
@@ -281,7 +282,7 @@ public class UserServiceTest {
 
     assertThrows(ApiException.class, () -> this.service.followUser(email, cName));
   }
-  
+
   @Test
   public void ShouldReturnSuggestedUsers() throws ApiException {
     var email = ezRandom.nextObject(String.class);
@@ -290,5 +291,40 @@ public class UserServiceTest {
     Mockito.when(this.userRepository.findSuggestedUsers(anyString(), anyInt())).thenReturn(list);
     var listdto = this.service.getSuggestedUsers(email, 1);
     assertNotNull(listdto);
+  }
+
+  @Test
+  public void ShouldSendRequest() throws ApiException {
+    var user1 = ezRandom.nextObject(User.class);
+    var user2 = ezRandom.nextObject(User.class);
+    var email = ezRandom.nextObject(String.class);
+    var reqDto = ezRandom.nextObject(CreateContactRequestDto.class);
+
+    Mockito.when(this.userRepository.findByEmail(email)).thenReturn(Optional.of(user1));
+    Mockito.when(this.userRepository.findByCanonicalName(reqDto.getCanonicalName())).thenReturn(Optional.of(user2));
+
+    this.service.sendContactRequest(email, reqDto);
+  }
+
+  @Test
+  public void ShouldFailSendRequestUserWhenWrongEmail() throws ApiException {
+    var email = ezRandom.nextObject(String.class);
+    var reqDto = ezRandom.nextObject(CreateContactRequestDto.class);
+
+    Mockito.when(this.userRepository.findByEmail(email)).thenReturn(Optional.empty());
+
+    assertThrows(ApiException.class, () -> this.service.sendContactRequest(email, reqDto));
+  }
+
+  @Test
+  public void ShouldFailSendRequestUserWhenCanonicalName() throws ApiException {
+    var user1 = ezRandom.nextObject(User.class);
+    var email = ezRandom.nextObject(String.class);
+    var reqDto = ezRandom.nextObject(CreateContactRequestDto.class);
+
+    Mockito.when(this.userRepository.findByEmail(email)).thenReturn(Optional.of(user1));
+    Mockito.when(this.userRepository.findByCanonicalName(reqDto.getCanonicalName())).thenReturn(Optional.empty());
+
+    assertThrows(ApiException.class, () -> this.service.sendContactRequest(email, reqDto));
   }
 }
