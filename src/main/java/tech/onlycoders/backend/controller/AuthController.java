@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import java.time.Duration;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
@@ -189,6 +190,7 @@ public class AuthController {
   @PreAuthorize("!hasAnyAuthority('USER','ADMIN')")
   @PostMapping("register")
   @Operation(summary = "Creates a user. Returns a new token and cookie.")
+  @SecurityRequirement(name = "bearerAuth")
   ResponseEntity<AuthResponseDto> registerUser(
     HttpServletResponse response,
     @RequestBody @Valid CreateUserDto createUserDto

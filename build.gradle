@@ -22,64 +22,45 @@ repositories {
 
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-data-neo4j'
-    implementation 'org.springframework.boot:spring-boot-starter-data-neo4j'
     implementation 'org.springframework.boot:spring-boot-starter-security'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation 'org.springframework.boot:spring-boot-starter-jdbc'
-
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-jetty'
+    implementation 'com.github.javafaker:javafaker:0.12'
+
+    compile 'org.springdoc:springdoc-openapi-ui:1.5.8'
+
+    implementation 'net.sargue:mailgun:1.10.0'
+    implementation 'org.glassfish.jersey.inject:jersey-hk2:2.32'
 
     compile 'joda-time:joda-time:2.10.10'
 
     compile 'org.liquigraph:liquigraph-spring-boot-starter:4.0.2'
     compile 'org.neo4j:neo4j-jdbc-bolt:4.0.1'
 
-    compile 'org.springdoc:springdoc-openapi-ui:1.5.8'
-
     compile 'com.google.firebase:firebase-admin:7.1.1'
 
     compile 'io.jsonwebtoken:jjwt:0.9.1'
     compile 'javax.xml.bind:jaxb-api:2.3.1'
 
     compile 'org.mapstruct:mapstruct:1.4.2.Final'
-    annotationProcessor 'org.mapstruct:mapstruct-processor:1.4.2.Final'
 
     compileOnly 'org.projectlombok:lombok:1.18.20'
-    developmentOnly 'org.springframework.boot:spring-boot-devtools'
-    annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
-    annotationProcessor 'org.projectlombok:lombok'
-    annotationProcessor 'org.projectlombok:lombok-mapstruct-binding:0.1.0'
-    testImplementation 'org.springframework.boot:spring-boot-starter-test'
-    testImplementation 'org.springframework.security:spring-security-test'
-    testCompile 'org.jeasy:easy-random-core:5.0.0'
-    implementation 'org.springframework.boot:spring-boot-starter-security'
-    implementation 'org.springframework.boot:spring-boot-starter-validation'
-    implementation 'org.springframework.boot:spring-boot-starter-web'
-
-    compile 'org.liquigraph:liquigraph-spring-boot-starter:4.0.2'
-    compile 'org.neo4j:neo4j-jdbc-bolt:4.0.1'
-
-    compile 'org.springdoc:springdoc-openapi-ui:1.5.8'
-
-    compile 'com.google.firebase:firebase-admin:7.1.1'
-
-    compile 'io.jsonwebtoken:jjwt:0.9.1'
-    compile 'javax.xml.bind:jaxb-api:2.3.1'
-
     compile 'org.mapstruct:mapstruct:1.4.2.Final'
     compileOnly 'org.mapstruct:mapstruct-processor:1.4.2.Final'
 
-    implementation 'net.sargue:mailgun:1.10.0'
-    implementation 'org.glassfish.jersey.inject:jersey-hk2:2.32'
 
-    compileOnly 'org.projectlombok:lombok:1.18.20'
-    developmentOnly 'org.springframework.boot:spring-boot-devtools'
     annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
     annotationProcessor 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok-mapstruct-binding:0.1.0'
+    annotationProcessor 'org.mapstruct:mapstruct-processor:1.4.2.Final'
+
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.springframework.security:spring-security-test'
     testCompile 'org.jeasy:easy-random-core:5.0.0'
+
+    developmentOnly 'org.springframework.boot:spring-boot-devtools'
 }
 
 test {
