@@ -259,4 +259,43 @@ public class UserController {
     this.userService.addTag(email, canonicalName);
     return ResponseEntity.ok().build();
   }
+
+  @ApiResponses(
+    value = {
+      @ApiResponse(responseCode = "200", content = { @Content(mediaType = "application/json") }),
+      @ApiResponse(
+        responseCode = "400",
+        content = {
+          @Content(mediaType = "application/json", schema = @Schema(implementation = ApiErrorResponse.class))
+        }
+      ),
+      @ApiResponse(
+        responseCode = "401",
+        content = {
+          @Content(mediaType = "application/json", schema = @Schema(implementation = ApiErrorResponse.class))
+        }
+      ),
+      @ApiResponse(
+        responseCode = "403",
+        content = {
+          @Content(mediaType = "application/json", schema = @Schema(implementation = ApiErrorResponse.class))
+        }
+      ),
+      @ApiResponse(
+        responseCode = "404",
+        content = {
+          @Content(mediaType = "application/json", schema = @Schema(implementation = ApiErrorResponse.class))
+        }
+      )
+    }
+  )
+  @PreAuthorize("hasAuthority('USER')")
+  @PostMapping("/following/{canonicalName}")
+  @Operation(summary = "Adds a tag to the user.")
+  ResponseEntity<?> followUser(@PathVariable @NotBlank String canonicalName) throws ApiException {
+    var userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    var email = userDetails.getEmail();
+    this.userService.followUser(email, canonicalName);
+    return ResponseEntity.ok().build();
+  }
 }
