@@ -66,6 +66,9 @@ public class UserServiceTest {
   @Mock
   private PostRepository postRepository;
 
+  @Mock
+  private PostRepository postRepository;
+
   @Spy
   private final UserMapper userMapper = Mappers.getMapper(UserMapper.class);
 
