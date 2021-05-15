@@ -40,7 +40,8 @@ public class JwtService {
       var email = claims.getSubject();
       var canonicalName = (String) claims.get("canonicalName");
       var roles = (String) claims.get("roles");
-      return UserDetails.builder().email(email).canonicalName(canonicalName).roles(roles).build();
+      var id = (String) claims.get("id");
+      return UserDetails.builder().id(id).email(email).canonicalName(canonicalName).roles(roles).build();
     } catch (SignatureException | ExpiredJwtException | MalformedJwtException e) {
       throw new ApiException(HttpStatus.UNAUTHORIZED, "Unauthorized");
     }

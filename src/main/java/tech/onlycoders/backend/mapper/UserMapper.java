@@ -1,5 +1,6 @@
 package tech.onlycoders.backend.mapper;
 
+import java.util.List;
 import org.mapstruct.InjectionStrategy;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -17,4 +18,6 @@ public interface UserMapper {
 
   @Mapping(target = "gitProfile", ignore = true)
   User createUserDtoToUser(CreateUserDto createUser);
+
+  List<ReadUserLiteDto> listUserToListReadUserLiteDto(List<User> users);
 }

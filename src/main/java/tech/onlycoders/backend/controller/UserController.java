@@ -15,10 +15,14 @@ import org.springframework.web.bind.annotation.*;
 import tech.onlycoders.backend.bean.auth.UserDetails;
 import tech.onlycoders.backend.dto.ApiErrorResponse;
 import tech.onlycoders.backend.dto.contactrequest.request.CreateContactRequestDto;
+import tech.onlycoders.backend.dto.organization.request.CreateEducationalOrganizationDto;
+import tech.onlycoders.backend.dto.organization.request.CreateOrganizationDto;
 import tech.onlycoders.backend.dto.user.request.EducationExperienceDto;
 import tech.onlycoders.backend.dto.user.request.WorkExperienceDto;
 import tech.onlycoders.backend.dto.user.response.ReadUserDto;
 import tech.onlycoders.backend.exception.ApiException;
+import tech.onlycoders.backend.service.EducationalOrganizationService;
+import tech.onlycoders.backend.service.OrganizationService;
 import tech.onlycoders.backend.service.UserService;
 
 @RestController
@@ -27,9 +31,17 @@ import tech.onlycoders.backend.service.UserService;
 public class UserController {
 
   private final UserService userService;
+  private final OrganizationService organizationService;
+  private final EducationalOrganizationService educationalOrganizationService;
 
-  public UserController(UserService userService) {
+  public UserController(
+    UserService userService,
+    OrganizationService organizationService,
+    EducationalOrganizationService educationalOrganizationService
+  ) {
     this.userService = userService;
+    this.organizationService = organizationService;
+    this.educationalOrganizationService = educationalOrganizationService;
   }
 
   @ApiResponses(
@@ -76,7 +88,9 @@ public class UserController {
     value = {
       @ApiResponse(
         responseCode = "200",
-        content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ReadUserDto.class)) }
+        content = {
+          @Content(mediaType = "application/json", schema = @Schema(implementation = WorkExperienceDto.class))
+        }
       ),
       @ApiResponse(
         responseCode = "400",
@@ -105,16 +119,21 @@ public class UserController {
     }
   )
   @PreAuthorize("hasAuthority('USER')")
-  @PostMapping("/works/{organizationId}")
+  @PostMapping("/works")
   @Operation(summary = "Adds a working experience.")
-  ResponseEntity<?> addWorkingExperience(
-    @PathVariable @NotBlank String organizationId,
-    @RequestBody @Valid WorkExperienceDto workExperienceDto
-  ) throws ApiException {
+  ResponseEntity<WorkExperienceDto> addWorkingExperience(@RequestBody @Valid WorkExperienceDto workExperienceDto)
+    throws ApiException {
+    if (workExperienceDto.getId() == null) {
+      var newOrganization =
+        this.organizationService.createOrganization(
+            CreateOrganizationDto.builder().name(workExperienceDto.getName()).build()
+          );
+      workExperienceDto.setId(newOrganization.getId());
+    }
     var userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     var email = userDetails.getEmail();
-    this.userService.addWork(email, organizationId, workExperienceDto);
-    return ResponseEntity.ok().build();
+    var result = this.userService.addWork(email, workExperienceDto);
+    return ResponseEntity.ok(result);
   }
 
   @ApiResponses(
@@ -147,16 +166,21 @@ public class UserController {
     }
   )
   @PreAuthorize("hasAuthority('USER')")
-  @PostMapping("/schools/{organizationId}")
+  @PostMapping("/schools")
   @Operation(summary = "Adds a school.")
-  ResponseEntity<?> addEducationExperience(
-    @PathVariable @NotBlank String organizationId,
-    @RequestBody @Valid EducationExperienceDto educationExperienceDto
-  ) throws ApiException {
+  ResponseEntity<?> addEducationExperience(@RequestBody @Valid EducationExperienceDto educationExperienceDto)
+    throws ApiException {
+    if (educationExperienceDto.getId() == null) {
+      var newOrganization =
+        this.educationalOrganizationService.createEducationalOrganization(
+            CreateEducationalOrganizationDto.builder().name(educationExperienceDto.getName()).build()
+          );
+      educationExperienceDto.setId(newOrganization.getId());
+    }
     var userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     var email = userDetails.getEmail();
-    this.userService.addSchool(email, organizationId, educationExperienceDto);
-    return ResponseEntity.ok().build();
+    var result = this.userService.addSchool(email, educationExperienceDto);
+    return ResponseEntity.ok(result);
   }
 
   @ApiResponses(
@@ -273,6 +297,45 @@ public class UserController {
     var userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     var email = userDetails.getEmail();
     this.userService.sendContactRequest(email, contactRequestDto);
+    return ResponseEntity.ok().build();
+  }
+
+  @ApiResponses(
+    value = {
+      @ApiResponse(responseCode = "200", content = { @Content(mediaType = "application/json") }),
+      @ApiResponse(
+        responseCode = "400",
+        content = {
+          @Content(mediaType = "application/json", schema = @Schema(implementation = ApiErrorResponse.class))
+        }
+      ),
+      @ApiResponse(
+        responseCode = "401",
+        content = {
+          @Content(mediaType = "application/json", schema = @Schema(implementation = ApiErrorResponse.class))
+        }
+      ),
+      @ApiResponse(
+        responseCode = "403",
+        content = {
+          @Content(mediaType = "application/json", schema = @Schema(implementation = ApiErrorResponse.class))
+        }
+      ),
+      @ApiResponse(
+        responseCode = "404",
+        content = {
+          @Content(mediaType = "application/json", schema = @Schema(implementation = ApiErrorResponse.class))
+        }
+      )
+    }
+  )
+  @PreAuthorize("hasAuthority('USER')")
+  @PostMapping("/following/{canonicalName}")
+  @Operation(summary = "Adds a tag to the user.")
+  ResponseEntity<?> followUser(@PathVariable @NotBlank String canonicalName) throws ApiException {
+    var userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    var email = userDetails.getEmail();
+    this.userService.followUser(email, canonicalName);
     return ResponseEntity.ok().build();
   }
 }

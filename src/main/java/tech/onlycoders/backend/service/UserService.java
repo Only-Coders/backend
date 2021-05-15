@@ -1,13 +1,19 @@
 package tech.onlycoders.backend.service;
 
+import java.util.List;
+import javax.validation.constraints.Min;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import tech.onlycoders.backend.dto.PaginateDto;
 import tech.onlycoders.backend.dto.auth.response.AuthResponseDto;
 import tech.onlycoders.backend.dto.contactrequest.request.CreateContactRequestDto;
+import tech.onlycoders.backend.dto.organization.response.ReadOrganizationDto;
 import tech.onlycoders.backend.dto.user.request.CreateUserDto;
 import tech.onlycoders.backend.dto.user.request.EducationExperienceDto;
 import tech.onlycoders.backend.dto.user.request.WorkExperienceDto;
 import tech.onlycoders.backend.dto.user.response.ReadUserDto;
+import tech.onlycoders.backend.dto.user.response.ReadUserLiteDto;
 import tech.onlycoders.backend.exception.ApiException;
 import tech.onlycoders.backend.mapper.UserMapper;
 import tech.onlycoders.backend.model.*;
@@ -92,9 +98,9 @@ public class UserService {
     }
   }
 
-  public void addWork(String email, String organizationId, WorkExperienceDto workExperienceDto) throws ApiException {
+  public WorkExperienceDto addWork(String email, WorkExperienceDto workExperienceDto) throws ApiException {
     var organization =
-      this.organizationRepository.findById(organizationId)
+      this.organizationRepository.findById(workExperienceDto.getId())
         .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Organization not found"));
     var user =
       this.userRepository.findByEmail(email)
@@ -103,14 +109,16 @@ public class UserService {
     worksAt.setOrganization(organization);
     worksAt.setSince(workExperienceDto.getSince());
     worksAt.setUntil(workExperienceDto.getUntil());
+    worksAt.setPosition(workExperienceDto.getPosition());
     user.getWorkingPlaces().add(worksAt);
     this.userRepository.save(user);
+    return workExperienceDto;
   }
 
-  public void addSchool(String email, String organizationId, EducationExperienceDto educationExperienceDto)
+  public EducationExperienceDto addSchool(String email, EducationExperienceDto educationExperienceDto)
     throws ApiException {
     var organization =
-      this.educationalOrganizationRepository.findById(organizationId)
+      this.educationalOrganizationRepository.findById(educationExperienceDto.getId())
         .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Organization not found"));
     var user =
       this.userRepository.findByEmail(email)
@@ -122,6 +130,12 @@ public class UserService {
     studiesAt.setDegree(educationExperienceDto.getDegree());
     user.getSchools().add(studiesAt);
     this.userRepository.save(user);
+    return educationExperienceDto;
+  }
+
+  public List<ReadUserLiteDto> getSuggestedUsers(String email, Integer size) {
+    var users = userRepository.findSuggestedUsers(email, size);
+    return userMapper.listUserToListReadUserLiteDto(users);
   }
 
   public void addSkill(String email, String canonicalName) throws ApiException {
@@ -146,6 +160,7 @@ public class UserService {
     this.userRepository.save(user);
   }
 
+
   public void sendContactRequest(String email, CreateContactRequestDto contactRequestDto) throws ApiException {
     var user =
       this.userRepository.findByEmail(email)
@@ -155,6 +170,16 @@ public class UserService {
         .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "User not found"));
     var contactRequest = ContactRequest.builder().message(contactRequestDto.getMessage()).receiver(contact).build();
     user.getRequests().add(contactRequest);
+    userRepository.save(user);
+  }
+  public void followUser(String email, String canonicalName) throws ApiException {
+    var user =
+      this.userRepository.findByEmail(email)
+        .orElseThrow(() -> new ApiException(HttpStatus.INTERNAL_SERVER_ERROR, "User not found"));
+    var followed =
+      this.userRepository.findByCanonicalName(canonicalName)
+        .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "User not found"));
+    user.getFollowed().add(followed);
     userRepository.save(user);
   }
 }
