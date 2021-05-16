@@ -6,15 +6,14 @@ import static org.mockito.ArgumentMatchers.anyString;
 
 import java.util.Optional;
 import org.jeasy.random.EasyRandom;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mapstruct.factory.Mappers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.junit.MockitoJUnitRunner;
-import org.springframework.test.util.ReflectionTestUtils;
+import org.mockito.Spy;
+import org.mockito.junit.jupiter.MockitoExtension;
 import tech.onlycoders.backend.bean.FirebaseService;
 import tech.onlycoders.backend.dto.admin.request.CreateAdminDto;
 import tech.onlycoders.backend.exception.ApiException;
@@ -23,7 +22,7 @@ import tech.onlycoders.backend.model.Admin;
 import tech.onlycoders.backend.repository.AdminRepository;
 import tech.onlycoders.backend.repository.PersonRepository;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class AdminServiceTest {
 
   @InjectMocks
@@ -40,11 +39,8 @@ public class AdminServiceTest {
 
   private final EasyRandom ezRandom = new EasyRandom();
 
-  @Before
-  public void setUp() {
-    var adminMapper = Mappers.getMapper(AdminMapper.class);
-    ReflectionTestUtils.setField(service, "adminMapper", adminMapper);
-  }
+  @Spy
+  private final AdminMapper adminMapper = Mappers.getMapper(AdminMapper.class);
 
   @Test
   public void ShouldFailWhenFirebaseReturnsException() throws ApiException {

@@ -6,17 +6,14 @@ import com.google.firebase.auth.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import tech.onlycoders.backend.exception.ApiException;
-import tech.onlycoders.backend.service.MailService;
 
 @Service
 public class FirebaseService {
 
   private final FirebaseAuth firebaseAuth;
-  private final MailService mailService;
 
-  public FirebaseService(FirebaseAuth firebaseAuth, MailService mailService) {
+  public FirebaseService(FirebaseAuth firebaseAuth) {
     this.firebaseAuth = firebaseAuth;
-    this.mailService = mailService;
   }
 
   public String verifyFirebaseToken(String firebaseToken) throws ApiException {
@@ -41,7 +38,8 @@ public class FirebaseService {
       var passwordLink = this.firebaseAuth.generatePasswordResetLink(email, resetPasswordAction);
       var activateAccountAction = ActionCodeSettings.builder().setUrl(passwordLink).build();
       var activateLink = this.firebaseAuth.generateEmailVerificationLink(email, activateAccountAction);
-      this.mailService.sendMail("Activacion de Cuenta", email, activateLink);
+      // this.mailService.sendMail("Activacion de Cuenta", email, activateLink);
+      // TODO: Call notificator service
     } catch (FirebaseAuthException e) {
       var code = e.getAuthErrorCode();
       if (code.equals(EMAIL_ALREADY_EXISTS)) {

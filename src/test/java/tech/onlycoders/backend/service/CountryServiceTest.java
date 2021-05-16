@@ -4,19 +4,18 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.anyString;
 
 import java.util.ArrayList;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mapstruct.factory.Mappers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.junit.MockitoJUnitRunner;
-import org.springframework.test.util.ReflectionTestUtils;
+import org.mockito.Spy;
+import org.mockito.junit.jupiter.MockitoExtension;
 import tech.onlycoders.backend.mapper.CountryMapper;
 import tech.onlycoders.backend.repository.CountryRepository;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class CountryServiceTest {
 
   @InjectMocks
@@ -25,11 +24,8 @@ public class CountryServiceTest {
   @Mock
   private CountryRepository countryRepository;
 
-  @Before
-  public void setUp() {
-    var countryMapper = Mappers.getMapper(CountryMapper.class);
-    ReflectionTestUtils.setField(service, "countryMapper", countryMapper);
-  }
+  @Spy
+  private final CountryMapper countryMapper = Mappers.getMapper(CountryMapper.class);
 
   @Test
   public void ShouldFailWhenFirebaseReturnsException() {

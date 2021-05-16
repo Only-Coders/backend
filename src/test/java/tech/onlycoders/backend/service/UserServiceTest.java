@@ -7,15 +7,14 @@ import static org.mockito.ArgumentMatchers.*;
 import java.util.ArrayList;
 import java.util.Optional;
 import org.jeasy.random.EasyRandom;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mapstruct.factory.Mappers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.junit.MockitoJUnitRunner;
-import org.springframework.test.util.ReflectionTestUtils;
+import org.mockito.Spy;
+import org.mockito.junit.jupiter.MockitoExtension;
 import tech.onlycoders.backend.dto.auth.response.AuthResponseDto;
 import tech.onlycoders.backend.dto.contactrequest.request.CreateContactRequestDto;
 import tech.onlycoders.backend.dto.user.request.CreateUserDto;
@@ -26,7 +25,7 @@ import tech.onlycoders.backend.mapper.UserMapper;
 import tech.onlycoders.backend.model.*;
 import tech.onlycoders.backend.repository.*;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class UserServiceTest {
 
   @InjectMocks
@@ -64,11 +63,8 @@ public class UserServiceTest {
   @Mock
   private TagRepository tagRepository;
 
-  @Before
-  public void setUp() {
-    var userMapper = Mappers.getMapper(UserMapper.class);
-    ReflectionTestUtils.setField(service, "userMapper", userMapper);
-  }
+  @Spy
+  private final UserMapper userMapper = Mappers.getMapper(UserMapper.class);
 
   @Test
   public void ShouldFailWhenFirebaseReturnsException() {

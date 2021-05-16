@@ -8,15 +8,14 @@ import static org.mockito.ArgumentMatchers.anyString;
 import java.util.ArrayList;
 import java.util.Optional;
 import org.jeasy.random.EasyRandom;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mapstruct.factory.Mappers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.junit.MockitoJUnitRunner;
-import org.springframework.test.util.ReflectionTestUtils;
+import org.mockito.Spy;
+import org.mockito.junit.jupiter.MockitoExtension;
 import tech.onlycoders.backend.dto.post.request.CreatePostDto;
 import tech.onlycoders.backend.exception.ApiException;
 import tech.onlycoders.backend.mapper.PostMapper;
@@ -27,7 +26,7 @@ import tech.onlycoders.backend.repository.PostRepository;
 import tech.onlycoders.backend.repository.TagRepository;
 import tech.onlycoders.backend.repository.UserRepository;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class PostServiceTest {
 
   @InjectMocks
@@ -44,11 +43,8 @@ public class PostServiceTest {
 
   private final EasyRandom ezRandom = new EasyRandom();
 
-  @Before
-  public void setUp() {
-    PostMapper postMapper = Mappers.getMapper(PostMapper.class);
-    ReflectionTestUtils.setField(service, "postMapper", postMapper);
-  }
+  @Spy
+  private final PostMapper postMapper = Mappers.getMapper(PostMapper.class);
 
   @Test
   public void ShouldCreatePostWhenDataIsOk() throws ApiException {

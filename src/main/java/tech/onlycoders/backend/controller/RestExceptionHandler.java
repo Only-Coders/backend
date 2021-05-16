@@ -4,7 +4,6 @@ import static org.springframework.http.HttpStatus.*;
 
 import java.util.stream.Collectors;
 import javax.validation.ConstraintViolationException;
-import org.neo4j.exceptions.EntityNotFoundException;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
@@ -21,11 +20,6 @@ import tech.onlycoders.backend.exception.ApiException;
 @Order(Ordered.HIGHEST_PRECEDENCE)
 @ControllerAdvice
 public class RestExceptionHandler {
-
-  @ExceptionHandler(EntityNotFoundException.class)
-  protected ResponseEntity<ApiErrorResponse> handleEntityNotFound(EntityNotFoundException ex) {
-    return ResponseEntity.status(NOT_FOUND).body(new ApiErrorResponse(NOT_FOUND, "Entity Not Found"));
-  }
 
   @ExceptionHandler(ApiException.class)
   protected ResponseEntity<ApiErrorResponse> handleApiError(ApiException apiException) {

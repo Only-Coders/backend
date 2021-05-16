@@ -1,0 +1,12 @@
+CREATE CONSTRAINT person_unique_email IF NOT exists ON (p:Person) ASSERT p.email IS UNIQUE;
+CREATE INDEX person_id IF NOT exists FOR (p:Person) ON (p.id);
+CREATE INDEX role_name IF NOT exists FOR (r:Role) ON (r.name);
+CREATE INDEX skill_cn IF NOT exists FOR (s:Skill) ON (s.canonicalName);
+CREATE INDEX country_code IF NOT exists FOR (c:Country) ON (c.code);
+CREATE INDEX organization_id IF NOT exists FOR (o:Organization) ON (o.id);
+CREATE INDEX educational_organization_id IF NOT exists FOR (e:EducationalOrganization) ON (e.id);
+CREATE INDEX report_type_id IF NOT exists FOR (r:ReportType) ON (r.id);
+CREATE INDEX tag_cn IF NOT exists FOR (t:Tag) ON (t.canonicalName);
+CREATE INDEX post_id IF NOT exists FOR (p:Post) ON (p.id);
+CREATE INDEX reaction_id IF NOT exists FOR (r:Reaction) ON (r.id);
+CREATE INDEX git_platform_id IF NOT exists FOR (g:GitPlatform) ON (g.id);
