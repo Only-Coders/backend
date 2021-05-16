@@ -21,6 +21,7 @@ import tech.onlycoders.backend.dto.user.request.CreateUserDto;
 import tech.onlycoders.backend.dto.user.request.EducationExperienceDto;
 import tech.onlycoders.backend.dto.user.request.WorkExperienceDto;
 import tech.onlycoders.backend.exception.ApiException;
+import tech.onlycoders.backend.mapper.PostMapper;
 import tech.onlycoders.backend.mapper.UserMapper;
 import tech.onlycoders.backend.model.*;
 import tech.onlycoders.backend.repository.*;
@@ -66,11 +67,11 @@ public class UserServiceTest {
   @Mock
   private PostRepository postRepository;
 
-  @Mock
-  private PostRepository postRepository;
-
   @Spy
   private final UserMapper userMapper = Mappers.getMapper(UserMapper.class);
+
+  @Spy
+  private final PostMapper postMapper = Mappers.getMapper(PostMapper.class);
 
   @Test
   public void ShouldFailWhenFirebaseReturnsException() {
@@ -363,5 +364,34 @@ public class UserServiceTest {
     Mockito.when(this.postRepository.findById(postId)).thenReturn(Optional.empty());
 
     assertThrows(ApiException.class, () -> this.service.addFavoritePost(email, postId));
+  }
+
+  @Test
+  public void ShouldReturnFavoritePosts() throws ApiException {
+    var email = ezRandom.nextObject(String.class);
+    var postList = new ArrayList<Post>();
+    postList.add(new Post());
+    var size = 20;
+    var page = 0;
+
+    Mockito.when(this.postRepository.getUserFavoritePostTotalQuantity(email)).thenReturn(1);
+    Mockito.when(this.postRepository.getUserFavoritePosts(email, page, size)).thenReturn(postList);
+
+    var result = this.service.getFavoritePosts(email, page, size);
+    assertNotNull(result);
+  }
+
+  @Test
+  public void ShouldFailReturnFavoritePostsWhenUserNotFound() throws ApiException {
+    var user1 = ezRandom.nextObject(User.class);
+    var email = ezRandom.nextObject(String.class);
+    var size = 20;
+    var page = 0;
+
+    Mockito.when(this.userRepository.findByEmail(email)).thenReturn(Optional.of(user1));
+    Mockito.when(this.postRepository.getUserFavoritePostTotalQuantity(email)).thenReturn(0);
+
+    var result = this.service.getFavoritePosts(email, page, size);
+    assertNotNull(result);
   }
 }

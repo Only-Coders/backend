@@ -1,5 +1,7 @@
 package tech.onlycoders.backend.service;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.List;
 import javax.validation.constraints.Min;
 import org.springframework.data.domain.PageRequest;
@@ -9,12 +11,14 @@ import tech.onlycoders.backend.dto.PaginateDto;
 import tech.onlycoders.backend.dto.auth.response.AuthResponseDto;
 import tech.onlycoders.backend.dto.contactrequest.request.CreateContactRequestDto;
 import tech.onlycoders.backend.dto.organization.response.ReadOrganizationDto;
+import tech.onlycoders.backend.dto.post.response.ReadPostDto;
 import tech.onlycoders.backend.dto.user.request.CreateUserDto;
 import tech.onlycoders.backend.dto.user.request.EducationExperienceDto;
 import tech.onlycoders.backend.dto.user.request.WorkExperienceDto;
 import tech.onlycoders.backend.dto.user.response.ReadUserDto;
 import tech.onlycoders.backend.dto.user.response.ReadUserLiteDto;
 import tech.onlycoders.backend.exception.ApiException;
+import tech.onlycoders.backend.mapper.PostMapper;
 import tech.onlycoders.backend.mapper.UserMapper;
 import tech.onlycoders.backend.model.*;
 import tech.onlycoders.backend.repository.*;
@@ -36,6 +40,7 @@ public class UserService {
   private final AuthService authService;
 
   private final UserMapper userMapper;
+  private final PostMapper postMapper;
 
   public UserService(
     UserRepository userRepository,
@@ -49,7 +54,8 @@ public class UserService {
     SkillRepository skillRepository,
     AuthService authService,
     TagRepository tagRepository,
-    PostRepository postRepository
+    PostRepository postRepository,
+    PostMapper postMapper
   ) {
     this.userRepository = userRepository;
     this.personRepository = personRepository;
@@ -63,6 +69,7 @@ public class UserService {
     this.authService = authService;
     this.tagRepository = tagRepository;
     this.postRepository = postRepository;
+    this.postMapper = postMapper;
   }
 
   public ReadUserDto getProfile(String canonicalName) throws ApiException {
@@ -195,5 +202,31 @@ public class UserService {
 
     post.getUserFavorites().add(user);
     postRepository.save(post);
+  }
+
+  public PaginateDto<ReadPostDto> getFavoritePosts(String email, Integer page, Integer size) throws ApiException {
+    var totalQuantity = this.postRepository.getUserFavoritePostTotalQuantity(email);
+    if (totalQuantity == 0) {
+      this.userRepository.findByEmail(email)
+        .orElseThrow(() -> new ApiException(HttpStatus.INTERNAL_SERVER_ERROR, "User not found"));
+    }
+    var pagesQuantity = this.getPagesQuantity(totalQuantity, size);
+    var posts = this.postRepository.getUserFavoritePosts(email, page * size, size);
+
+    var paginated = new PaginateDto<ReadPostDto>();
+    paginated.setCurrentPage(page);
+    paginated.setTotalElements(totalQuantity);
+    paginated.setTotalPages(pagesQuantity);
+    paginated.setContent(postMapper.listPostToListPostDto(posts));
+
+    return paginated;
+  }
+
+  private int getPagesQuantity(int totalQuantity, int pageSize) {
+    var bd_totalQuantity = BigDecimal.valueOf(totalQuantity);
+    var bd_pageSize = BigDecimal.valueOf(pageSize);
+
+    var bd_pageQuantity = bd_totalQuantity.divide(bd_pageSize);
+    return bd_pageQuantity.setScale(0, RoundingMode.UP).intValue();
   }
 }
