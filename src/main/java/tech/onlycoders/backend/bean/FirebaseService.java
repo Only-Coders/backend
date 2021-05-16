@@ -20,11 +20,11 @@ public class FirebaseService {
     try {
       FirebaseToken token = firebaseAuth.verifyIdToken(firebaseToken);
       if (!token.isEmailVerified()) {
-        throw new ApiException(HttpStatus.FORBIDDEN, "Email not verified");
+        throw new ApiException(HttpStatus.FORBIDDEN, "error.email-not-verified");
       }
       return token.getEmail();
     } catch (FirebaseAuthException e) {
-      throw new ApiException(HttpStatus.FORBIDDEN, "Invalid firebase token");
+      throw new ApiException(HttpStatus.FORBIDDEN, "error.invalid-firebase-token");
     }
   }
 
@@ -43,10 +43,10 @@ public class FirebaseService {
     } catch (FirebaseAuthException e) {
       var code = e.getAuthErrorCode();
       if (code.equals(EMAIL_ALREADY_EXISTS)) {
-        throw new ApiException(HttpStatus.CONFLICT, "Email already taken.");
+        throw new ApiException(HttpStatus.CONFLICT, "error.email-taken");
       }
       e.printStackTrace();
-      throw new ApiException(HttpStatus.INTERNAL_SERVER_ERROR, "Something went wrong.");
+      throw new ApiException(HttpStatus.INTERNAL_SERVER_ERROR, "error.500");
     }
   }
 }

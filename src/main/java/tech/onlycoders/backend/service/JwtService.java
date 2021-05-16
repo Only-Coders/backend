@@ -43,7 +43,7 @@ public class JwtService {
       var id = (String) claims.get("id");
       return UserDetails.builder().id(id).email(email).canonicalName(canonicalName).roles(roles).build();
     } catch (SignatureException | ExpiredJwtException | MalformedJwtException e) {
-      throw new ApiException(HttpStatus.UNAUTHORIZED, "Unauthorized");
+      throw new ApiException(HttpStatus.UNAUTHORIZED, "error.not-authorized");
     }
   }
 
@@ -58,10 +58,10 @@ public class JwtService {
       if (expirationDate.after(today)) {
         return Pair.of(e.getClaims().getSubject(), e.getClaims().getIssuedAt());
       } else {
-        throw new ApiException(HttpStatus.UNAUTHORIZED, "Unauthorized");
+        throw new ApiException(HttpStatus.UNAUTHORIZED, "error.not-authorized");
       }
     } catch (SignatureException | MalformedJwtException e) {
-      throw new ApiException(HttpStatus.UNAUTHORIZED, "Unauthorized");
+      throw new ApiException(HttpStatus.UNAUTHORIZED, "error.not-authorized");
     }
   }
 }

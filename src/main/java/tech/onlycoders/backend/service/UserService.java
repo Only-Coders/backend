@@ -3,8 +3,6 @@ package tech.onlycoders.backend.service;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.List;
-import javax.validation.constraints.Min;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import tech.onlycoders.backend.dto.PaginateDto;
@@ -75,25 +73,25 @@ public class UserService {
   public ReadUserDto getProfile(String canonicalName) throws ApiException {
     var user =
       this.userRepository.findByCanonicalName(canonicalName)
-        .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Profile not found"));
+        .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "error.profile-not-found"));
     return userMapper.userToReadPersonDto(user);
   }
 
   public AuthResponseDto createUser(String email, CreateUserDto createUserDto) throws ApiException {
     var optionalPerson = this.personRepository.findByEmail(email);
     if (optionalPerson.isPresent()) {
-      throw new ApiException(HttpStatus.CONFLICT, "Email already taken");
+      throw new ApiException(HttpStatus.CONFLICT, "error.email-taken");
     } else {
       var user = userMapper.createUserDtoToUser(createUserDto);
       user.country =
         countryRepository
           .findById(createUserDto.getCountry().getCode())
-          .orElseThrow(() -> new ApiException(HttpStatus.CONFLICT, "Country not found"));
+          .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "error.country-not-found"));
       user.setEmail(email);
       if (createUserDto.getGitProfile() != null) {
         var gitPlatform = gitPlatformRepository
           .findById(createUserDto.getGitProfile().getPlatform().toString())
-          .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Git platform not found"));
+          .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "error.git-platform-not-found"));
         var gitUser = GitProfile
           .builder()
           .username(createUserDto.getGitProfile().getUserName())
@@ -111,10 +109,10 @@ public class UserService {
   public WorkExperienceDto addWork(String email, WorkExperienceDto workExperienceDto) throws ApiException {
     var organization =
       this.organizationRepository.findById(workExperienceDto.getId())
-        .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Organization not found"));
+        .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "error.organization-not-found"));
     var user =
       this.userRepository.findByEmail(email)
-        .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "User not found"));
+        .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "error.user-not-found"));
     var worksAt = new WorksAt();
     worksAt.setOrganization(organization);
     worksAt.setSince(workExperienceDto.getSince());
@@ -129,10 +127,10 @@ public class UserService {
     throws ApiException {
     var organization =
       this.educationalOrganizationRepository.findById(educationExperienceDto.getId())
-        .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Organization not found"));
+        .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "error.organization-not-found"));
     var user =
       this.userRepository.findByEmail(email)
-        .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "User not found"));
+        .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "error.user-not-found"));
     var studiesAt = new StudiesAt();
     studiesAt.setOrganization(organization);
     studiesAt.setSince(educationExperienceDto.getSince());
@@ -151,10 +149,10 @@ public class UserService {
   public void addSkill(String email, String canonicalName) throws ApiException {
     var skill =
       this.skillRepository.findById(canonicalName)
-        .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Skill not found"));
+        .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "error.skill-not-found"));
     var user =
       this.userRepository.findByEmail(email)
-        .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "User not found"));
+        .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "error.user-not-found"));
     user.getSkills().add(skill);
     this.userRepository.save(user);
   }
@@ -162,10 +160,10 @@ public class UserService {
   public void addTag(String email, String canonicalName) throws ApiException {
     var tag =
       this.tagRepository.findById(canonicalName)
-        .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Tag not found"));
+        .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "error.tag-not-found"));
     var user =
       this.userRepository.findByEmail(email)
-        .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "User not found"));
+        .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "error.user-not-found"));
     user.getTags().add(tag);
     this.userRepository.save(user);
   }
@@ -173,10 +171,10 @@ public class UserService {
   public void sendContactRequest(String email, CreateContactRequestDto contactRequestDto) throws ApiException {
     var user =
       this.userRepository.findByEmail(email)
-        .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "User not found"));
+        .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "error.user-not-found"));
     var contact =
       this.userRepository.findByCanonicalName(contactRequestDto.getCanonicalName())
-        .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "User not found"));
+        .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "error.user-not-found"));
     var contactRequest = ContactRequest.builder().message(contactRequestDto.getMessage()).receiver(contact).build();
     user.getRequests().add(contactRequest);
     userRepository.save(user);
@@ -185,10 +183,10 @@ public class UserService {
   public void followUser(String email, String canonicalName) throws ApiException {
     var user =
       this.userRepository.findByEmail(email)
-        .orElseThrow(() -> new ApiException(HttpStatus.INTERNAL_SERVER_ERROR, "User not found"));
+        .orElseThrow(() -> new ApiException(HttpStatus.INTERNAL_SERVER_ERROR, "error.user-not-found"));
     var followed =
       this.userRepository.findByCanonicalName(canonicalName)
-        .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "User not found"));
+        .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "error.user-not-found"));
     user.getFollowed().add(followed);
     userRepository.save(user);
   }

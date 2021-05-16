@@ -41,9 +41,7 @@ public class PostService {
   public ReadPostDto createPost(String publisherCanonicalName, CreatePostDto createPostDto) throws ApiException {
     var publisher = userRepository
       .findByCanonicalName(publisherCanonicalName)
-      .orElseThrow(
-        () -> new ApiException(HttpStatus.NOT_FOUND, "Couldn't find Person [" + publisherCanonicalName + "]")
-      );
+      .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "error.user-not-found"));
 
     var mentions = getPersonList(createPostDto.getMentionCanonicalNames());
     var tags = getOrSaveTagList(createPostDto.getTagNames());
@@ -91,7 +89,7 @@ public class PostService {
       for (String cName : canonicalNames) {
         var person = userRepository
           .findByCanonicalName(cName)
-          .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Couldn't find Person [" + cName + "]"));
+          .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "error.user-not-found"));
         list.add(person);
       }
     }
