@@ -33,7 +33,7 @@ public class AdminService {
   public ReadAdminDto createAdmin(CreateAdminDto createAdminDto) throws ApiException {
     var optionalPerson = this.personRepository.findByEmail(createAdminDto.getEmail());
     if (optionalPerson.isPresent()) {
-      throw new ApiException(HttpStatus.CONFLICT, "Email already taken");
+      throw new ApiException(HttpStatus.CONFLICT, "error.email-taken");
     } else {
       this.firebaseService.createUser(createAdminDto.getEmail());
       var admin = this.adminMapper.createAdminDtoToPerson(createAdminDto);

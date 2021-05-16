@@ -8,13 +8,13 @@ import java.util.Date;
 import java.util.Optional;
 import org.jeasy.random.EasyRandom;
 import org.joda.time.DateTime;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 import tech.onlycoders.backend.bean.FirebaseService;
 import tech.onlycoders.backend.dto.auth.request.AuthRequestDto;
@@ -23,7 +23,7 @@ import tech.onlycoders.backend.model.Role;
 import tech.onlycoders.backend.model.User;
 import tech.onlycoders.backend.repository.PersonRepository;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class AuthServiceTest {
 
   @InjectMocks
@@ -40,7 +40,7 @@ public class AuthServiceTest {
 
   private final EasyRandom ezRandom = new EasyRandom();
 
-  @Before
+  @BeforeEach
   public void setUp() {
     ReflectionTestUtils.setField(jwtService, "SECRET_KEY", "asdasd");
     ReflectionTestUtils.setField(jwtService, "ACCESS_EXPIRATION", 5000);

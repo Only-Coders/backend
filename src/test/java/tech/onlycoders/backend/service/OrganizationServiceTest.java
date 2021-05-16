@@ -5,23 +5,22 @@ import static org.mockito.ArgumentMatchers.*;
 
 import java.util.stream.Collectors;
 import org.jeasy.random.EasyRandom;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mapstruct.factory.Mappers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.Spy;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.test.util.ReflectionTestUtils;
 import tech.onlycoders.backend.dto.organization.request.CreateOrganizationDto;
 import tech.onlycoders.backend.mapper.OrganizationMapper;
 import tech.onlycoders.backend.model.Organization;
 import tech.onlycoders.backend.repository.OrganizationRepository;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class OrganizationServiceTest {
 
   @InjectMocks
@@ -30,13 +29,10 @@ public class OrganizationServiceTest {
   @Mock
   private OrganizationRepository organizationRepository;
 
-  private final EasyRandom ezRandom = new EasyRandom();
+  @Spy
+  private final OrganizationMapper organizationMapper = Mappers.getMapper(OrganizationMapper.class);
 
-  @Before
-  public void setUp() {
-    var mapper = Mappers.getMapper(OrganizationMapper.class);
-    ReflectionTestUtils.setField(service, "organizationMapper", mapper);
-  }
+  private final EasyRandom ezRandom = new EasyRandom();
 
   @Test
   public void ShouldPaginateOrganizations() {

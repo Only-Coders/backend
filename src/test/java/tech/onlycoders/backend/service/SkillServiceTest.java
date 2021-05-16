@@ -1,28 +1,27 @@
 package tech.onlycoders.backend.service;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.*;
 
 import java.util.stream.Collectors;
 import org.jeasy.random.EasyRandom;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mapstruct.factory.Mappers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.Spy;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.test.util.ReflectionTestUtils;
 import tech.onlycoders.backend.dto.skill.request.CreateSkillDto;
 import tech.onlycoders.backend.mapper.SkillMapper;
 import tech.onlycoders.backend.model.Skill;
 import tech.onlycoders.backend.repository.SkillRepository;
 import tech.onlycoders.backend.utils.CanonicalFactory;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class SkillServiceTest {
 
   @InjectMocks
@@ -33,11 +32,8 @@ public class SkillServiceTest {
 
   private final EasyRandom ezRandom = new EasyRandom();
 
-  @Before
-  public void setUp() {
-    var mapper = Mappers.getMapper(SkillMapper.class);
-    ReflectionTestUtils.setField(service, "skillMapper", mapper);
-  }
+  @Spy
+  private final SkillMapper skillMapper = Mappers.getMapper(SkillMapper.class);
 
   @Test
   public void ShouldPaginateSkills() {

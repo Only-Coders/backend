@@ -28,9 +28,12 @@ public class Post extends BaseEntity {
   @Relationship(type = "MENTIONS", direction = Relationship.Direction.OUTGOING)
   public Set<Person> mentions = new HashSet<>();
 
-  @Relationship(type = "HAS", direction = Relationship.Direction.OUTGOING)
-  public Set<Tag> tags = new HashSet<>();
+  @Relationship(type = "HAS")
+  public Set<DisplayedTag> tags = new HashSet<>();
 
   @Relationship(type = "PUBLISH", direction = Relationship.Direction.INCOMING)
   public Person publisher;
+
+  @Relationship(value = "IS_FAVORITE", direction = Relationship.Direction.INCOMING)
+  public Set<User> userFavorites = new HashSet<>();
 }

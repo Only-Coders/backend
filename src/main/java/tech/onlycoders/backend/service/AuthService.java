@@ -47,7 +47,7 @@ public class AuthService {
     if (optionalPerson.isPresent()) {
       var person = optionalPerson.get();
       if (person.getSecurityUpdate() != null && person.getSecurityUpdate().after(pairEmailIAT.getSecond())) {
-        throw new ApiException(HttpStatus.UNAUTHORIZED, "Unauthorized");
+        throw new ApiException(HttpStatus.UNAUTHORIZED, "error.not-authorized");
       }
       claims.put("id", person.getId());
       claims.put("roles", person.getRole().getName());

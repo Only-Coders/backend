@@ -54,7 +54,7 @@ public class AuthenticationFilter extends GenericFilterBean {
         asHttp(request),
         asHttp(response),
         null,
-        new ApiException(HttpStatus.UNAUTHORIZED, "UNAUTHORIZED")
+        new ApiException(HttpStatus.UNAUTHORIZED, "error.not-authorized")
       );
       return;
     }
@@ -82,7 +82,7 @@ public class AuthenticationFilter extends GenericFilterBean {
         asHttp(request),
         asHttp(response),
         null,
-        new ApiException(HttpStatus.UNAUTHORIZED, "UNAUTHORIZED")
+        new ApiException(HttpStatus.UNAUTHORIZED, "error.not-authorized")
       );
       SecurityContextHolder.clearContext();
     }

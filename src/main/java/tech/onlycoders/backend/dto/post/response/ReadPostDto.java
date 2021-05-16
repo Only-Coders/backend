@@ -5,7 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import tech.onlycoders.backend.dto.tag.response.ReadTagNameDto;
+import tech.onlycoders.backend.dto.tag.response.ReadDisplayedTagDto;
 import tech.onlycoders.backend.dto.user.response.ReadUserLiteDto;
 import tech.onlycoders.backend.model.PostType;
 
@@ -21,5 +21,5 @@ public class ReadPostDto {
   private Boolean isPublic;
   private String url;
   private List<ReadUserLiteDto> mentions;
-  private List<ReadTagNameDto> tagNames;
+  private List<ReadDisplayedTagDto> tags;
 }
