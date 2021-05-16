@@ -1,5 +1,6 @@
 package tech.onlycoders.backend.service;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -7,16 +8,15 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import tech.onlycoders.backend.dto.post.request.CreatePostDto;
 import tech.onlycoders.backend.dto.post.response.ReadPostDto;
-import tech.onlycoders.backend.dto.tag.response.ReadTagNameDto;
 import tech.onlycoders.backend.exception.ApiException;
 import tech.onlycoders.backend.mapper.PostMapper;
+import tech.onlycoders.backend.model.DisplayedTag;
 import tech.onlycoders.backend.model.Person;
 import tech.onlycoders.backend.model.Tag;
 import tech.onlycoders.backend.repository.PostRepository;
 import tech.onlycoders.backend.repository.TagRepository;
 import tech.onlycoders.backend.repository.UserRepository;
 import tech.onlycoders.backend.utils.CanonicalFactory;
-import tech.onlycoders.backend.utils.ProcessingTagLists;
 
 @Service
 public class PostService {
@@ -49,19 +49,18 @@ public class PostService {
     var post = postMapper.createPostDtoToPost(createPostDto);
     post.setPublisher(publisher);
     post.setMentions(mentions);
-    post.setTags(tags.getPersitedTags());
+    post.setTags(tags);
     post = postRepository.save(post);
 
     publisher.setDefaultPrivacyIsPublic(post.getIsPublic());
     userRepository.save(publisher);
 
     var dto = postMapper.postToReadPersonDto(post);
-    dto.setTagNames(tags.getTagNames());
     return dto;
   }
 
-  private ProcessingTagLists getOrSaveTagList(List<String> displayTagNames) {
-    var titlist = new ProcessingTagLists();
+  private Set<DisplayedTag> getOrSaveTagList(List<String> displayTagNames) {
+    var taglist = new HashSet<DisplayedTag>();
     if (displayTagNames != null) {
       for (String displayName : displayTagNames) {
         var canonicalName = CanonicalFactory.getCanonicalName(displayName);
@@ -74,13 +73,10 @@ public class PostService {
               return newTag;
             }
           );
-        titlist.getPersitedTags().add(tag);
-        titlist
-          .getTagNames()
-          .add(ReadTagNameDto.builder().displayName(displayName).canonicalName(canonicalName).build());
+        taglist.add(DisplayedTag.builder().displayName(displayName).tag(tag).build());
       }
     }
-    return titlist;
+    return taglist;
   }
 
   private Set<Person> getPersonList(List<String> canonicalNames) throws ApiException {

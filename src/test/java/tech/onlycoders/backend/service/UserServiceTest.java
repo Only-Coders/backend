@@ -22,6 +22,8 @@ import tech.onlycoders.backend.dto.user.request.EducationExperienceDto;
 import tech.onlycoders.backend.dto.user.request.WorkExperienceDto;
 import tech.onlycoders.backend.exception.ApiException;
 import tech.onlycoders.backend.mapper.PostMapper;
+import tech.onlycoders.backend.mapper.PostMapperImpl;
+import tech.onlycoders.backend.mapper.TagMapperImpl;
 import tech.onlycoders.backend.mapper.UserMapper;
 import tech.onlycoders.backend.model.*;
 import tech.onlycoders.backend.repository.*;
@@ -71,7 +73,7 @@ public class UserServiceTest {
   private final UserMapper userMapper = Mappers.getMapper(UserMapper.class);
 
   @Spy
-  private final PostMapper postMapper = Mappers.getMapper(PostMapper.class);
+  private final PostMapper postMapper = new PostMapperImpl(new TagMapperImpl());
 
   @Test
   public void ShouldFailWhenFirebaseReturnsException() {
