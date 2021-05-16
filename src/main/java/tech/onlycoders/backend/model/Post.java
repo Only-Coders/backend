@@ -33,4 +33,7 @@ public class Post extends BaseEntity {
 
   @Relationship(type = "PUBLISH", direction = Relationship.Direction.INCOMING)
   public Person publisher;
+
+  @Relationship(value = "IS_FAVORITE", direction = Relationship.Direction.INCOMING)
+  public Set<User> userFavorites = new HashSet<>();
 }

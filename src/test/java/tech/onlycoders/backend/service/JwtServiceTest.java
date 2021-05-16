@@ -3,21 +3,21 @@ package tech.onlycoders.backend.service;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.HashMap;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 import tech.onlycoders.backend.exception.ApiException;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class JwtServiceTest {
 
   @InjectMocks
   private JwtService jwtService;
 
-  @Before
+  @BeforeEach
   public void setUp() {
     ReflectionTestUtils.setField(jwtService, "SECRET_KEY", "asdasd");
     ReflectionTestUtils.setField(jwtService, "ACCESS_EXPIRATION", 5000);
