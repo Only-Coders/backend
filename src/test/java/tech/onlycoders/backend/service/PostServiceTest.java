@@ -19,6 +19,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import tech.onlycoders.backend.dto.post.request.CreatePostDto;
 import tech.onlycoders.backend.exception.ApiException;
 import tech.onlycoders.backend.mapper.PostMapper;
+import tech.onlycoders.backend.mapper.PostMapperImpl;
+import tech.onlycoders.backend.mapper.TagMapperImpl;
 import tech.onlycoders.backend.model.Post;
 import tech.onlycoders.backend.model.Tag;
 import tech.onlycoders.backend.model.User;
@@ -44,7 +46,7 @@ public class PostServiceTest {
   private final EasyRandom ezRandom = new EasyRandom();
 
   @Spy
-  private final PostMapper postMapper = Mappers.getMapper(PostMapper.class);
+  private final PostMapper postMapper = new PostMapperImpl(new TagMapperImpl());
 
   @Test
   public void ShouldCreatePostWhenDataIsOk() throws ApiException {

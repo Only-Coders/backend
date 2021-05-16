@@ -6,11 +6,11 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
-@Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class ReadTagNameDto {
+@Builder
+public class ReadDisplayedTagDto {
 
-  public String canonicalName;
   public String displayName;
+  private String canonicalName;
 }
