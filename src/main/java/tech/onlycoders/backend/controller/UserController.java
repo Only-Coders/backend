@@ -118,7 +118,7 @@ public class UserController {
     }
   )
   @PreAuthorize("hasAuthority('USER')")
-  @PostMapping("/works")
+  @PostMapping("/worksplaces")
   @Operation(summary = "Adds a working experience.")
   ResponseEntity<WorkExperienceDto> addWorkingExperience(@RequestBody @Valid WorkExperienceDto workExperienceDto)
     throws ApiException {
@@ -163,8 +163,8 @@ public class UserController {
     }
   )
   @PreAuthorize("hasAuthority('USER')")
-  @PostMapping("/schools")
-  @Operation(summary = "Adds a school.")
+  @PostMapping("/institutes")
+  @Operation(summary = "Adds a school experience.")
   ResponseEntity<?> addEducationExperience(@RequestBody @Valid EducationExperienceDto educationExperienceDto)
     throws ApiException {
     if (educationExperienceDto.getId() == null) {
