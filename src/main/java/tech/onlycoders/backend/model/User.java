@@ -21,8 +21,8 @@ public class User extends Person {
   @Relationship(type = "WORKS", direction = Relationship.Direction.OUTGOING)
   private Set<WorkPosition> workingPlaces = new HashSet<>();
 
-  @Relationship("STUDIES_AT")
-  private Set<StudiesAt> schools = new HashSet<>();
+  @Relationship(type = "STUDIES", direction = Relationship.Direction.OUTGOING)
+  private Set<Degree> schools = new HashSet<>();
 
   @Relationship("USES")
   private GitProfile gitProfile;

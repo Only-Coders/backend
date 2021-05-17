@@ -11,3 +11,4 @@ CREATE INDEX git_platform_id IF NOT exists FOR (g:GitPlatform) ON (g.id);
 CREATE INDEX workposition_id IF NOT exists FOR (p:WorkPosition) ON (p.id);
 CREATE INDEX workplace_id IF NOT exists FOR (p:Workplace) ON (p.id);
 CREATE INDEX institute_id IF NOT exists FOR (p:Institute) ON (p.id);
+CREATE INDEX degree_id IF NOT exists FOR (p:Degree) ON (p.id);

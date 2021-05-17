@@ -124,14 +124,14 @@ public class UserService {
 
   public EducationExperienceDto addSchool(String email, EducationExperienceDto educationExperienceDto)
     throws ApiException {
-    var organization =
+    var institute =
       this.instituteRepository.findById(educationExperienceDto.getId())
         .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "error.workplace-not-found"));
     var user =
       this.userRepository.findByEmail(email)
         .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "error.user-not-found"));
-    var studiesAt = new StudiesAt();
-    studiesAt.setOrganization(organization);
+    var studiesAt = new Degree();
+    studiesAt.setInstitute(institute);
     studiesAt.setSince(educationExperienceDto.getSince());
     studiesAt.setUntil(educationExperienceDto.getUntil());
     studiesAt.setDegree(educationExperienceDto.getDegree());
