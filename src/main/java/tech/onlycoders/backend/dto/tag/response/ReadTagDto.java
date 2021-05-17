@@ -12,4 +12,6 @@ import lombok.NoArgsConstructor;
 public class ReadTagDto {
 
   private String canonicalName;
+
+  private Long followerQuantity;
 }

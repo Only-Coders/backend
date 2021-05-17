@@ -32,6 +32,9 @@ public class TagService {
     var pageRequest = PageRequest.of(page, size);
     var paginatedTags = this.tagRepository.findByCanonicalNameContainingIgnoreCase(tagName, pageRequest);
     var tags = tagMapper.listTagsToListReadTagDto(paginatedTags.getContent());
+    for (ReadTagDto tag : tags) {
+      tag.setFollowerQuantity(this.tagRepository.getFollowerQuantity(tag.getCanonicalName()));
+    }
     var pagination = new PaginateDto<ReadTagDto>();
     pagination.setContent(tags);
     pagination.setCurrentPage(paginatedTags.getNumber());
