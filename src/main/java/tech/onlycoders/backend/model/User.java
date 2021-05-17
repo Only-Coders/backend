@@ -18,11 +18,11 @@ public class User extends Person {
 
   private Boolean blocked = false;
 
-  @Relationship("WORKS_AT")
-  private Set<WorksAt> workingPlaces = new HashSet<>();
+  @Relationship(type = "WORKS", direction = Relationship.Direction.OUTGOING)
+  private Set<WorkPosition> workingPlaces = new HashSet<>();
 
-  @Relationship("STUDIES_AT")
-  private Set<StudiesAt> schools = new HashSet<>();
+  @Relationship(type = "STUDIES", direction = Relationship.Direction.OUTGOING)
+  private Set<Degree> schools = new HashSet<>();
 
   @Relationship("USES")
   private GitProfile gitProfile;

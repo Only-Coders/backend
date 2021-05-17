@@ -8,7 +8,6 @@ import org.springframework.stereotype.Service;
 import tech.onlycoders.backend.dto.PaginateDto;
 import tech.onlycoders.backend.dto.auth.response.AuthResponseDto;
 import tech.onlycoders.backend.dto.contactrequest.request.CreateContactRequestDto;
-import tech.onlycoders.backend.dto.organization.response.ReadOrganizationDto;
 import tech.onlycoders.backend.dto.post.response.ReadPostDto;
 import tech.onlycoders.backend.dto.user.request.CreateUserDto;
 import tech.onlycoders.backend.dto.user.request.EducationExperienceDto;
@@ -28,8 +27,8 @@ public class UserService {
   private final PersonRepository personRepository;
   private final GitPlatformRepository gitPlatformRepository;
   private final GitProfileRepository gitProfileRepository;
-  private final OrganizationRepository organizationRepository;
-  private final EducationalOrganizationRepository educationalOrganizationRepository;
+  private final WorkplaceRepository workplaceRepository;
+  private final InstituteRepository instituteRepository;
   private final CountryRepository countryRepository;
   private final SkillRepository skillRepository;
   private final PostRepository postRepository;
@@ -46,8 +45,8 @@ public class UserService {
     UserMapper userMapper,
     GitPlatformRepository gitPlatformRepository,
     GitProfileRepository gitProfileRepository,
-    OrganizationRepository organizationRepository,
-    EducationalOrganizationRepository educationalOrganizationRepository,
+    WorkplaceRepository workplaceRepository,
+    InstituteRepository instituteRepository,
     CountryRepository countryRepository,
     SkillRepository skillRepository,
     AuthService authService,
@@ -60,8 +59,8 @@ public class UserService {
     this.userMapper = userMapper;
     this.gitPlatformRepository = gitPlatformRepository;
     this.gitProfileRepository = gitProfileRepository;
-    this.organizationRepository = organizationRepository;
-    this.educationalOrganizationRepository = educationalOrganizationRepository;
+    this.workplaceRepository = workplaceRepository;
+    this.instituteRepository = instituteRepository;
     this.countryRepository = countryRepository;
     this.skillRepository = skillRepository;
     this.authService = authService;
@@ -107,14 +106,14 @@ public class UserService {
   }
 
   public WorkExperienceDto addWork(String email, WorkExperienceDto workExperienceDto) throws ApiException {
-    var organization =
-      this.organizationRepository.findById(workExperienceDto.getId())
-        .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "error.organization-not-found"));
+    var workplace =
+      this.workplaceRepository.findById(workExperienceDto.getId())
+        .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "error.workplace-not-found"));
     var user =
       this.userRepository.findByEmail(email)
         .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "error.user-not-found"));
-    var worksAt = new WorksAt();
-    worksAt.setOrganization(organization);
+    var worksAt = new WorkPosition();
+    worksAt.setWorkplace(workplace);
     worksAt.setSince(workExperienceDto.getSince());
     worksAt.setUntil(workExperienceDto.getUntil());
     worksAt.setPosition(workExperienceDto.getPosition());
@@ -125,14 +124,14 @@ public class UserService {
 
   public EducationExperienceDto addSchool(String email, EducationExperienceDto educationExperienceDto)
     throws ApiException {
-    var organization =
-      this.educationalOrganizationRepository.findById(educationExperienceDto.getId())
-        .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "error.organization-not-found"));
+    var institute =
+      this.instituteRepository.findById(educationExperienceDto.getId())
+        .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "error.workplace-not-found"));
     var user =
       this.userRepository.findByEmail(email)
         .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "error.user-not-found"));
-    var studiesAt = new StudiesAt();
-    studiesAt.setOrganization(organization);
+    var studiesAt = new Degree();
+    studiesAt.setInstitute(institute);
     studiesAt.setSince(educationExperienceDto.getSince());
     studiesAt.setUntil(educationExperienceDto.getUntil());
     studiesAt.setDegree(educationExperienceDto.getDegree());

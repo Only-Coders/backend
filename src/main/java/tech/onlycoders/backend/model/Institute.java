@@ -6,7 +6,7 @@ import lombok.NoArgsConstructor;
 import org.springframework.data.neo4j.core.schema.Node;
 
 @EqualsAndHashCode(callSuper = true)
-@Node({ "EducationalOrganization", "Organization" })
+@Node({ "Institute", "Workplace" })
 @Data
 @NoArgsConstructor
-public class EducationalOrganization extends Organization {}
+public class Institute extends Workplace {}

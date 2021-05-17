@@ -44,10 +44,10 @@ public class UserServiceTest {
   private PersonRepository personRepository;
 
   @Mock
-  private OrganizationRepository organizationRepository;
+  private WorkplaceRepository workplaceRepository;
 
   @Mock
-  private EducationalOrganizationRepository educationalOrganizationRepository;
+  private InstituteRepository instituteRepository;
 
   @Mock
   private GitPlatformRepository gitPlatformRepository;
@@ -133,12 +133,12 @@ public class UserServiceTest {
   @Test
   public void ShouldAddWorkingExperience() throws ApiException {
     var user = ezRandom.nextObject(User.class);
-    var organization = ezRandom.nextObject(Organization.class);
+    var organization = ezRandom.nextObject(Workplace.class);
     var workExperienceDto = ezRandom.nextObject(WorkExperienceDto.class);
     var email = ezRandom.nextObject(String.class);
 
     Mockito.when(this.userRepository.findByEmail(email)).thenReturn(Optional.of(user));
-    Mockito.when(this.organizationRepository.findById(workExperienceDto.getId())).thenReturn(Optional.of(organization));
+    Mockito.when(this.workplaceRepository.findById(workExperienceDto.getId())).thenReturn(Optional.of(organization));
 
     this.service.addWork(email, workExperienceDto);
   }
@@ -148,18 +148,18 @@ public class UserServiceTest {
     var workExperienceDto = ezRandom.nextObject(WorkExperienceDto.class);
     var email = ezRandom.nextObject(String.class);
 
-    Mockito.when(this.organizationRepository.findById(workExperienceDto.getId())).thenReturn(Optional.empty());
+    Mockito.when(this.workplaceRepository.findById(workExperienceDto.getId())).thenReturn(Optional.empty());
 
     assertThrows(ApiException.class, () -> this.service.addWork(email, workExperienceDto));
   }
 
   @Test
   public void ShouldFailToAddWorkingExperienceWhenUserNotFound() {
-    var organization = ezRandom.nextObject(Organization.class);
+    var organization = ezRandom.nextObject(Workplace.class);
     var workExperienceDto = ezRandom.nextObject(WorkExperienceDto.class);
     var email = ezRandom.nextObject(String.class);
 
-    Mockito.when(this.organizationRepository.findById(workExperienceDto.getId())).thenReturn(Optional.of(organization));
+    Mockito.when(this.workplaceRepository.findById(workExperienceDto.getId())).thenReturn(Optional.of(organization));
     Mockito.when(this.userRepository.findByEmail(email)).thenReturn(Optional.empty());
 
     assertThrows(ApiException.class, () -> this.service.addWork(email, workExperienceDto));
@@ -168,13 +168,13 @@ public class UserServiceTest {
   @Test
   public void ShouldAddSchool() throws ApiException {
     var user = ezRandom.nextObject(User.class);
-    var organization = ezRandom.nextObject(EducationalOrganization.class);
+    var organization = ezRandom.nextObject(Institute.class);
     var educationExperienceDto = ezRandom.nextObject(EducationExperienceDto.class);
     var email = ezRandom.nextObject(String.class);
 
     Mockito.when(this.userRepository.findByEmail(email)).thenReturn(Optional.of(user));
     Mockito
-      .when(this.educationalOrganizationRepository.findById(educationExperienceDto.getId()))
+      .when(this.instituteRepository.findById(educationExperienceDto.getId()))
       .thenReturn(Optional.of(organization));
 
     this.service.addSchool(email, educationExperienceDto);
@@ -185,21 +185,19 @@ public class UserServiceTest {
     var educationExperienceDto = ezRandom.nextObject(EducationExperienceDto.class);
     var email = ezRandom.nextObject(String.class);
 
-    Mockito
-      .when(this.educationalOrganizationRepository.findById(educationExperienceDto.getId()))
-      .thenReturn(Optional.empty());
+    Mockito.when(this.instituteRepository.findById(educationExperienceDto.getId())).thenReturn(Optional.empty());
 
     assertThrows(ApiException.class, () -> this.service.addSchool(email, educationExperienceDto));
   }
 
   @Test
   public void ShouldFailToAddSchoolWhenUserNotFound() {
-    var organization = ezRandom.nextObject(EducationalOrganization.class);
+    var organization = ezRandom.nextObject(Institute.class);
     var educationExperienceDto = ezRandom.nextObject(EducationExperienceDto.class);
     var email = ezRandom.nextObject(String.class);
 
     Mockito
-      .when(this.educationalOrganizationRepository.findById(educationExperienceDto.getId()))
+      .when(this.instituteRepository.findById(educationExperienceDto.getId()))
       .thenReturn(Optional.of(organization));
     Mockito.when(this.userRepository.findByEmail(email)).thenReturn(Optional.empty());
 
