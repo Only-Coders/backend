@@ -13,20 +13,20 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import tech.onlycoders.backend.dto.ApiErrorResponse;
 import tech.onlycoders.backend.dto.PaginateDto;
-import tech.onlycoders.backend.dto.workplace.request.CreateEducationalOrganizationDto;
-import tech.onlycoders.backend.dto.workplace.response.ReadEducationalOrganizationDto;
-import tech.onlycoders.backend.service.EducationalOrganizationService;
+import tech.onlycoders.backend.dto.institute.request.CreateInstituteDto;
+import tech.onlycoders.backend.dto.institute.response.ReadInstituteDto;
+import tech.onlycoders.backend.service.InstituteService;
 
 @RestController
-@RequestMapping("/api/educational-organizations")
+@RequestMapping("/api/institutes")
 @SecurityRequirement(name = "bearerAuth")
 @Validated
-public class EducationalOrganizationController {
+public class InstituteController {
 
-  private final EducationalOrganizationService organizationService;
+  private final InstituteService instituteService;
 
-  public EducationalOrganizationController(EducationalOrganizationService organizationService) {
-    this.organizationService = organizationService;
+  public InstituteController(InstituteService instituteService) {
+    this.instituteService = instituteService;
   }
 
   @PreAuthorize("hasAuthority('USER')")
@@ -35,10 +35,7 @@ public class EducationalOrganizationController {
       @ApiResponse(
         responseCode = "200",
         content = {
-          @Content(
-            mediaType = "application/json",
-            schema = @Schema(implementation = PaginatedEducationalOrganizations.class)
-          )
+          @Content(mediaType = "application/json", schema = @Schema(implementation = PaginatedInstitutes.class))
         }
       ),
       @ApiResponse(
@@ -62,13 +59,13 @@ public class EducationalOrganizationController {
     }
   )
   @GetMapping
-  @Operation(summary = "Search Organizations by name")
-  ResponseEntity<PaginateDto<ReadEducationalOrganizationDto>> getOrganizations(
-    @RequestParam(defaultValue = "", required = false) String organizationName,
+  @Operation(summary = "Search Institutes by name")
+  ResponseEntity<PaginateDto<ReadInstituteDto>> getInstitutes(
+    @RequestParam(defaultValue = "", required = false) String instituteName,
     @RequestParam(defaultValue = "0", required = false) @Min(0) Integer page,
     @RequestParam(defaultValue = "20", required = false) @Min(1) Integer size
   ) {
-    var pagination = this.organizationService.listEducationalOrganizations(organizationName, page, size);
+    var pagination = this.instituteService.listInstitutes(instituteName, page, size);
     return ResponseEntity.ok(pagination);
   }
 
@@ -78,10 +75,7 @@ public class EducationalOrganizationController {
       @ApiResponse(
         responseCode = "200",
         content = {
-          @Content(
-            mediaType = "application/json",
-            schema = @Schema(implementation = ReadEducationalOrganizationDto.class)
-          )
+          @Content(mediaType = "application/json", schema = @Schema(implementation = ReadInstituteDto.class))
         }
       ),
       @ApiResponse(
@@ -105,13 +99,11 @@ public class EducationalOrganizationController {
     }
   )
   @PostMapping
-  @Operation(summary = "Create an Organization")
-  ResponseEntity<ReadEducationalOrganizationDto> createOrganization(
-    @RequestBody CreateEducationalOrganizationDto createEducationalOrganization
-  ) {
-    var organization = this.organizationService.createEducationalOrganization(createEducationalOrganization);
-    return ResponseEntity.ok(organization);
+  @Operation(summary = "Create an Institute")
+  ResponseEntity<ReadInstituteDto> createInstitute(@RequestBody CreateInstituteDto createInstituteDto) {
+    var instituteDto = this.instituteService.createInstitute(createInstituteDto);
+    return ResponseEntity.ok(instituteDto);
   }
 }
 
-class PaginatedEducationalOrganizations extends PaginateDto<ReadEducationalOrganizationDto> {}
+class PaginatedInstitutes extends PaginateDto<ReadInstituteDto> {}

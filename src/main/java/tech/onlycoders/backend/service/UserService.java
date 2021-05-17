@@ -28,7 +28,7 @@ public class UserService {
   private final GitPlatformRepository gitPlatformRepository;
   private final GitProfileRepository gitProfileRepository;
   private final WorkplaceRepository workplaceRepository;
-  private final EducationalOrganizationRepository educationalOrganizationRepository;
+  private final InstituteRepository instituteRepository;
   private final CountryRepository countryRepository;
   private final SkillRepository skillRepository;
   private final PostRepository postRepository;
@@ -46,7 +46,7 @@ public class UserService {
     GitPlatformRepository gitPlatformRepository,
     GitProfileRepository gitProfileRepository,
     WorkplaceRepository workplaceRepository,
-    EducationalOrganizationRepository educationalOrganizationRepository,
+    InstituteRepository instituteRepository,
     CountryRepository countryRepository,
     SkillRepository skillRepository,
     AuthService authService,
@@ -60,7 +60,7 @@ public class UserService {
     this.gitPlatformRepository = gitPlatformRepository;
     this.gitProfileRepository = gitProfileRepository;
     this.workplaceRepository = workplaceRepository;
-    this.educationalOrganizationRepository = educationalOrganizationRepository;
+    this.instituteRepository = instituteRepository;
     this.countryRepository = countryRepository;
     this.skillRepository = skillRepository;
     this.authService = authService;
@@ -125,7 +125,7 @@ public class UserService {
   public EducationExperienceDto addSchool(String email, EducationExperienceDto educationExperienceDto)
     throws ApiException {
     var organization =
-      this.educationalOrganizationRepository.findById(educationExperienceDto.getId())
+      this.instituteRepository.findById(educationExperienceDto.getId())
         .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "error.workplace-not-found"));
     var user =
       this.userRepository.findByEmail(email)

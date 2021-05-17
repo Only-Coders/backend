@@ -17,14 +17,14 @@ import tech.onlycoders.backend.bean.auth.UserDetails;
 import tech.onlycoders.backend.dto.ApiErrorResponse;
 import tech.onlycoders.backend.dto.PaginateDto;
 import tech.onlycoders.backend.dto.contactrequest.request.CreateContactRequestDto;
+import tech.onlycoders.backend.dto.institute.request.CreateInstituteDto;
 import tech.onlycoders.backend.dto.post.response.ReadPostDto;
 import tech.onlycoders.backend.dto.user.request.EducationExperienceDto;
 import tech.onlycoders.backend.dto.user.request.WorkExperienceDto;
 import tech.onlycoders.backend.dto.user.response.ReadUserDto;
-import tech.onlycoders.backend.dto.workplace.request.CreateEducationalOrganizationDto;
 import tech.onlycoders.backend.dto.workplace.request.CreateWorkplaceDto;
 import tech.onlycoders.backend.exception.ApiException;
-import tech.onlycoders.backend.service.EducationalOrganizationService;
+import tech.onlycoders.backend.service.InstituteService;
 import tech.onlycoders.backend.service.UserService;
 import tech.onlycoders.backend.service.WorkplaceService;
 
@@ -35,16 +35,12 @@ public class UserController {
 
   private final UserService userService;
   private final WorkplaceService workplaceService;
-  private final EducationalOrganizationService educationalOrganizationService;
+  private final InstituteService instituteService;
 
-  public UserController(
-    UserService userService,
-    WorkplaceService workplaceService,
-    EducationalOrganizationService educationalOrganizationService
-  ) {
+  public UserController(UserService userService, WorkplaceService workplaceService, InstituteService instituteService) {
     this.userService = userService;
     this.workplaceService = workplaceService;
-    this.educationalOrganizationService = educationalOrganizationService;
+    this.instituteService = instituteService;
   }
 
   @ApiResponses(
@@ -173,8 +169,8 @@ public class UserController {
     throws ApiException {
     if (educationExperienceDto.getId() == null) {
       var newOrganization =
-        this.educationalOrganizationService.createEducationalOrganization(
-            CreateEducationalOrganizationDto.builder().name(educationExperienceDto.getName()).build()
+        this.instituteService.createInstitute(
+            CreateInstituteDto.builder().name(educationExperienceDto.getName()).build()
           );
       educationExperienceDto.setId(newOrganization.getId());
     }

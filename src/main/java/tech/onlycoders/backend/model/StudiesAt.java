@@ -20,7 +20,7 @@ public class StudiesAt {
   private String id;
 
   @TargetNode
-  private EducationalOrganization organization;
+  private Institute organization;
 
   @DateLong
   private Date since;
