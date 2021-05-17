@@ -16,11 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import tech.onlycoders.backend.bean.auth.UserDetails;
-import tech.onlycoders.backend.dto.PaginateDto;
-import tech.onlycoders.backend.dto.country.response.ReadCountryDto;
-import tech.onlycoders.backend.dto.organization.response.ReadEducationalOrganizationDto;
 import tech.onlycoders.backend.dto.user.response.ReadUserLiteDto;
-import tech.onlycoders.backend.service.CountryService;
 import tech.onlycoders.backend.service.UserService;
 
 @RestController

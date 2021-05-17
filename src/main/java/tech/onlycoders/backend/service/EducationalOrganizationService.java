@@ -3,9 +3,9 @@ package tech.onlycoders.backend.service;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import tech.onlycoders.backend.dto.PaginateDto;
-import tech.onlycoders.backend.dto.organization.request.CreateEducationalOrganizationDto;
-import tech.onlycoders.backend.dto.organization.response.ReadEducationalOrganizationDto;
-import tech.onlycoders.backend.mapper.OrganizationMapper;
+import tech.onlycoders.backend.dto.workplace.request.CreateEducationalOrganizationDto;
+import tech.onlycoders.backend.dto.workplace.response.ReadEducationalOrganizationDto;
+import tech.onlycoders.backend.mapper.WorkplaceMapper;
 import tech.onlycoders.backend.model.EducationalOrganization;
 import tech.onlycoders.backend.repository.EducationalOrganizationRepository;
 
@@ -13,14 +13,14 @@ import tech.onlycoders.backend.repository.EducationalOrganizationRepository;
 public class EducationalOrganizationService {
 
   private final EducationalOrganizationRepository organizationRepository;
-  private final OrganizationMapper organizationMapper;
+  private final WorkplaceMapper workplaceMapper;
 
   public EducationalOrganizationService(
     EducationalOrganizationRepository organizationRepository,
-    OrganizationMapper organizationMapper
+    WorkplaceMapper workplaceMapper
   ) {
     this.organizationRepository = organizationRepository;
-    this.organizationMapper = organizationMapper;
+    this.workplaceMapper = workplaceMapper;
   }
 
   public PaginateDto<ReadEducationalOrganizationDto> listEducationalOrganizations(
@@ -31,7 +31,7 @@ public class EducationalOrganizationService {
     var pageRequest = PageRequest.of(page, size);
     var paginatedOrganizations =
       this.organizationRepository.findByNameContainingIgnoreCase(organizationName, pageRequest);
-    var organizations = organizationMapper.listEducationalOrganizationsToListReadEducationalOrganizationDto(
+    var organizations = workplaceMapper.listEducationalOrganizationsToListReadEducationalOrganizationDto(
       paginatedOrganizations.getContent()
     );
     var pagination = new PaginateDto<ReadEducationalOrganizationDto>();
@@ -48,6 +48,6 @@ public class EducationalOrganizationService {
     var organization = new EducationalOrganization();
     organization.setName(createOrganizationDto.getName());
     this.organizationRepository.save(organization);
-    return this.organizationMapper.educationalOrganizationsReadToEducationalOrganizationDto(organization);
+    return this.workplaceMapper.educationalOrganizationsReadToEducationalOrganizationDto(organization);
   }
 }

@@ -1,4 +1,4 @@
-package tech.onlycoders.backend.dto.organization.request;
+package tech.onlycoders.backend.dto.workplace.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,7 +9,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class CreateEducationalOrganizationDto {
+public class ReadEducationalOrganizationDto {
 
+  private String id;
   private String name;
 }

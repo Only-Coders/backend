@@ -15,8 +15,8 @@ import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
-import tech.onlycoders.backend.dto.organization.request.CreateEducationalOrganizationDto;
-import tech.onlycoders.backend.mapper.OrganizationMapper;
+import tech.onlycoders.backend.dto.workplace.request.CreateEducationalOrganizationDto;
+import tech.onlycoders.backend.mapper.WorkplaceMapper;
 import tech.onlycoders.backend.model.EducationalOrganization;
 import tech.onlycoders.backend.repository.EducationalOrganizationRepository;
 
@@ -32,7 +32,7 @@ public class EducationalOrganizationServiceTest {
   private final EasyRandom ezRandom = new EasyRandom();
 
   @Spy
-  private final OrganizationMapper countryMapper = Mappers.getMapper(OrganizationMapper.class);
+  private final WorkplaceMapper countryMapper = Mappers.getMapper(WorkplaceMapper.class);
 
   @Test
   public void ShouldPaginateOrganizations() {

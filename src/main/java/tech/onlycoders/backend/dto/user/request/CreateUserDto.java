@@ -16,8 +16,6 @@ import tech.onlycoders.backend.dto.user.GitProfileDto;
 @NoArgsConstructor
 public class CreateUserDto {
 
-  @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-  @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
   private Date birthDate;
 
   private String description;

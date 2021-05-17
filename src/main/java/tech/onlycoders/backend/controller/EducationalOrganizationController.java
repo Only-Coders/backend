@@ -13,8 +13,8 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import tech.onlycoders.backend.dto.ApiErrorResponse;
 import tech.onlycoders.backend.dto.PaginateDto;
-import tech.onlycoders.backend.dto.organization.request.CreateEducationalOrganizationDto;
-import tech.onlycoders.backend.dto.organization.response.ReadEducationalOrganizationDto;
+import tech.onlycoders.backend.dto.workplace.request.CreateEducationalOrganizationDto;
+import tech.onlycoders.backend.dto.workplace.response.ReadEducationalOrganizationDto;
 import tech.onlycoders.backend.service.EducationalOrganizationService;
 
 @RestController
