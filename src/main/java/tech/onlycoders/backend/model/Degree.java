@@ -5,9 +5,9 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.data.neo4j.core.schema.*;
+import org.springframework.data.neo4j.core.schema.Node;
+import org.springframework.data.neo4j.core.schema.Relationship;
 import org.springframework.data.neo4j.core.support.DateLong;
-import org.springframework.data.neo4j.core.support.UUIDStringGenerator;
 
 @Node
 @Data

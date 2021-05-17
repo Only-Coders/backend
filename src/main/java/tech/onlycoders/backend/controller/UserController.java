@@ -23,6 +23,7 @@ import tech.onlycoders.backend.dto.user.request.EducationExperienceDto;
 import tech.onlycoders.backend.dto.user.request.WorkExperienceDto;
 import tech.onlycoders.backend.dto.user.response.ReadUserDto;
 import tech.onlycoders.backend.dto.workplace.request.CreateWorkplaceDto;
+import tech.onlycoders.backend.dto.workposition.response.ReadWorkPositionDto;
 import tech.onlycoders.backend.exception.ApiException;
 import tech.onlycoders.backend.service.InstituteService;
 import tech.onlycoders.backend.service.UserService;
@@ -88,7 +89,7 @@ public class UserController {
       @ApiResponse(
         responseCode = "200",
         content = {
-          @Content(mediaType = "application/json", schema = @Schema(implementation = WorkExperienceDto.class))
+          @Content(mediaType = "application/json", schema = @Schema(implementation = ReadWorkPositionDto.class))
         }
       ),
       @ApiResponse(
@@ -120,7 +121,7 @@ public class UserController {
   @PreAuthorize("hasAuthority('USER')")
   @PostMapping("/workplaces")
   @Operation(summary = "Adds a working experience.")
-  ResponseEntity<WorkExperienceDto> addWorkingExperience(@RequestBody @Valid WorkExperienceDto workExperienceDto)
+  ResponseEntity<ReadWorkPositionDto> addWorkingExperience(@RequestBody @Valid WorkExperienceDto workExperienceDto)
     throws ApiException {
     if (workExperienceDto.getId() == null) {
       var newOrganization =

@@ -1,6 +1,8 @@
 package tech.onlycoders.backend.model;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -19,7 +21,7 @@ public class User extends Person {
   private Boolean blocked = false;
 
   @Relationship(type = "WORKS", direction = Relationship.Direction.OUTGOING)
-  private Set<WorkPosition> workingPlaces = new HashSet<>();
+  private List<WorkPosition> workingPlaces = new ArrayList<>();
 
   @Relationship(type = "STUDIES", direction = Relationship.Direction.OUTGOING)
   private Set<Degree> schools = new HashSet<>();
