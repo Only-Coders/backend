@@ -16,6 +16,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import tech.onlycoders.backend.dto.institute.request.CreateInstituteDto;
+import tech.onlycoders.backend.mapper.InstituteMapper;
 import tech.onlycoders.backend.mapper.WorkplaceMapper;
 import tech.onlycoders.backend.model.Institute;
 import tech.onlycoders.backend.repository.InstituteRepository;
@@ -32,7 +33,7 @@ public class InstituteServiceTest {
   private final EasyRandom ezRandom = new EasyRandom();
 
   @Spy
-  private final WorkplaceMapper countryMapper = Mappers.getMapper(WorkplaceMapper.class);
+  private final InstituteMapper countryMapper = Mappers.getMapper(InstituteMapper.class);
 
   @Test
   public void ShouldPaginateOrganizations() {
