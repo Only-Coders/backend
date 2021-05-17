@@ -118,7 +118,7 @@ public class UserController {
     }
   )
   @PreAuthorize("hasAuthority('USER')")
-  @PostMapping("/worksplaces")
+  @PostMapping("/workplaces")
   @Operation(summary = "Adds a working experience.")
   ResponseEntity<WorkExperienceDto> addWorkingExperience(@RequestBody @Valid WorkExperienceDto workExperienceDto)
     throws ApiException {
