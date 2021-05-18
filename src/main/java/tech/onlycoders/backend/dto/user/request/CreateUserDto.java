@@ -1,6 +1,5 @@
 package tech.onlycoders.backend.dto.user.request;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import java.util.Date;
 import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
@@ -8,7 +7,6 @@ import javax.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.format.annotation.DateTimeFormat;
 import tech.onlycoders.backend.dto.user.GitProfileDto;
 
 @Data
@@ -16,8 +14,6 @@ import tech.onlycoders.backend.dto.user.GitProfileDto;
 @NoArgsConstructor
 public class CreateUserDto {
 
-  @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-  @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
   private Date birthDate;
 
   private String description;
