@@ -19,7 +19,10 @@ import tech.onlycoders.backend.exception.ApiException;
 import tech.onlycoders.backend.mapper.PostMapper;
 import tech.onlycoders.backend.mapper.UserMapper;
 import tech.onlycoders.backend.mapper.WorkPositionMapper;
-import tech.onlycoders.backend.model.*;
+import tech.onlycoders.backend.model.ContactRequest;
+import tech.onlycoders.backend.model.Degree;
+import tech.onlycoders.backend.model.GitProfile;
+import tech.onlycoders.backend.model.WorkPosition;
 import tech.onlycoders.backend.repository.*;
 
 @Service
@@ -34,6 +37,7 @@ public class UserService {
   private final SkillRepository skillRepository;
   private final PostRepository postRepository;
   private final TagRepository tagRepository;
+  private final RoleRepository roleRepository;
 
   private final AuthService authService;
 
@@ -53,6 +57,7 @@ public class UserService {
     AuthService authService,
     TagRepository tagRepository,
     PostRepository postRepository,
+    RoleRepository roleRepository,
     PostMapper postMapper,
     WorkPositionMapper workPositionMapper
   ) {
@@ -67,6 +72,7 @@ public class UserService {
     this.authService = authService;
     this.tagRepository = tagRepository;
     this.postRepository = postRepository;
+    this.roleRepository = roleRepository;
     this.postMapper = postMapper;
     this.workPositionMapper = workPositionMapper;
   }
@@ -84,6 +90,9 @@ public class UserService {
       throw new ApiException(HttpStatus.CONFLICT, "error.email-taken");
     } else {
       var user = userMapper.createUserDtoToUser(createUserDto);
+      var role = roleRepository
+        .findById("USER")
+        .orElseThrow(() -> new ApiException(HttpStatus.INTERNAL_SERVER_ERROR, "error.500"));
       user.country =
         countryRepository
           .findById(createUserDto.getCountry().getCode())
@@ -100,8 +109,8 @@ public class UserService {
           .build();
         user.setGitProfile(gitProfile);
       }
-      user.setRole(Role.builder().name("USER").build());
-      userRepository.save(user);
+      user.setRole(role);
+      this.userRepository.save(user);
       return this.authService.postCreateUser(user);
     }
   }
