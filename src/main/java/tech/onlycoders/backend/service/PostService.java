@@ -53,13 +53,11 @@ public class PostService {
 
     publisher.setDefaultPrivacyIsPublic(post.getIsPublic());
     userRepository.save(publisher);
-
-    var dto = postMapper.postToReadPersonDto(post);
-    return dto;
+    return postMapper.postToReadPersonDto(post);
   }
 
   private Set<DisplayedTag> getOrSaveTagList(List<String> displayTagNames) {
-    var taglist = new HashSet<DisplayedTag>();
+    var tagList = new HashSet<DisplayedTag>();
     if (displayTagNames != null) {
       for (String displayName : displayTagNames) {
         var canonicalName = CanonicalFactory.getCanonicalName(displayName);
@@ -72,10 +70,10 @@ public class PostService {
               return newTag;
             }
           );
-        taglist.add(DisplayedTag.builder().displayName(displayName).tag(tag).build());
+        tagList.add(DisplayedTag.builder().displayName(displayName).tag(tag).build());
       }
     }
-    return taglist;
+    return tagList;
   }
 
   private Set<Person> getPersonList(List<String> canonicalNames) throws ApiException {
