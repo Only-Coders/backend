@@ -32,6 +32,9 @@ public class UserServiceTest {
   private UserService service;
 
   @Mock
+  private NotificatorService notificatorService;
+
+  @Mock
   private AuthService authService;
 
   @Mock
