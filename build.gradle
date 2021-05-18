@@ -21,6 +21,10 @@ repositories {
 }
 
 dependencies {
+    implementation 'org.springframework.boot:spring-boot-starter-amqp'
+    compile 'com.fasterxml.jackson.core:jackson-databind:2.12.3'
+    compile 'com.fasterxml.jackson.core:jackson-annotations:2.12.3'
+    compile 'com.fasterxml.jackson.core:jackson-core:2.12.3'
 
     implementation 'org.springframework.boot:spring-boot-starter-data-neo4j'
     implementation 'org.springframework.boot:spring-boot-starter-security'

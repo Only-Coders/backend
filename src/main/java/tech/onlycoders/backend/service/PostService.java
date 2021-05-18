@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.Set;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import tech.onlycoders.backend.dto.notificator.EventType;
+import tech.onlycoders.backend.dto.notificator.MessageDTO;
 import tech.onlycoders.backend.dto.PaginateDto;
 import tech.onlycoders.backend.dto.post.request.CreatePostDto;
 import tech.onlycoders.backend.dto.post.response.ReadPostDto;
@@ -27,17 +29,20 @@ public class PostService {
   private final PostRepository postRepository;
   private final TagRepository tagRepository;
   private final PostMapper postMapper;
+  private final NotificatorService notificatorService;
 
   public PostService(
     UserRepository userRepository,
     PostRepository postRepository,
     TagRepository tagRepository,
-    PostMapper postMapper
+    PostMapper postMapper,
+    NotificatorService notificatorService
   ) {
     this.userRepository = userRepository;
     this.postRepository = postRepository;
     this.tagRepository = tagRepository;
     this.postMapper = postMapper;
+    this.notificatorService = notificatorService;
   }
 
   public ReadPostDto createPost(String publisherCanonicalName, CreatePostDto createPostDto) throws ApiException {
@@ -46,6 +51,20 @@ public class PostService {
       .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "error.user-not-found"));
 
     var mentions = getPersonList(createPostDto.getMentionCanonicalNames());
+
+    var message = String.format(
+      "%s %s te ha mencionado en un nuevo post.",
+      publisher.getFirstName(),
+      publisher.getLastName()
+    );
+
+    mentions.forEach(
+      person ->
+        this.notificatorService.send(
+            MessageDTO.builder().to(person.getEmail()).eventType(EventType.NEW_MENTION).message(message).build()
+          )
+    );
+
     var tags = getOrSaveTagList(createPostDto.getTagNames());
 
     var post = postMapper.createPostDtoToPost(createPostDto);

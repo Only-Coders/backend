@@ -8,6 +8,8 @@ import org.springframework.stereotype.Service;
 import tech.onlycoders.backend.dto.PaginateDto;
 import tech.onlycoders.backend.dto.auth.response.AuthResponseDto;
 import tech.onlycoders.backend.dto.contactrequest.request.CreateContactRequestDto;
+import tech.onlycoders.backend.dto.notificator.EventType;
+import tech.onlycoders.backend.dto.notificator.MessageDTO;
 import tech.onlycoders.backend.dto.post.response.ReadPostDto;
 import tech.onlycoders.backend.dto.user.request.CreateUserDto;
 import tech.onlycoders.backend.dto.user.request.EducationExperienceDto;
@@ -41,6 +43,7 @@ public class UserService {
   private final RoleRepository roleRepository;
 
   private final AuthService authService;
+  private final NotificatorService notificatorService;
 
   private final UserMapper userMapper;
   private final PostMapper postMapper;
@@ -59,6 +62,7 @@ public class UserService {
     TagRepository tagRepository,
     PostRepository postRepository,
     RoleRepository roleRepository,
+    NotificatorService notificatorService,
     PostMapper postMapper,
     WorkPositionMapper workPositionMapper
   ) {
@@ -74,6 +78,7 @@ public class UserService {
     this.tagRepository = tagRepository;
     this.postRepository = postRepository;
     this.roleRepository = roleRepository;
+    this.notificatorService = notificatorService;
     this.postMapper = postMapper;
     this.workPositionMapper = workPositionMapper;
   }
@@ -188,6 +193,15 @@ public class UserService {
     var contactRequest = ContactRequest.builder().message(contactRequestDto.getMessage()).receiver(contact).build();
     user.getRequests().add(contactRequest);
     userRepository.save(user);
+
+    var message = String.format(
+      "%s %s te ha enviado una solicitud de contacto!",
+      user.getFirstName(),
+      user.getLastName()
+    );
+    this.notificatorService.send(
+        MessageDTO.builder().message(message).to(contact.getEmail()).eventType(EventType.CONTACT_REQUEST).build()
+      );
   }
 
   public void followUser(String email, String canonicalName) throws ApiException {
