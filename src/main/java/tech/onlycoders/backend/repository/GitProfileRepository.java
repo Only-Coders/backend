@@ -5,4 +5,4 @@ import org.springframework.stereotype.Repository;
 import tech.onlycoders.backend.model.GitProfile;
 
 @Repository
-public interface GitProfileRepository extends Neo4jRepository<GitProfile, String> {}
+public interface GitProfileRepository extends Neo4jRepository<GitProfile, Long> {}
