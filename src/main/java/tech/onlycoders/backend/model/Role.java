@@ -24,6 +24,7 @@ public class Role {
   @DateLong
   @CreatedDate
   private Date createdAt;
-  //  @Version
-  //  private Long version = 0L;
+
+  @Version
+  private Long version;
 }

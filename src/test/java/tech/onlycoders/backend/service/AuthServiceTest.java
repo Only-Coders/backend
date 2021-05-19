@@ -67,7 +67,7 @@ public class AuthServiceTest {
   }
 
   @Test
-  public void ShouldReturnAnAccessTokenAfterCreatedUser() throws ApiException {
+  public void ShouldReturnAnAccessTokenAfterCreatedUser() {
     var user = ezRandom.nextObject(User.class);
     var token = this.service.postCreateUser(user);
     assertNotNull(token);

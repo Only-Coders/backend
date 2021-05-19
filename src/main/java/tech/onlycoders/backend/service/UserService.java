@@ -95,15 +95,18 @@ public class UserService {
     if (optionalPerson.isPresent()) {
       throw new ApiException(HttpStatus.CONFLICT, "error.email-taken");
     } else {
-      var user = userMapper.createUserDtoToUser(createUserDto);
       var role = roleRepository
         .findById("USER")
         .orElseThrow(() -> new ApiException(HttpStatus.INTERNAL_SERVER_ERROR, "error.500"));
-      user.country =
-        countryRepository
-          .findById(createUserDto.getCountry().getCode())
-          .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "error.country-not-found"));
+
+      var country = countryRepository
+        .findById(createUserDto.getCountry().getCode())
+        .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "error.country-not-found"));
+
+      var user = userMapper.createUserDtoToUser(createUserDto);
       user.setEmail(email);
+      user.setCountry(country);
+
       if (createUserDto.getGitProfile() != null) {
         var gitPlatform = gitPlatformRepository
           .findById(createUserDto.getGitProfile().getPlatform().toString())
@@ -164,10 +167,10 @@ public class UserService {
   public void addSkill(String email, String canonicalName) throws ApiException {
     var skill =
       this.skillRepository.findById(canonicalName)
-        .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "error.skill-not-found"));
+        .orElseThrow(() -> new ApiException(HttpStatus.INTERNAL_SERVER_ERROR, "error.500"));
     var user =
       this.userRepository.findByEmail(email)
-        .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "error.user-not-found"));
+        .orElseThrow(() -> new ApiException(HttpStatus.INTERNAL_SERVER_ERROR, "error.500"));
     user.getSkills().add(skill);
     this.userRepository.save(user);
   }

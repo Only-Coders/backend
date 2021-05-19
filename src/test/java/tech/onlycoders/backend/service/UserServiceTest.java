@@ -272,7 +272,7 @@ public class UserServiceTest {
   }
 
   @Test
-  public void ShouldFailFollowUserWhenWrongEmail() throws ApiException {
+  public void ShouldFailFollowUserWhenWrongEmail() {
     var email = ezRandom.nextObject(String.class);
     var cName = ezRandom.nextObject(String.class);
 
@@ -282,7 +282,7 @@ public class UserServiceTest {
   }
 
   @Test
-  public void ShouldFailFollowUserWhenWrongCanonicalName() throws ApiException {
+  public void ShouldFailFollowUserWhenWrongCanonicalName() {
     var user1 = ezRandom.nextObject(User.class);
     var email = ezRandom.nextObject(String.class);
     var cName = ezRandom.nextObject(String.class);
@@ -294,7 +294,7 @@ public class UserServiceTest {
   }
 
   @Test
-  public void ShouldReturnSuggestedUsers() throws ApiException {
+  public void ShouldReturnSuggestedUsers() {
     var email = ezRandom.nextObject(String.class);
     var list = new ArrayList<User>();
     list.add(ezRandom.nextObject(User.class));
@@ -317,7 +317,7 @@ public class UserServiceTest {
   }
 
   @Test
-  public void ShouldFailSendRequestUserWhenWrongEmail() throws ApiException {
+  public void ShouldFailSendRequestUserWhenWrongEmail() {
     var email = ezRandom.nextObject(String.class);
     var reqDto = ezRandom.nextObject(CreateContactRequestDto.class);
 
@@ -327,7 +327,7 @@ public class UserServiceTest {
   }
 
   @Test
-  public void ShouldFailSendRequestUserWhenCanonicalName() throws ApiException {
+  public void ShouldFailSendRequestUserWhenCanonicalName() {
     var user1 = ezRandom.nextObject(User.class);
     var email = ezRandom.nextObject(String.class);
     var reqDto = ezRandom.nextObject(CreateContactRequestDto.class);
@@ -352,7 +352,7 @@ public class UserServiceTest {
   }
 
   @Test
-  public void ShouldFailAddFavoritePostWhenWrongEmail() throws ApiException {
+  public void ShouldFailAddFavoritePostWhenWrongEmail() {
     var email = ezRandom.nextObject(String.class);
     var postId = ezRandom.nextObject(String.class);
 
@@ -362,7 +362,7 @@ public class UserServiceTest {
   }
 
   @Test
-  public void ShouldFailAddFavoritePostWhenWrongPostId() throws ApiException {
+  public void ShouldFailAddFavoritePostWhenWrongPostId() {
     var user1 = ezRandom.nextObject(User.class);
     var email = ezRandom.nextObject(String.class);
     var postId = ezRandom.nextObject(String.class);

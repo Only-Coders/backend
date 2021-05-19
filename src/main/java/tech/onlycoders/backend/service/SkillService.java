@@ -24,9 +24,16 @@ public class SkillService {
 
   public ReadSkillDto createSkill(CreateSkillDto createSkillDto) {
     var canonicalName = CanonicalFactory.getCanonicalName(createSkillDto.getName());
-    var skill = Skill.builder().canonicalName(canonicalName).name(createSkillDto.getName()).build();
-    skillRepository.save(skill);
-    return this.skillMapper.skillToReadSkillDto(skill);
+    var persistedSkill = skillRepository
+      .findById(canonicalName)
+      .orElseGet(
+        () -> {
+          var skill = Skill.builder().canonicalName(canonicalName).name(createSkillDto.getName()).build();
+          skillRepository.save(skill);
+          return skill;
+        }
+      );
+    return this.skillMapper.skillToReadSkillDto(persistedSkill);
   }
 
   public PaginateDto<ReadSkillDto> listSkills(String skillName, Integer page, Integer size) {

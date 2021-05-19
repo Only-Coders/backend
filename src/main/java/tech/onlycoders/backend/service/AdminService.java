@@ -9,6 +9,7 @@ import tech.onlycoders.backend.exception.ApiException;
 import tech.onlycoders.backend.mapper.AdminMapper;
 import tech.onlycoders.backend.repository.AdminRepository;
 import tech.onlycoders.backend.repository.PersonRepository;
+import tech.onlycoders.backend.repository.RoleRepository;
 
 @Service
 public class AdminService {
@@ -17,17 +18,20 @@ public class AdminService {
   private final PersonRepository personRepository;
   private final AdminRepository adminRepository;
   private final FirebaseService firebaseService;
+  private final RoleRepository roleRepository;
 
   public AdminService(
     PersonRepository personRepository,
     AdminMapper adminMapper,
     AdminRepository adminRepository,
-    FirebaseService firebaseService
+    FirebaseService firebaseService,
+    RoleRepository roleRepository
   ) {
     this.personRepository = personRepository;
     this.adminMapper = adminMapper;
     this.adminRepository = adminRepository;
     this.firebaseService = firebaseService;
+    this.roleRepository = roleRepository;
   }
 
   public ReadAdminDto createAdmin(CreateAdminDto createAdminDto) throws ApiException {
@@ -37,6 +41,10 @@ public class AdminService {
     } else {
       this.firebaseService.createUser(createAdminDto.getEmail());
       var admin = this.adminMapper.createAdminDtoToPerson(createAdminDto);
+      var role =
+        this.roleRepository.findById("ADMIn")
+          .orElseThrow(() -> new ApiException(HttpStatus.INTERNAL_SERVER_ERROR, "error.500"));
+      admin.setRole(role);
       adminRepository.save(admin);
       return adminMapper.adminToReadAdminDto(admin);
     }

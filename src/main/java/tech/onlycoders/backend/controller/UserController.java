@@ -88,7 +88,7 @@ public class UserController {
   )
   @PreAuthorize("hasAuthority('USER')")
   @GetMapping("/{canonicalName}")
-  @Operation(summary = "Este endpoint obtiene una personas")
+  @Operation(summary = "Gets user profile")
   ResponseEntity<ReadUserDto> getProfile(@PathVariable String canonicalName) throws ApiException {
     var persistedPerson = this.userService.getProfile(canonicalName);
     return ResponseEntity.ok(persistedPerson);
