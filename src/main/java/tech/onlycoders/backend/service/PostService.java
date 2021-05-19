@@ -10,7 +10,10 @@ import tech.onlycoders.backend.dto.post.request.CreatePostDto;
 import tech.onlycoders.backend.dto.post.response.ReadPostDto;
 import tech.onlycoders.backend.exception.ApiException;
 import tech.onlycoders.backend.mapper.PostMapper;
-import tech.onlycoders.backend.model.*;
+import tech.onlycoders.backend.model.DisplayedTag;
+import tech.onlycoders.backend.model.Post;
+import tech.onlycoders.backend.model.Tag;
+import tech.onlycoders.backend.model.User;
 import tech.onlycoders.backend.repository.PostRepository;
 import tech.onlycoders.backend.repository.TagRepository;
 import tech.onlycoders.backend.repository.UserRepository;
@@ -90,10 +93,23 @@ public class PostService {
   }
 
   public PaginateDto<ReadPostDto> getMyPosts(String email, Integer page, Integer size) {
+    return getReadPostDtoPaginateDto(email, page, size);
+  }
+
+  private PaginateDto<ReadPostDto> getReadPostDtoPaginateDto(String email, Integer page, Integer size) {
     var skip = page * size;
     var posts = postRepository.getPosts(email, skip, size);
 
     var totalQuantity = postRepository.countUserPosts(email);
+    return getReadPostDtoPaginateDto(page, size, posts, totalQuantity);
+  }
+
+  private PaginateDto<ReadPostDto> getReadPostDtoPaginateDto(
+    Integer page,
+    Integer size,
+    List<Post> posts,
+    Integer totalQuantity
+  ) {
     var totalPages = PaginationUtils.getPagesQuantity(totalQuantity, size);
     var paginated = new PaginateDto<ReadPostDto>();
     paginated.setCurrentPage(page);
@@ -105,18 +121,7 @@ public class PostService {
   }
 
   public PaginateDto<ReadPostDto> getPostsOfUser(String canonicalName, Integer page, Integer size) {
-    var skip = page * size;
-    var posts = postRepository.getPosts(canonicalName, skip, size);
-
-    var totalQuantity = postRepository.countUserPosts(canonicalName);
-    var totalPages = PaginationUtils.getPagesQuantity(totalQuantity, size);
-    var paginated = new PaginateDto<ReadPostDto>();
-    paginated.setCurrentPage(page);
-    paginated.setTotalElements(totalQuantity);
-    paginated.setTotalPages(totalPages);
-    paginated.setContent(postMapper.listPostToListPostDto(posts));
-
-    return paginated;
+    return getReadPostDtoPaginateDto(canonicalName, page, size);
   }
 
   public PaginateDto<ReadPostDto> getUserPosts(
@@ -132,14 +137,7 @@ public class PostService {
       var posts = postRepository.getUserPublicPosts(targetCanonicalName, skip, size);
 
       var totalQuantity = postRepository.countUserPublicPosts(targetCanonicalName);
-      var totalPages = PaginationUtils.getPagesQuantity(totalQuantity, size);
-      var paginated = new PaginateDto<ReadPostDto>();
-      paginated.setCurrentPage(page);
-      paginated.setTotalElements(totalQuantity);
-      paginated.setTotalPages(totalPages);
-      paginated.setContent(postMapper.listPostToListPostDto(posts));
-
-      return paginated;
+      return getReadPostDtoPaginateDto(page, size, posts, totalQuantity);
     }
   }
 }

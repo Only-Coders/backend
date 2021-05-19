@@ -117,7 +117,7 @@ public class PostServiceTest {
     Mockito
       .when(this.postRepository.getPosts(requesterCanonicalName, page, size))
       .thenReturn(ezRandom.objects(Post.class, 10).collect(Collectors.toList()));
-    Mockito.when(this.postRepository.countUserPosts(requesterCanonicalName)).thenReturn(ezRandom.nextInt());
+    Mockito.when(this.postRepository.countUserPosts(requesterCanonicalName)).thenReturn(ezRandom.nextInt(10));
 
     var result = this.service.getPostsOfUser(requesterCanonicalName, page, size);
     assertNotNull(result);
