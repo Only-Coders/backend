@@ -25,7 +25,6 @@ public class DisplayedTag {
   private Tag tag;
 
   private String displayName;
-
-  @Version
-  private Long version;
+  //  @Version
+  //  private Long version = 0L;
 }

@@ -19,6 +19,8 @@ import tech.onlycoders.backend.dto.PaginateDto;
 import tech.onlycoders.backend.dto.contactrequest.request.CreateContactRequestDto;
 import tech.onlycoders.backend.dto.institute.request.CreateInstituteDto;
 import tech.onlycoders.backend.dto.post.response.ReadPostDto;
+import tech.onlycoders.backend.dto.skill.request.CreateSkillDto;
+import tech.onlycoders.backend.dto.user.request.AddSkillDto;
 import tech.onlycoders.backend.dto.user.request.EducationExperienceDto;
 import tech.onlycoders.backend.dto.user.request.WorkExperienceDto;
 import tech.onlycoders.backend.dto.user.response.ReadUserDto;
@@ -26,6 +28,7 @@ import tech.onlycoders.backend.dto.workplace.request.CreateWorkplaceDto;
 import tech.onlycoders.backend.dto.workposition.response.ReadWorkPositionDto;
 import tech.onlycoders.backend.exception.ApiException;
 import tech.onlycoders.backend.service.InstituteService;
+import tech.onlycoders.backend.service.SkillService;
 import tech.onlycoders.backend.service.UserService;
 import tech.onlycoders.backend.service.WorkplaceService;
 
@@ -37,11 +40,18 @@ public class UserController {
   private final UserService userService;
   private final WorkplaceService workplaceService;
   private final InstituteService instituteService;
+  private final SkillService skillService;
 
-  public UserController(UserService userService, WorkplaceService workplaceService, InstituteService instituteService) {
+  public UserController(
+    UserService userService,
+    WorkplaceService workplaceService,
+    InstituteService instituteService,
+    SkillService skillService
+  ) {
     this.userService = userService;
     this.workplaceService = workplaceService;
     this.instituteService = instituteService;
+    this.skillService = skillService;
   }
 
   @ApiResponses(
@@ -211,12 +221,16 @@ public class UserController {
     }
   )
   @PreAuthorize("hasAuthority('USER')")
-  @PostMapping("/skills/{canonicalName}")
+  @PostMapping("/skills")
   @Operation(summary = "Adds a skill to the user.")
-  ResponseEntity<?> addSkill(@PathVariable @NotBlank String canonicalName) throws ApiException {
+  ResponseEntity<?> addSkill(@RequestBody AddSkillDto addSkillDto) throws ApiException {
     var userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     var email = userDetails.getEmail();
-    this.userService.addSkill(email, canonicalName);
+    if (addSkillDto.getCanonicalName() == null) {
+      var readSkillDto = this.skillService.createSkill(CreateSkillDto.builder().name(addSkillDto.getName()).build());
+      addSkillDto.setCanonicalName(readSkillDto.getCanonicalName());
+    }
+    this.userService.addSkill(email, addSkillDto.getCanonicalName());
     return ResponseEntity.ok().build();
   }
 

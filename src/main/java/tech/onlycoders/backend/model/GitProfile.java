@@ -37,7 +37,6 @@ public class GitProfile {
   @DateLong
   @CreatedDate
   private Date createdAt;
-
-  @Version
-  private Long version;
+  //  @Version
+  //  private Long version = 0L;
 }

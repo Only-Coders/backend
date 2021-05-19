@@ -53,6 +53,9 @@ public class UserServiceTest {
   private GitProfileRepository gitProfileRepository;
 
   @Mock
+  private RoleRepository roleRepository;
+
+  @Mock
   private CountryRepository countryRepository;
 
   @Mock
@@ -100,6 +103,7 @@ public class UserServiceTest {
     Mockito.when(this.authService.postCreateUser(any(User.class))).thenReturn(new AuthResponseDto());
     Mockito.when(this.personRepository.findByEmail(anyString())).thenReturn(Optional.empty());
     Mockito.when(this.countryRepository.findById(anyString())).thenReturn(Optional.of(country));
+    Mockito.when(this.roleRepository.findById(anyString())).thenReturn(Optional.of(ezRandom.nextObject(Role.class)));
     Mockito
       .when(this.gitPlatformRepository.findById(anyString()))
       .thenReturn(Optional.of(ezRandom.nextObject(GitPlatform.class)));

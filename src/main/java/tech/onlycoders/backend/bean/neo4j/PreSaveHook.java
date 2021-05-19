@@ -25,6 +25,10 @@ public class PreSaveHook {
   }
 
   private boolean needsCanonicalName(Person entity) {
-    return entity.getVersion() == 0 || entity.getCanonicalName() == null || entity.getCanonicalName().isBlank();
+    return (
+      entity.getUpdatedAt().compareTo(entity.getCreatedAt()) != 0 ||
+      entity.getCanonicalName() == null ||
+      entity.getCanonicalName().isBlank()
+    );
   }
 }
