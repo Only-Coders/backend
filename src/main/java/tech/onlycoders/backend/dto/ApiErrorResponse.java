@@ -7,7 +7,7 @@ import lombok.EqualsAndHashCode;
 import org.springframework.http.HttpStatus;
 
 @Data
-@EqualsAndHashCode(callSuper = false)
+@EqualsAndHashCode
 public class ApiErrorResponse {
 
   private final int statusCode;

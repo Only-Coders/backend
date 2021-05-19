@@ -17,6 +17,7 @@ public class GitPlatform {
   private String id;
 
   private String name;
-  //  @Version
-  //  private Long version = 0L;
+
+  @Version
+  private Long version;
 }

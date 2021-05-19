@@ -5,15 +5,20 @@ import static com.google.firebase.auth.AuthErrorCode.EMAIL_ALREADY_EXISTS;
 import com.google.firebase.auth.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import tech.onlycoders.backend.dto.notificator.EventType;
+import tech.onlycoders.backend.dto.notificator.MessageDTO;
 import tech.onlycoders.backend.exception.ApiException;
+import tech.onlycoders.backend.service.NotificatorService;
 
 @Service
 public class FirebaseService {
 
   private final FirebaseAuth firebaseAuth;
+  private final NotificatorService notificatorService;
 
-  public FirebaseService(FirebaseAuth firebaseAuth) {
+  public FirebaseService(FirebaseAuth firebaseAuth, NotificatorService notificatorService) {
     this.firebaseAuth = firebaseAuth;
+    this.notificatorService = notificatorService;
   }
 
   public String verifyFirebaseToken(String firebaseToken) throws ApiException {
@@ -38,8 +43,10 @@ public class FirebaseService {
       var passwordLink = this.firebaseAuth.generatePasswordResetLink(email, resetPasswordAction);
       var activateAccountAction = ActionCodeSettings.builder().setUrl(passwordLink).build();
       var activateLink = this.firebaseAuth.generateEmailVerificationLink(email, activateAccountAction);
-      // this.mailService.sendMail("Activacion de Cuenta", email, activateLink);
-      // TODO: Call notificator service
+
+      this.notificatorService.send(
+          MessageDTO.builder().eventType(EventType.NEW_ADMIN_ACCOUNT).to(email).message(activateLink).build()
+        );
     } catch (FirebaseAuthException e) {
       var code = e.getAuthErrorCode();
       if (code.equals(EMAIL_ALREADY_EXISTS)) {

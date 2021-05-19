@@ -22,6 +22,7 @@ public interface TagMapper {
     return tag.getCanonicalName();
   }
 
+  @Mapping(target = "followerQuantity", ignore = true)
   ReadTagDto tagToReadTagDto(Tag tag);
 
   @IterableMapping(elementTargetType = Tag.class)

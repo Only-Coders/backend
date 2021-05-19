@@ -23,9 +23,16 @@ public class TagService {
 
   public ReadTagDto createTag(CreateTagDto createTagDto) {
     var canonicalName = CanonicalFactory.getCanonicalName(createTagDto.getCanonicalName());
-    var tag = Tag.builder().canonicalName(canonicalName).build();
-    tagRepository.save(tag);
-    return this.tagMapper.tagToReadTagDto(tag);
+    var persistedTag = tagRepository
+      .findById(canonicalName)
+      .orElseGet(
+        () -> {
+          var tag = Tag.builder().canonicalName(canonicalName).build();
+          tagRepository.save(tag);
+          return tag;
+        }
+      );
+    return this.tagMapper.tagToReadTagDto(persistedTag);
   }
 
   public PaginateDto<ReadTagDto> listTags(String tagName, Integer page, Integer size) {

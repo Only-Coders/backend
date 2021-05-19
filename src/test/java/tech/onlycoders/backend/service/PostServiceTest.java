@@ -40,6 +40,9 @@ public class PostServiceTest {
   private UserRepository personRepository;
 
   @Mock
+  private NotificatorService notificatorService;
+
+  @Mock
   private PostRepository postRepository;
 
   @Mock
