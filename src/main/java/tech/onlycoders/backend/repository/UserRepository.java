@@ -25,4 +25,9 @@ public interface UserRepository extends Neo4jRepository<User, String> {
     "} RETURN p ORDER BY quantity DESC LIMIT $size;"
   )
   List<User> findSuggestedUsers(String email, Integer size);
+
+  @Query(
+    "MATCH (u:User{canonicalName:$requesterCanonicalName})-[IS_CONNECTED]-(u2:User{canonicalName:$targetCanonicalName}) RETURN count(u2)>0"
+  )
+  Boolean userIsContact(String requesterCanonicalName, String targetCanonicalName);
 }

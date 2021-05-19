@@ -5,17 +5,17 @@ import java.util.List;
 import java.util.Set;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import tech.onlycoders.backend.dto.PaginateDto;
 import tech.onlycoders.backend.dto.post.request.CreatePostDto;
 import tech.onlycoders.backend.dto.post.response.ReadPostDto;
 import tech.onlycoders.backend.exception.ApiException;
 import tech.onlycoders.backend.mapper.PostMapper;
-import tech.onlycoders.backend.model.DisplayedTag;
-import tech.onlycoders.backend.model.Person;
-import tech.onlycoders.backend.model.Tag;
+import tech.onlycoders.backend.model.*;
 import tech.onlycoders.backend.repository.PostRepository;
 import tech.onlycoders.backend.repository.TagRepository;
 import tech.onlycoders.backend.repository.UserRepository;
 import tech.onlycoders.backend.utils.CanonicalFactory;
+import tech.onlycoders.backend.utils.PaginationUtils;
 
 @Service
 public class PostService {
@@ -76,8 +76,8 @@ public class PostService {
     return tagList;
   }
 
-  private Set<Person> getPersonList(List<String> canonicalNames) throws ApiException {
-    var list = new HashSet<Person>();
+  private Set<User> getPersonList(List<String> canonicalNames) throws ApiException {
+    var list = new HashSet<User>();
     if (canonicalNames != null) {
       for (String cName : canonicalNames) {
         var person = userRepository
@@ -87,5 +87,59 @@ public class PostService {
       }
     }
     return list;
+  }
+
+  public PaginateDto<ReadPostDto> getMyPosts(String email, Integer page, Integer size) {
+    var skip = page * size;
+    var posts = postRepository.getPosts(email, skip, size);
+
+    var totalQuantity = postRepository.countUserPosts(email);
+    var totalPages = PaginationUtils.getPagesQuantity(totalQuantity, size);
+    var paginated = new PaginateDto<ReadPostDto>();
+    paginated.setCurrentPage(page);
+    paginated.setTotalElements(totalQuantity);
+    paginated.setTotalPages(totalPages);
+    paginated.setContent(postMapper.listPostToListPostDto(posts));
+
+    return paginated;
+  }
+
+  public PaginateDto<ReadPostDto> getPostsOfUser(String canonicalName, Integer page, Integer size) {
+    var skip = page * size;
+    var posts = postRepository.getPosts(canonicalName, skip, size);
+
+    var totalQuantity = postRepository.countUserPosts(canonicalName);
+    var totalPages = PaginationUtils.getPagesQuantity(totalQuantity, size);
+    var paginated = new PaginateDto<ReadPostDto>();
+    paginated.setCurrentPage(page);
+    paginated.setTotalElements(totalQuantity);
+    paginated.setTotalPages(totalPages);
+    paginated.setContent(postMapper.listPostToListPostDto(posts));
+
+    return paginated;
+  }
+
+  public PaginateDto<ReadPostDto> getUserPosts(
+    String requesterCanonicalName,
+    String targetCanonicalName,
+    Integer page,
+    Integer size
+  ) {
+    if (userRepository.userIsContact(requesterCanonicalName, targetCanonicalName)) {
+      return this.getPostsOfUser(targetCanonicalName, page, size);
+    } else {
+      var skip = page * size;
+      var posts = postRepository.getUserPublicPosts(targetCanonicalName, skip, size);
+
+      var totalQuantity = postRepository.countUserPublicPosts(targetCanonicalName);
+      var totalPages = PaginationUtils.getPagesQuantity(totalQuantity, size);
+      var paginated = new PaginateDto<ReadPostDto>();
+      paginated.setCurrentPage(page);
+      paginated.setTotalElements(totalQuantity);
+      paginated.setTotalPages(totalPages);
+      paginated.setContent(postMapper.listPostToListPostDto(posts));
+
+      return paginated;
+    }
   }
 }

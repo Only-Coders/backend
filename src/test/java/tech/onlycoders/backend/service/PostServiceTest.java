@@ -2,11 +2,11 @@ package tech.onlycoders.backend.service;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.*;
 
 import java.util.ArrayList;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import org.jeasy.random.EasyRandom;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -16,6 +16,8 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 import tech.onlycoders.backend.dto.post.request.CreatePostDto;
 import tech.onlycoders.backend.exception.ApiException;
 import tech.onlycoders.backend.mapper.PostMapper;
@@ -74,16 +76,15 @@ public class PostServiceTest {
   }
 
   @Test
-  public void ShouldFailWhenPublisherDoesntExist() throws ApiException {
+  public void ShouldFailWhenPublisherDoesntExist() {
     var requestDto = ezRandom.nextObject(CreatePostDto.class);
-    var publisher = new User();
     Mockito.when(personRepository.findByCanonicalName(anyString())).thenReturn(Optional.empty());
 
     assertThrows(ApiException.class, () -> service.createPost("canonicalName", requestDto));
   }
 
   @Test
-  public void ShouldFailWhenMentionDoesntExist() throws ApiException {
+  public void ShouldFailWhenMentionDoesntExist() {
     var requestDto = ezRandom.nextObject(CreatePostDto.class);
     requestDto.setMentionCanonicalNames(new ArrayList<>());
     requestDto.getMentionCanonicalNames().add("wrong");
@@ -92,5 +93,67 @@ public class PostServiceTest {
     Mockito.when(personRepository.findByCanonicalName("wrong")).thenReturn(Optional.empty());
 
     assertThrows(ApiException.class, () -> service.createPost("canonicalName", requestDto));
+  }
+
+  @Test
+  public void ShouldViewMyPosts() {
+    var canonicalName = ezRandom.nextObject(String.class);
+    var postList = new ArrayList<Post>();
+    postList.add(new Post());
+    var size = 20;
+    var page = 0;
+
+    Mockito.when(this.postRepository.getPosts(canonicalName, page, size)).thenReturn(postList);
+
+    var result = this.service.getMyPosts(canonicalName, page, size);
+    assertNotNull(result);
+  }
+
+  @Test
+  public void ShouldViewCountUserPosts() {
+    var requesterCanonicalName = ezRandom.nextObject(String.class);
+    var size = 20;
+    var page = 0;
+    Mockito
+      .when(this.postRepository.getPosts(requesterCanonicalName, page, size))
+      .thenReturn(ezRandom.objects(Post.class, 10).collect(Collectors.toList()));
+    Mockito.when(this.postRepository.countUserPosts(requesterCanonicalName)).thenReturn(ezRandom.nextInt());
+
+    var result = this.service.getPostsOfUser(requesterCanonicalName, page, size);
+    assertNotNull(result);
+  }
+
+  @Test
+  @MockitoSettings(strictness = Strictness.LENIENT)
+  public void ShouldViewPrivatePosts() {
+    var requesterCanonicalName = ezRandom.nextObject(String.class);
+    var targetCanonicalName = ezRandom.nextObject(String.class);
+    var size = 20;
+    var page = 0;
+    Mockito.when(this.personRepository.userIsContact(requesterCanonicalName, targetCanonicalName)).thenReturn(true);
+    Mockito
+      .when(this.postRepository.getPosts(requesterCanonicalName, page, size))
+      .thenReturn(ezRandom.objects(Post.class, 10).collect(Collectors.toList()));
+    Mockito.when(this.postRepository.countUserPosts(requesterCanonicalName)).thenReturn(ezRandom.nextInt());
+
+    var result = this.service.getUserPosts(requesterCanonicalName, targetCanonicalName, page, size);
+    assertNotNull(result);
+  }
+
+  @Test
+  @MockitoSettings(strictness = Strictness.LENIENT)
+  public void ShouldViewPublicPosts() {
+    var requesterCanonicalName = ezRandom.nextObject(String.class);
+    var targetCanonicalName = ezRandom.nextObject(String.class);
+    var size = 20;
+    var page = 0;
+    Mockito.when(this.personRepository.userIsContact(requesterCanonicalName, targetCanonicalName)).thenReturn(false);
+    Mockito
+      .when(this.postRepository.getUserPublicPosts(requesterCanonicalName, page, size))
+      .thenReturn(ezRandom.objects(Post.class, 10).collect(Collectors.toList()));
+    Mockito.when(this.postRepository.countUserPublicPosts(requesterCanonicalName)).thenReturn(ezRandom.nextInt());
+
+    var result = this.service.getUserPosts(requesterCanonicalName, targetCanonicalName, page, size);
+    assertNotNull(result);
   }
 }

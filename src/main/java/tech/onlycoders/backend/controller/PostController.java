@@ -6,13 +6,11 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import javax.validation.Valid;
+import javax.validation.constraints.Min;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import tech.onlycoders.backend.bean.auth.UserDetails;
 import tech.onlycoders.backend.dto.ApiErrorResponse;
 import tech.onlycoders.backend.dto.PaginateDto;
@@ -64,6 +62,47 @@ public class PostController {
     var userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     var createdPost = postService.createPost(userDetails.getCanonicalName(), createPostDto);
     return ResponseEntity.ok(createdPost);
+  }
+
+  @ApiResponses(
+    value = {
+      @ApiResponse(
+        responseCode = "200",
+        content = { @Content(mediaType = "application/json", schema = @Schema(implementation = PaginatedPosts.class)) }
+      ),
+      @ApiResponse(
+        responseCode = "400",
+        content = {
+          @Content(mediaType = "application/json", schema = @Schema(implementation = ApiErrorResponse.class))
+        }
+      ),
+      @ApiResponse(
+        responseCode = "401",
+        content = {
+          @Content(mediaType = "application/json", schema = @Schema(implementation = ApiErrorResponse.class))
+        }
+      ),
+      @ApiResponse(
+        responseCode = "403",
+        content = {
+          @Content(mediaType = "application/json", schema = @Schema(implementation = ApiErrorResponse.class))
+        }
+      )
+    }
+  )
+  @PreAuthorize("hasAuthority('USER')")
+  @GetMapping("/user/{canonicalName}")
+  ResponseEntity<PaginateDto<ReadPostDto>> getPosts(
+    @PathVariable String canonicalName,
+    @RequestParam(defaultValue = "0", required = false) @Min(0) Integer page,
+    @RequestParam(defaultValue = "20", required = false) @Min(1) Integer size
+  ) {
+    var userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    if (canonicalName.equals(userDetails.getCanonicalName())) {
+      return ResponseEntity.ok(postService.getMyPosts(canonicalName, page, size));
+    } else {
+      return ResponseEntity.ok(postService.getUserPosts(userDetails.getCanonicalName(), canonicalName, page, size));
+    }
   }
 }
 
