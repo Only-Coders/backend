@@ -24,6 +24,7 @@ import tech.onlycoders.backend.model.Degree;
 import tech.onlycoders.backend.model.GitProfile;
 import tech.onlycoders.backend.model.WorkPosition;
 import tech.onlycoders.backend.repository.*;
+import tech.onlycoders.backend.utils.PaginationUtils;
 
 @Service
 public class UserService {
@@ -203,9 +204,10 @@ public class UserService {
   public void addFavoritePost(String email, String postId) throws ApiException {
     var user =
       this.userRepository.findByEmail(email)
-        .orElseThrow(() -> new ApiException(HttpStatus.INTERNAL_SERVER_ERROR, "User not found"));
+        .orElseThrow(() -> new ApiException(HttpStatus.INTERNAL_SERVER_ERROR, "error.500"));
     var post =
-      this.postRepository.findById(postId).orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Post not found"));
+      this.postRepository.findById(postId)
+        .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "error.post-not-found"));
 
     post.getUserFavorites().add(user);
     postRepository.save(post);
@@ -215,9 +217,9 @@ public class UserService {
     var totalQuantity = this.postRepository.getUserFavoritePostTotalQuantity(email);
     if (totalQuantity == 0) {
       this.userRepository.findByEmail(email)
-        .orElseThrow(() -> new ApiException(HttpStatus.INTERNAL_SERVER_ERROR, "User not found"));
+        .orElseThrow(() -> new ApiException(HttpStatus.INTERNAL_SERVER_ERROR, "error.500"));
     }
-    var pagesQuantity = this.getPagesQuantity(totalQuantity, size);
+    var pagesQuantity = PaginationUtils.getPagesQuantity(totalQuantity, size);
     var posts = this.postRepository.getUserFavoritePosts(email, page * size, size);
 
     var paginated = new PaginateDto<ReadPostDto>();
@@ -227,13 +229,5 @@ public class UserService {
     paginated.setContent(postMapper.listPostToListPostDto(posts));
 
     return paginated;
-  }
-
-  private int getPagesQuantity(int totalQuantity, int pageSize) {
-    var bd_totalQuantity = BigDecimal.valueOf(totalQuantity);
-    var bd_pageSize = BigDecimal.valueOf(pageSize);
-
-    var bd_pageQuantity = bd_totalQuantity.divide(bd_pageSize);
-    return bd_pageQuantity.setScale(0, RoundingMode.UP).intValue();
   }
 }
