@@ -82,10 +82,10 @@ public class UserServiceTest {
   private PostRepository postRepository;
 
   @Spy
-  private final UserMapper userMapper = Mappers.getMapper(UserMapper.class);
+  private final UserMapper userMapper = new UserMapperImpl();
 
   @Spy
-  private final WorkPositionMapper workPositionMapper = Mappers.getMapper(WorkPositionMapper.class);
+  private final WorkPositionMapper workPositionMapper = new WorkPositionMapperImpl(new WorkplaceMapperImpl());
 
   @Spy
   private final PostMapper postMapper = new PostMapperImpl(new TagMapperImpl());
@@ -305,9 +305,14 @@ public class UserServiceTest {
   @Test
   public void ShouldReturnSuggestedUsers() {
     var email = ezRandom.nextObject(String.class);
-    var list = new ArrayList<User>();
-    list.add(ezRandom.nextObject(User.class));
-    Mockito.when(this.userRepository.findSuggestedUsers(anyString(), anyInt())).thenReturn(list);
+    var users = new ArrayList<User>();
+    users.add(ezRandom.nextObject(User.class));
+
+    var workPositions = new ArrayList<WorkPosition>();
+    workPositions.add(ezRandom.nextObject(WorkPosition.class));
+
+    Mockito.when(this.userRepository.findSuggestedUsers(anyString(), anyInt())).thenReturn(users);
+    Mockito.when(this.workPositionRepository.getUserCurrentPositions(anyString())).thenReturn(workPositions);
     var userLiteDtos = this.service.getSuggestedUsers(email, 1);
     assertNotNull(userLiteDtos);
   }

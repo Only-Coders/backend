@@ -146,7 +146,7 @@ public class UserService {
     workPosition.setUntil(workExperienceDto.getUntil());
     workPosition.setPosition(workExperienceDto.getPosition());
     this.workPositionRepository.save(workPosition);
-    this.workPositionRepository.storeWorkPosition(workPosition.getId(), user.getId());
+    this.workPositionRepository.addUserWorkPosition(workPosition.getId(), user.getId());
     return this.workPositionMapper.workPositionToReadWorkPositionDto(workPosition);
   }
 
@@ -170,7 +170,16 @@ public class UserService {
 
   public List<ReadUserLiteDto> getSuggestedUsers(String email, Integer size) {
     var users = userRepository.findSuggestedUsers(email, size);
-    return userMapper.listUserToListReadUserLiteDto(users);
+    var userDtos = userMapper.listUserToListReadUserLiteDto(users);
+
+    for (ReadUserLiteDto user : userDtos) {
+      var currentPositions = this.workPositionRepository.getUserCurrentPositions(user.canonicalName);
+      if (currentPositions.size() > 0) {
+        user.setCurrentPosition(workPositionMapper.workPositionToReadWorkPositionDto(currentPositions.get(0)));
+      }
+    }
+
+    return userDtos;
   }
 
   public void addSkill(String email, String canonicalName) throws ApiException {

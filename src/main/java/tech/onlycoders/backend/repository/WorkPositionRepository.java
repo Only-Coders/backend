@@ -1,5 +1,6 @@
 package tech.onlycoders.backend.repository;
 
+import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.neo4j.repository.Neo4jRepository;
@@ -11,5 +12,11 @@ import tech.onlycoders.backend.model.Workplace;
 @Repository
 public interface WorkPositionRepository extends Neo4jRepository<WorkPosition, String> {
   @Query("MATCH (a:User{id: $userId}) WITH a MATCH (b:WorkPosition{id: $workPositionId}) CREATE (a)-[:WORKS]->(b)")
-  void storeWorkPosition(String workPositionId, String userId);
+  void addUserWorkPosition(String workPositionId, String userId);
+
+  @Query(
+    "MATCH (u:User{canonicalName: $canonicalName})-[:WORKS]->(p:WorkPosition)-[o:ON]->(w) " +
+    "WHERE NOT EXISTS(p.until) RETURN p, collect(o), collect(w)  ORDER BY p.since DESC"
+  )
+  List<WorkPosition> getUserCurrentPositions(String canonicalName);
 }

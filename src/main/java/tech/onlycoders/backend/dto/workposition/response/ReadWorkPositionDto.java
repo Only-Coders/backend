@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.data.neo4j.core.schema.Relationship;
 import org.springframework.data.neo4j.core.support.DateLong;
+import tech.onlycoders.backend.dto.workplace.response.ReadWorkplaceDto;
 import tech.onlycoders.backend.model.Workplace;
 
 @Data
@@ -15,13 +16,10 @@ import tech.onlycoders.backend.model.Workplace;
 @Builder
 public class ReadWorkPositionDto {
 
-  @Relationship(type = "ON", direction = Relationship.Direction.OUTGOING)
-  private Workplace workplace;
+  private ReadWorkplaceDto workplace;
 
-  @DateLong
   private Date since;
 
-  @DateLong
   private Date until;
 
   private String position;
