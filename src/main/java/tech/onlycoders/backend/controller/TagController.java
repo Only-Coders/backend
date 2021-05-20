@@ -59,7 +59,7 @@ public class TagController {
   @GetMapping
   @Operation(summary = "Search tags by name")
   ResponseEntity<PaginateDto<ReadTagDto>> getTags(
-    @RequestParam String tagName,
+    @RequestParam(required = false) String tagName,
     @RequestParam(defaultValue = "0") @Min(0) Integer page,
     @RequestParam(defaultValue = "20") @Min(1) Integer size
   ) {

@@ -38,10 +38,20 @@ public class TagServiceTest {
   @Test
   public void ShouldPaginateTags() {
     var tags = ezRandom.objects(Tag.class, 10).collect(Collectors.toList());
-    var pages = new PageImpl<>(tags);
-    var page = PageRequest.of(1, 1);
-    Mockito.when(this.tagRepository.findByCanonicalNameContainingIgnoreCase(anyString(), eq(page))).thenReturn(pages);
-    var result = this.service.listTags("asd", 1, 1);
+
+    Mockito.when(this.tagRepository.getTagQuantity()).thenReturn(10);
+    Mockito.when(this.tagRepository.getTagsPaginated(anyInt(), anyInt())).thenReturn(tags);
+    var result = this.service.listTags(null, 1, 10);
+    assertEquals(10, result.getTotalElements());
+  }
+
+  @Test
+  public void ShouldPaginateTagsByName() {
+    var tags = ezRandom.objects(Tag.class, 10).collect(Collectors.toList());
+
+    Mockito.when(this.tagRepository.getTagQuantityByName(anyString())).thenReturn(10);
+    Mockito.when(this.tagRepository.getTagsByNamePaginated(anyString(), anyInt(), anyInt())).thenReturn(tags);
+    var result = this.service.listTags("asd", 1, 10);
     assertEquals(10, result.getTotalElements());
   }
 

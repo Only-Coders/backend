@@ -45,7 +45,7 @@ public class SuggestedUserController {
   )
   @GetMapping
   @Operation(summary = "List suggested users")
-  ResponseEntity<List<ReadUserLiteDto>> getCountries(@RequestParam(defaultValue = "5") @Min(1) Integer size) {
+  ResponseEntity<List<ReadUserLiteDto>> getSuggestedUsers(@RequestParam(defaultValue = "5") @Min(1) Integer size) {
     var userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     var email = userDetails.getEmail();
     var users = this.userService.getSuggestedUsers(email, size);
