@@ -9,6 +9,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.data.neo4j.config.EnableNeo4jAuditing;
+import tech.onlycoders.backend.service.UserService;
 
 @SpringBootApplication
 @OpenAPIDefinition(
@@ -27,7 +28,9 @@ public class BackendApplication {
   }
 
   @Bean
-  CommandLineRunner runner() {
-    return args -> {};
+  CommandLineRunner runner(UserService userService) {
+    return args -> {
+      userService.followUser("mathiaszunino@gmail.com", "ritamelanoxrbat");
+    };
   }
 }

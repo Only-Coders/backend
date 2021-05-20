@@ -9,7 +9,6 @@ import tech.onlycoders.backend.model.Admin;
 
 @Mapper(componentModel = "spring", injectionStrategy = InjectionStrategy.CONSTRUCTOR)
 public interface AdminMapper {
-  @Mapping(target = "version", ignore = true)
   @Mapping(target = "updatedAt", ignore = true)
   @Mapping(target = "securityUpdate", ignore = true)
   @Mapping(target = "role", ignore = true)

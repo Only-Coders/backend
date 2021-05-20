@@ -20,7 +20,6 @@ public class BlackList {
   @DateLong
   @CreatedDate
   private Date createdAt;
-
-  @Version
-  private Long version;
+  //  @Version
+  //  private Long version;
 }

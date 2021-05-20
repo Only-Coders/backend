@@ -17,7 +17,6 @@ public interface UserMapper {
   ReadUserDto userToReadPersonDto(User person);
 
   @Mapping(target = "workingPlaces", ignore = true)
-  @Mapping(target = "version", ignore = true)
   @Mapping(target = "updatedAt", ignore = true)
   @Mapping(target = "tags", ignore = true)
   @Mapping(target = "skills", ignore = true)
