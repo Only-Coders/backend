@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import tech.onlycoders.backend.dto.workposition.response.ReadWorkPositionDto;
 
 @Data
 @Builder
@@ -15,4 +16,5 @@ public class ReadUserLiteDto {
   public String firstName;
   public String lastName;
   public String imageURI;
+  public ReadWorkPositionDto currentPosition;
 }
