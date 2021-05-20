@@ -9,6 +9,12 @@ import tech.onlycoders.backend.model.User;
 
 @Repository
 public interface UserRepository extends Neo4jRepository<User, String> {
+  @Query("MATCH (u:User{ email: $email }) return u limit 1")
+  Optional<User> findOneByEmail(String email);
+
+  @Query("MATCH (u:User{ canonicalName: $canonicalName }) return u limit 1")
+  Optional<User> findOneByCanonicalName(String canonicalName);
+
   Optional<User> findByEmail(String email);
 
   Optional<User> findByCanonicalName(String canonicalName);

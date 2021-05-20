@@ -265,8 +265,8 @@ public class UserServiceTest {
     var email = ezRandom.nextObject(String.class);
     var cName = ezRandom.nextObject(String.class);
 
-    Mockito.when(this.userRepository.findByEmail(email)).thenReturn(Optional.of(user1));
-    Mockito.when(this.userRepository.findByCanonicalName(cName)).thenReturn(Optional.of(user2));
+    Mockito.when(this.userRepository.findOneByEmail(email)).thenReturn(Optional.of(user1));
+    Mockito.when(this.userRepository.findOneByCanonicalName(cName)).thenReturn(Optional.of(user2));
 
     this.service.followUser(email, cName);
   }
@@ -276,8 +276,7 @@ public class UserServiceTest {
     var email = ezRandom.nextObject(String.class);
     var cName = ezRandom.nextObject(String.class);
 
-    Mockito.when(this.userRepository.findByEmail(email)).thenReturn(Optional.empty());
-
+    Mockito.when(this.userRepository.findOneByEmail(email)).thenReturn(Optional.empty());
     assertThrows(ApiException.class, () -> this.service.followUser(email, cName));
   }
 
@@ -287,8 +286,8 @@ public class UserServiceTest {
     var email = ezRandom.nextObject(String.class);
     var cName = ezRandom.nextObject(String.class);
 
-    Mockito.when(this.userRepository.findByEmail(email)).thenReturn(Optional.of(user1));
-    Mockito.when(this.userRepository.findByCanonicalName(cName)).thenReturn(Optional.empty());
+    Mockito.when(this.userRepository.findOneByEmail(email)).thenReturn(Optional.of(user1));
+    Mockito.when(this.userRepository.findOneByCanonicalName(cName)).thenReturn(Optional.empty());
 
     assertThrows(ApiException.class, () -> this.service.followUser(email, cName));
   }
@@ -310,8 +309,8 @@ public class UserServiceTest {
     var email = ezRandom.nextObject(String.class);
     var reqDto = ezRandom.nextObject(CreateContactRequestDto.class);
 
-    Mockito.when(this.userRepository.findByEmail(email)).thenReturn(Optional.of(user1));
-    Mockito.when(this.userRepository.findByCanonicalName(reqDto.getCanonicalName())).thenReturn(Optional.of(user2));
+    Mockito.when(this.userRepository.findOneByEmail(email)).thenReturn(Optional.of(user1));
+    Mockito.when(this.userRepository.findOneByCanonicalName(reqDto.getCanonicalName())).thenReturn(Optional.of(user2));
 
     this.service.sendContactRequest(email, reqDto);
   }
@@ -321,7 +320,7 @@ public class UserServiceTest {
     var email = ezRandom.nextObject(String.class);
     var reqDto = ezRandom.nextObject(CreateContactRequestDto.class);
 
-    Mockito.when(this.userRepository.findByEmail(email)).thenReturn(Optional.empty());
+    Mockito.when(this.userRepository.findOneByEmail(email)).thenReturn(Optional.empty());
 
     assertThrows(ApiException.class, () -> this.service.sendContactRequest(email, reqDto));
   }
@@ -332,8 +331,8 @@ public class UserServiceTest {
     var email = ezRandom.nextObject(String.class);
     var reqDto = ezRandom.nextObject(CreateContactRequestDto.class);
 
-    Mockito.when(this.userRepository.findByEmail(email)).thenReturn(Optional.of(user1));
-    Mockito.when(this.userRepository.findByCanonicalName(reqDto.getCanonicalName())).thenReturn(Optional.empty());
+    Mockito.when(this.userRepository.findOneByEmail(email)).thenReturn(Optional.of(user1));
+    Mockito.when(this.userRepository.findOneByCanonicalName(reqDto.getCanonicalName())).thenReturn(Optional.empty());
 
     assertThrows(ApiException.class, () -> this.service.sendContactRequest(email, reqDto));
   }

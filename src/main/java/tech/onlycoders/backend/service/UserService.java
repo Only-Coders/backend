@@ -188,12 +188,15 @@ public class UserService {
 
   public void sendContactRequest(String email, CreateContactRequestDto contactRequestDto) throws ApiException {
     var user =
-      this.userRepository.findByEmail(email)
+      this.userRepository.findOneByEmail(email)
         .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "error.user-not-found"));
+
     var contact =
-      this.userRepository.findByCanonicalName(contactRequestDto.getCanonicalName())
+      this.userRepository.findOneByCanonicalName(contactRequestDto.getCanonicalName())
         .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "error.user-not-found"));
+
     var contactRequest = ContactRequest.builder().message(contactRequestDto.getMessage()).receiver(contact).build();
+
     user.getRequests().add(contactRequest);
     userRepository.save(user);
 
@@ -209,10 +212,10 @@ public class UserService {
 
   public void followUser(String email, String canonicalName) throws ApiException {
     var user =
-      this.userRepository.findByEmail(email)
+      this.userRepository.findOneByEmail(email)
         .orElseThrow(() -> new ApiException(HttpStatus.INTERNAL_SERVER_ERROR, "error.user-not-found"));
     var followed =
-      this.userRepository.findByCanonicalName(canonicalName)
+      this.userRepository.findOneByCanonicalName(canonicalName)
         .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "error.user-not-found"));
     user.getFollowed().add(followed);
     userRepository.save(user);
