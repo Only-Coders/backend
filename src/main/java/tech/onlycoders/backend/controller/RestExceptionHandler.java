@@ -33,7 +33,12 @@ public class RestExceptionHandler {
   }
 
   private String getMessage(String language, String errorCode) {
-    var locale = new Locale(language);
+    Locale locale;
+    if (language == null) {
+      locale = new Locale("en");
+    } else {
+      locale = new Locale(language);
+    }
     return msgSrc.getMessage(errorCode, null, locale);
   }
 
