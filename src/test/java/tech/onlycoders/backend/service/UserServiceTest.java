@@ -56,6 +56,15 @@ public class UserServiceTest {
   private GitProfileRepository gitProfileRepository;
 
   @Mock
+  private DegreeRepository degreeRepository;
+
+  @Mock
+  private WorkPositionRepository workPositionRepository;
+
+  @Mock
+  private ContactRequestRepository contactRequestRepository;
+
+  @Mock
   private RoleRepository roleRepository;
 
   @Mock
@@ -299,8 +308,8 @@ public class UserServiceTest {
     var list = new ArrayList<User>();
     list.add(ezRandom.nextObject(User.class));
     Mockito.when(this.userRepository.findSuggestedUsers(anyString(), anyInt())).thenReturn(list);
-    var listdto = this.service.getSuggestedUsers(email, 1);
-    assertNotNull(listdto);
+    var userLiteDtos = this.service.getSuggestedUsers(email, 1);
+    assertNotNull(userLiteDtos);
   }
 
   @Test
@@ -400,5 +409,77 @@ public class UserServiceTest {
 
     var result = this.service.getFavoritePosts(email, page, size);
     assertNotNull(result);
+  }
+
+  @Test
+  public void ShouldUnfollowUser() throws ApiException {
+    var user1 = ezRandom.nextObject(User.class);
+    var user2 = ezRandom.nextObject(User.class);
+    var email = ezRandom.nextObject(String.class);
+    var cName = ezRandom.nextObject(String.class);
+
+    Mockito.when(this.userRepository.findByEmail(email)).thenReturn(Optional.of(user1));
+    Mockito.when(this.userRepository.findByCanonicalName(cName)).thenReturn(Optional.of(user2));
+
+    this.service.unfollowUser(email, cName);
+  }
+
+  @Test
+  public void ShouldFailUnfollowUserWhenWrongEmail() {
+    var email = ezRandom.nextObject(String.class);
+    var cName = ezRandom.nextObject(String.class);
+
+    Mockito.when(this.userRepository.findByEmail(email)).thenReturn(Optional.empty());
+
+    assertThrows(ApiException.class, () -> this.service.unfollowUser(email, cName));
+  }
+
+  @Test
+  public void ShouldFailUnfollowUserWhenWrongCanonicalName() {
+    var user1 = ezRandom.nextObject(User.class);
+    var email = ezRandom.nextObject(String.class);
+    var cName = ezRandom.nextObject(String.class);
+
+    Mockito.when(this.userRepository.findByEmail(email)).thenReturn(Optional.of(user1));
+    Mockito.when(this.userRepository.findByCanonicalName(cName)).thenReturn(Optional.empty());
+
+    assertThrows(ApiException.class, () -> this.service.unfollowUser(email, cName));
+  }
+
+  @Test
+  public void ShouldUnSendRequest() throws ApiException {
+    var user1 = ezRandom.nextObject(User.class);
+    var user2 = ezRandom.nextObject(User.class);
+
+    Mockito.when(this.userRepository.findByEmail(user1.getEmail())).thenReturn(Optional.of(user1));
+    Mockito.when(this.userRepository.findByCanonicalName(user2.getCanonicalName())).thenReturn(Optional.of(user2));
+
+    this.service.deleteContactRequest(user1.getEmail(), user2.getCanonicalName());
+  }
+
+  @Test
+  public void ShouldFailUnSendRequestUserWhenWrongEmail() {
+    var user1 = ezRandom.nextObject(User.class);
+    var user2 = ezRandom.nextObject(User.class);
+    Mockito.when(this.userRepository.findByEmail(user1.getEmail())).thenReturn(Optional.empty());
+
+    assertThrows(
+      ApiException.class,
+      () -> this.service.deleteContactRequest(user1.getEmail(), user2.getCanonicalName())
+    );
+  }
+
+  @Test
+  public void ShouldFailUnSendRequestUserWhenCanonicalName() {
+    var user1 = ezRandom.nextObject(User.class);
+    var user2 = ezRandom.nextObject(User.class);
+
+    Mockito.when(this.userRepository.findByEmail(user1.getEmail())).thenReturn(Optional.of(user1));
+    Mockito.when(this.userRepository.findByCanonicalName(user2.getCanonicalName())).thenReturn(Optional.empty());
+
+    assertThrows(
+      ApiException.class,
+      () -> this.service.deleteContactRequest(user1.getEmail(), user2.getCanonicalName())
+    );
   }
 }

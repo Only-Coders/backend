@@ -9,18 +9,13 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.data.neo4j.config.EnableNeo4jAuditing;
-import tech.onlycoders.backend.service.UserService;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 @SpringBootApplication
-@OpenAPIDefinition(
-  info = @Info(
-    title = "Sample Spring Boot API",
-    version = "v1",
-    description = "A demo project using Spring Boot with Swagger-UI enabled"
-  )
-)
+@OpenAPIDefinition(info = @Info(title = "OnlyCoders API", version = "v1"))
 @SecurityScheme(name = "bearerAuth", type = SecuritySchemeType.HTTP, bearerFormat = "JWT", scheme = "bearer")
 @EnableNeo4jAuditing
+@EnableTransactionManagement
 public class BackendApplication {
 
   public static void main(String[] args) {
@@ -28,9 +23,7 @@ public class BackendApplication {
   }
 
   @Bean
-  CommandLineRunner runner(UserService userService) {
-    return args -> {
-      userService.followUser("mathiaszunino@gmail.com", "ritamelanoxrbat");
-    };
+  CommandLineRunner runner() {
+    return args -> {};
   }
 }

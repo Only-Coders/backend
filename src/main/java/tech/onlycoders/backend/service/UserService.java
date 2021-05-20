@@ -1,10 +1,9 @@
 package tech.onlycoders.backend.service;
 
-import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import tech.onlycoders.backend.dto.PaginateDto;
 import tech.onlycoders.backend.dto.auth.response.AuthResponseDto;
 import tech.onlycoders.backend.dto.contactrequest.request.CreateContactRequestDto;
@@ -29,6 +28,7 @@ import tech.onlycoders.backend.repository.*;
 import tech.onlycoders.backend.utils.PaginationUtils;
 
 @Service
+@Transactional
 public class UserService {
 
   private final UserRepository userRepository;
@@ -41,6 +41,9 @@ public class UserService {
   private final PostRepository postRepository;
   private final TagRepository tagRepository;
   private final RoleRepository roleRepository;
+  private final ContactRequestRepository contactRequestRepository;
+  private final WorkPositionRepository workPositionRepository;
+  private final DegreeRepository degreeRepository;
 
   private final AuthService authService;
   private final NotificatorService notificatorService;
@@ -58,10 +61,13 @@ public class UserService {
     InstituteRepository instituteRepository,
     CountryRepository countryRepository,
     SkillRepository skillRepository,
+    WorkPositionRepository workPositionRepository,
     AuthService authService,
     TagRepository tagRepository,
     PostRepository postRepository,
     RoleRepository roleRepository,
+    ContactRequestRepository contactRequestRepository,
+    DegreeRepository degreeRepository,
     NotificatorService notificatorService,
     PostMapper postMapper,
     WorkPositionMapper workPositionMapper
@@ -74,10 +80,13 @@ public class UserService {
     this.instituteRepository = instituteRepository;
     this.countryRepository = countryRepository;
     this.skillRepository = skillRepository;
+    this.workPositionRepository = workPositionRepository;
     this.authService = authService;
     this.tagRepository = tagRepository;
     this.postRepository = postRepository;
     this.roleRepository = roleRepository;
+    this.contactRequestRepository = contactRequestRepository;
+    this.degreeRepository = degreeRepository;
     this.notificatorService = notificatorService;
     this.postMapper = postMapper;
     this.workPositionMapper = workPositionMapper;
@@ -136,8 +145,8 @@ public class UserService {
     workPosition.setSince(workExperienceDto.getSince());
     workPosition.setUntil(workExperienceDto.getUntil());
     workPosition.setPosition(workExperienceDto.getPosition());
-    user.getWorkingPlaces().add(workPosition);
-    this.userRepository.save(user);
+    this.workPositionRepository.save(workPosition);
+    this.workPositionRepository.storeWorkPosition(workPosition.getId(), user.getId());
     return this.workPositionMapper.workPositionToReadWorkPositionDto(workPosition);
   }
 
@@ -149,13 +158,13 @@ public class UserService {
     var user =
       this.userRepository.findByEmail(email)
         .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "error.user-not-found"));
-    var studiesAt = new Degree();
-    studiesAt.setInstitute(institute);
-    studiesAt.setSince(educationExperienceDto.getSince());
-    studiesAt.setUntil(educationExperienceDto.getUntil());
-    studiesAt.setDegree(educationExperienceDto.getDegree());
-    user.getSchools().add(studiesAt);
-    this.userRepository.save(user);
+    var degree = new Degree();
+    degree.setInstitute(institute);
+    degree.setSince(educationExperienceDto.getSince());
+    degree.setUntil(educationExperienceDto.getUntil());
+    degree.setDegree(educationExperienceDto.getDegree());
+    degreeRepository.save(degree);
+    degreeRepository.storeDegree(degree.getId(), user.getId());
     return educationExperienceDto;
   }
 
@@ -171,8 +180,7 @@ public class UserService {
     var user =
       this.userRepository.findByEmail(email)
         .orElseThrow(() -> new ApiException(HttpStatus.INTERNAL_SERVER_ERROR, "error.500"));
-    user.getSkills().add(skill);
-    this.userRepository.save(user);
+    this.userRepository.addSkill(user.getId(), skill.getCanonicalName());
   }
 
   public void addTag(String email, String canonicalName) throws ApiException {
@@ -182,20 +190,22 @@ public class UserService {
     var user =
       this.userRepository.findByEmail(email)
         .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "error.user-not-found"));
-    user.getTags().add(tag);
-    this.userRepository.save(user);
+    this.userRepository.followTag(user.getId(), tag.getCanonicalName());
   }
 
   public void sendContactRequest(String email, CreateContactRequestDto contactRequestDto) throws ApiException {
     var user =
       this.userRepository.findByEmail(email)
         .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "error.user-not-found"));
+
     var contact =
       this.userRepository.findByCanonicalName(contactRequestDto.getCanonicalName())
         .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "error.user-not-found"));
-    var contactRequest = ContactRequest.builder().message(contactRequestDto.getMessage()).receiver(contact).build();
-    user.getRequests().add(contactRequest);
-    userRepository.save(user);
+
+    var contactRequest = ContactRequest.builder().message(contactRequestDto.getMessage()).target(contact).build();
+
+    contactRequestRepository.save(contactRequest);
+    contactRequestRepository.storeContactRequest(contactRequest.getId(), user.getId());
 
     var message = String.format(
       "%s %s te ha enviado una solicitud de contacto!",
@@ -214,8 +224,7 @@ public class UserService {
     var followed =
       this.userRepository.findByCanonicalName(canonicalName)
         .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "error.user-not-found"));
-    user.getFollowed().add(followed);
-    userRepository.save(user);
+    this.userRepository.followUser(user.getId(), followed.getId());
   }
 
   public void addFavoritePost(String email, String postId) throws ApiException {
@@ -225,9 +234,7 @@ public class UserService {
     var post =
       this.postRepository.findById(postId)
         .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "error.post-not-found"));
-
-    post.getUserFavorites().add(user);
-    postRepository.save(post);
+    this.userRepository.addFavoritePost(user.getId(), post.getId());
   }
 
   public PaginateDto<ReadPostDto> getFavoritePosts(String email, Integer page, Integer size) throws ApiException {
@@ -246,5 +253,27 @@ public class UserService {
     paginated.setContent(postMapper.listPostToListPostDto(posts));
 
     return paginated;
+  }
+
+  public void unfollowUser(String email, String canonicalName) throws ApiException {
+    var user =
+      this.userRepository.findByEmail(email)
+        .orElseThrow(() -> new ApiException(HttpStatus.INTERNAL_SERVER_ERROR, "error.user-not-found"));
+    var followed =
+      this.userRepository.findByCanonicalName(canonicalName)
+        .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "error.user-not-found"));
+    this.userRepository.unfollowUser(user.getId(), followed.getId());
+  }
+
+  public void deleteContactRequest(String email, String canonicalName) throws ApiException {
+    var user =
+      this.userRepository.findByEmail(email)
+        .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "error.user-not-found"));
+
+    var targetUser =
+      this.userRepository.findByCanonicalName(canonicalName)
+        .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "error.user-not-found"));
+
+    contactRequestRepository.deleteRequest(user.getId(), targetUser.getId());
   }
 }

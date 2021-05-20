@@ -15,5 +15,5 @@ public class ContactRequest extends BaseEntity {
   private String message;
 
   @Relationship(type = "TO", direction = Relationship.Direction.OUTGOING)
-  public Person receiver;
+  public Person target;
 }
