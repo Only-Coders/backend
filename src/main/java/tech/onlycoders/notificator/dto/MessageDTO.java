@@ -1,4 +1,4 @@
-package tech.onlycoders.backend.dto.notificator;
+package tech.onlycoders.notificator.dto;
 
 import java.io.Serializable;
 import lombok.AllArgsConstructor;

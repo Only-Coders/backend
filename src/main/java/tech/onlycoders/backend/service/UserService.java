@@ -2,15 +2,12 @@ package tech.onlycoders.backend.service;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tech.onlycoders.backend.dto.PaginateDto;
 import tech.onlycoders.backend.dto.auth.response.AuthResponseDto;
 import tech.onlycoders.backend.dto.contactrequest.request.CreateContactRequestDto;
-import tech.onlycoders.backend.dto.notificator.EventType;
-import tech.onlycoders.backend.dto.notificator.MessageDTO;
 import tech.onlycoders.backend.dto.post.response.ReadPostDto;
 import tech.onlycoders.backend.dto.user.request.CreateUserDto;
 import tech.onlycoders.backend.dto.user.request.EducationExperienceDto;
@@ -25,6 +22,8 @@ import tech.onlycoders.backend.mapper.WorkPositionMapper;
 import tech.onlycoders.backend.model.*;
 import tech.onlycoders.backend.repository.*;
 import tech.onlycoders.backend.utils.PaginationUtils;
+import tech.onlycoders.notificator.dto.EventType;
+import tech.onlycoders.notificator.dto.MessageDTO;
 
 @Service
 @Transactional

@@ -5,8 +5,6 @@ import java.util.List;
 import java.util.Set;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import tech.onlycoders.backend.dto.notificator.EventType;
-import tech.onlycoders.backend.dto.notificator.MessageDTO;
 import tech.onlycoders.backend.dto.PaginateDto;
 import tech.onlycoders.backend.dto.post.request.CreatePostDto;
 import tech.onlycoders.backend.dto.post.response.ReadPostDto;
@@ -21,6 +19,8 @@ import tech.onlycoders.backend.repository.TagRepository;
 import tech.onlycoders.backend.repository.UserRepository;
 import tech.onlycoders.backend.utils.CanonicalFactory;
 import tech.onlycoders.backend.utils.PaginationUtils;
+import tech.onlycoders.notificator.dto.EventType;
+import tech.onlycoders.notificator.dto.MessageDTO;
 
 @Service
 public class PostService {

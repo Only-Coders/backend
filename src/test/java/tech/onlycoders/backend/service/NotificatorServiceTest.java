@@ -13,7 +13,7 @@ import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import org.springframework.amqp.core.Queue;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
-import tech.onlycoders.backend.dto.notificator.MessageDTO;
+import tech.onlycoders.notificator.dto.MessageDTO;
 
 @ExtendWith(MockitoExtension.class)
 public class NotificatorServiceTest {

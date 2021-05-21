@@ -5,10 +5,10 @@ import static com.google.firebase.auth.AuthErrorCode.EMAIL_ALREADY_EXISTS;
 import com.google.firebase.auth.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import tech.onlycoders.backend.dto.notificator.EventType;
-import tech.onlycoders.backend.dto.notificator.MessageDTO;
 import tech.onlycoders.backend.exception.ApiException;
 import tech.onlycoders.backend.service.NotificatorService;
+import tech.onlycoders.notificator.dto.EventType;
+import tech.onlycoders.notificator.dto.MessageDTO;
 
 @Service
 public class FirebaseService {
