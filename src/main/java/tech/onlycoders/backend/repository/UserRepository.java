@@ -6,6 +6,7 @@ import java.util.Set;
 import org.springframework.data.neo4j.repository.Neo4jRepository;
 import org.springframework.data.neo4j.repository.query.Query;
 import org.springframework.stereotype.Repository;
+import tech.onlycoders.backend.model.Post;
 import tech.onlycoders.backend.model.User;
 
 @Repository
@@ -47,4 +48,10 @@ public interface UserRepository extends Neo4jRepository<User, String> {
 
   @Query("MATCH (:User{id: $followerId})-[r:FOLLOWS]->(:User{id: $followedId}) delete r")
   void unfollowUser(String followerId, String followedId);
+
+  @Query("MATCH (u:User{canonicalName:$canonicalName})-[r:IS_CONNECTED]-(u2:User) RETURN u2")
+  List<User> getContacts(String canonicalName);
+
+  @Query("MATCH (u:User{canonicalName:$canonicalName})-[r:IS_CONNECTED]-(u2:User) RETURN count(u2)")
+  Integer countContacts(String canonicalName);
 }

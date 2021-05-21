@@ -9,8 +9,6 @@ import tech.onlycoders.backend.dto.PaginateDto;
 import tech.onlycoders.backend.dto.auth.response.AuthResponseDto;
 import tech.onlycoders.backend.dto.contactrequest.request.CreateContactRequestDto;
 import tech.onlycoders.backend.dto.contactrequest.response.ReadContactRequestDto;
-import tech.onlycoders.backend.dto.notificator.EventType;
-import tech.onlycoders.backend.dto.notificator.MessageDTO;
 import tech.onlycoders.backend.dto.post.response.ReadPostDto;
 import tech.onlycoders.backend.dto.user.request.CreateUserDto;
 import tech.onlycoders.backend.dto.user.request.EducationExperienceDto;
@@ -320,6 +318,21 @@ public class UserService {
     paginated.setTotalElements(totalQuantity);
     paginated.setTotalPages(pagesQuantity);
     paginated.setContent(requestDtos);
+
+    return paginated;
+  }
+
+  public PaginateDto<ReadUserLiteDto> getMyContacts(String canonicalName, Integer page, Integer size) {
+    var users = this.userRepository.getContacts(canonicalName);
+
+    var totalQuantity = this.userRepository.countContacts(canonicalName);
+    var pagesQuantity = PaginationUtils.getPagesQuantity(totalQuantity, size);
+
+    var paginated = new PaginateDto<ReadUserLiteDto>();
+    paginated.setCurrentPage(page);
+    paginated.setTotalElements(totalQuantity);
+    paginated.setTotalPages(pagesQuantity);
+    paginated.setContent(userMapper.listUserToListReadUserLiteDto(users));
 
     return paginated;
   }
