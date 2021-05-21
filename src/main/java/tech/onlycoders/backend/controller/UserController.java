@@ -6,6 +6,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import java.util.List;
 import javax.validation.Valid;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
@@ -17,6 +18,7 @@ import tech.onlycoders.backend.bean.auth.UserDetails;
 import tech.onlycoders.backend.dto.ApiErrorResponse;
 import tech.onlycoders.backend.dto.PaginateDto;
 import tech.onlycoders.backend.dto.contactrequest.request.CreateContactRequestDto;
+import tech.onlycoders.backend.dto.contactrequest.response.ReadContactRequestDto;
 import tech.onlycoders.backend.dto.institute.request.CreateInstituteDto;
 import tech.onlycoders.backend.dto.post.response.ReadPostDto;
 import tech.onlycoders.backend.dto.skill.request.CreateSkillDto;
@@ -512,4 +514,52 @@ public class UserController {
     var posts = this.userService.getFavoritePosts(email, page, size);
     return ResponseEntity.ok(posts);
   }
+
+  @ApiResponses(
+    value = {
+      @ApiResponse(
+        responseCode = "200",
+        content = {
+          @Content(mediaType = "application/json", schema = @Schema(implementation = PaginatedContactRequests.class))
+        }
+      ),
+      @ApiResponse(
+        responseCode = "400",
+        content = {
+          @Content(mediaType = "application/json", schema = @Schema(implementation = ApiErrorResponse.class))
+        }
+      ),
+      @ApiResponse(
+        responseCode = "401",
+        content = {
+          @Content(mediaType = "application/json", schema = @Schema(implementation = ApiErrorResponse.class))
+        }
+      ),
+      @ApiResponse(
+        responseCode = "403",
+        content = {
+          @Content(mediaType = "application/json", schema = @Schema(implementation = ApiErrorResponse.class))
+        }
+      ),
+      @ApiResponse(
+        responseCode = "404",
+        content = {
+          @Content(mediaType = "application/json", schema = @Schema(implementation = ApiErrorResponse.class))
+        }
+      )
+    }
+  )
+  @PreAuthorize("hasAuthority('USER')")
+  @GetMapping("/received-contact-requests")
+  @Operation(summary = "Get received contact requests")
+  ResponseEntity<PaginateDto<ReadContactRequestDto>> getReceivedContactRequests(
+    @RequestParam(defaultValue = "0") @Min(0) Integer page,
+    @RequestParam(defaultValue = "20") @Min(1) Integer size
+  ) throws ApiException {
+    var userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    var email = userDetails.getEmail();
+    return ResponseEntity.ok(this.userService.getReceivedContactRequests(email, page, size));
+  }
 }
+
+class PaginatedContactRequests extends PaginateDto<ReadContactRequestDto> {}

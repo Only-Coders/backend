@@ -1,5 +1,7 @@
 package tech.onlycoders.backend.model;
 
+import java.util.HashSet;
+import java.util.Set;
 import lombok.*;
 import org.springframework.data.neo4j.core.schema.Node;
 import org.springframework.data.neo4j.core.schema.Relationship;
@@ -16,4 +18,7 @@ public class ContactRequest extends BaseEntity {
 
   @Relationship(type = "TO", direction = Relationship.Direction.OUTGOING)
   public Person target;
+
+  @Relationship(type = "SENDS", direction = Relationship.Direction.INCOMING)
+  public Person requester;
 }

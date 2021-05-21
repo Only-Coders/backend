@@ -1,5 +1,6 @@
 package tech.onlycoders.backend.repository;
 
+import java.util.List;
 import org.springframework.data.neo4j.repository.Neo4jRepository;
 import org.springframework.data.neo4j.repository.query.Query;
 import org.springframework.stereotype.Repository;
@@ -12,4 +13,13 @@ public interface ContactRequestRepository extends Neo4jRepository<ContactRequest
 
   @Query("MATCH (:User{id: $sourceId})-[]->(cr:ContactRequest)-[]->(target:User{id: $targetId}) detach delete cr")
   void deleteRequest(String sourceId, String targetId);
+
+  @Query("MATCH (u:User)-[]->(cr:ContactRequest)-[]->(:User{email: $email}) RETURN count(cr)")
+  int getReceivedContactResquestTotalQuantity(String email);
+
+  @Query(
+    "MATCH (u:User)-[r]->(cr:ContactRequest)-[]->(:User{email: $email}) " +
+    "RETURN cr, collect(r), collect(u) SKIP $skip LIMIT $size"
+  )
+  List<ContactRequest> getReceivedContactResquests(String email, Integer skip, Integer size);
 }

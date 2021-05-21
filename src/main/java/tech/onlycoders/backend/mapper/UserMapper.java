@@ -23,7 +23,6 @@ public interface UserMapper {
   @Mapping(target = "securityUpdate", ignore = true)
   @Mapping(target = "schools", ignore = true)
   @Mapping(target = "role", ignore = true)
-  @Mapping(target = "requests", ignore = true)
   @Mapping(target = "id", ignore = true)
   @Mapping(target = "followed", ignore = true)
   @Mapping(target = "email", ignore = true)
