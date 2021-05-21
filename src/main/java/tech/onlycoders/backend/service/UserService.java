@@ -8,6 +8,9 @@ import org.springframework.transaction.annotation.Transactional;
 import tech.onlycoders.backend.dto.PaginateDto;
 import tech.onlycoders.backend.dto.auth.response.AuthResponseDto;
 import tech.onlycoders.backend.dto.contactrequest.request.CreateContactRequestDto;
+import tech.onlycoders.backend.dto.contactrequest.response.ReadContactRequestDto;
+import tech.onlycoders.backend.dto.notificator.EventType;
+import tech.onlycoders.backend.dto.notificator.MessageDTO;
 import tech.onlycoders.backend.dto.post.response.ReadPostDto;
 import tech.onlycoders.backend.dto.user.request.CreateUserDto;
 import tech.onlycoders.backend.dto.user.request.EducationExperienceDto;
@@ -16,6 +19,7 @@ import tech.onlycoders.backend.dto.user.response.ReadUserDto;
 import tech.onlycoders.backend.dto.user.response.ReadUserLiteDto;
 import tech.onlycoders.backend.dto.workposition.response.ReadWorkPositionDto;
 import tech.onlycoders.backend.exception.ApiException;
+import tech.onlycoders.backend.mapper.ContactRequestMapper;
 import tech.onlycoders.backend.mapper.PostMapper;
 import tech.onlycoders.backend.mapper.UserMapper;
 import tech.onlycoders.backend.mapper.WorkPositionMapper;
@@ -49,6 +53,7 @@ public class UserService {
   private final UserMapper userMapper;
   private final PostMapper postMapper;
   private final WorkPositionMapper workPositionMapper;
+  private final ContactRequestMapper contactRequestMapper;
 
   public UserService(
     UserRepository userRepository,
@@ -68,7 +73,8 @@ public class UserService {
     DegreeRepository degreeRepository,
     NotificatorService notificatorService,
     PostMapper postMapper,
-    WorkPositionMapper workPositionMapper
+    WorkPositionMapper workPositionMapper,
+    ContactRequestMapper contactRequestMapper
   ) {
     this.userRepository = userRepository;
     this.personRepository = personRepository;
@@ -88,6 +94,7 @@ public class UserService {
     this.notificatorService = notificatorService;
     this.postMapper = postMapper;
     this.workPositionMapper = workPositionMapper;
+    this.contactRequestMapper = contactRequestMapper;
   }
 
   public ReadUserDto getProfile(String canonicalName) throws ApiException {
@@ -286,5 +293,34 @@ public class UserService {
         .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "error.user-not-found"));
 
     contactRequestRepository.deleteRequest(user.getId(), targetUser.getId());
+  }
+
+  public PaginateDto<ReadContactRequestDto> getReceivedContactRequests(String email, Integer page, Integer size)
+    throws ApiException {
+    var totalQuantity = this.contactRequestRepository.getReceivedContactResquestTotalQuantity(email);
+    if (totalQuantity == 0) {
+      this.userRepository.findByEmail(email)
+        .orElseThrow(() -> new ApiException(HttpStatus.INTERNAL_SERVER_ERROR, "error.500"));
+    }
+    var pagesQuantity = PaginationUtils.getPagesQuantity(totalQuantity, size);
+    var contactResquests = this.contactRequestRepository.getReceivedContactResquests(email, page * size, size);
+
+    var requestDtos = contactRequestMapper.contactRequestListToReadContactRequestDtoList(contactResquests);
+    for (ReadContactRequestDto request : requestDtos) {
+      var position = workPositionRepository.getUserCurrentPositions(request.getRequester().getCanonicalName());
+      if (position.size() > 0) {
+        request
+          .getRequester()
+          .setCurrentPosition(workPositionMapper.workPositionToReadWorkPositionDto(position.get(0)));
+      }
+    }
+
+    var paginated = new PaginateDto<ReadContactRequestDto>();
+    paginated.setCurrentPage(page);
+    paginated.setTotalElements(totalQuantity);
+    paginated.setTotalPages(pagesQuantity);
+    paginated.setContent(requestDtos);
+
+    return paginated;
   }
 }

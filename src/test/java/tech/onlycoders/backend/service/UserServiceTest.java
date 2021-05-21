@@ -92,6 +92,9 @@ public class UserServiceTest {
   @Spy
   private final PostMapper postMapper = new PostMapperImpl(new TagMapperImpl());
 
+  @Spy
+  private final ContactRequestMapper contactRequestMapper = new ContactRequestMapperImpl();
+
   @Test
   public void ShouldFailWhenFirebaseReturnsException() {
     var canonicalName = ezRandom.nextObject(String.class);
@@ -501,5 +504,44 @@ public class UserServiceTest {
       ApiException.class,
       () -> this.service.deleteContactRequest(user1.getEmail(), user2.getCanonicalName())
     );
+  }
+
+  @Test
+  public void ShouldReturnContactRequests() throws ApiException {
+    var email = "email";
+
+    var request = new ContactRequest();
+    request.setRequester(ezRandom.nextObject(User.class));
+    var list = new ArrayList<ContactRequest>();
+    list.add(request);
+
+    var position = ezRandom.nextObject(WorkPosition.class);
+    position.setWorkplace(ezRandom.nextObject(Workplace.class));
+    var positionList = new ArrayList<WorkPosition>();
+    positionList.add(position);
+
+    Mockito.when(this.contactRequestRepository.getReceivedContactResquestTotalQuantity(anyString())).thenReturn(1);
+    Mockito
+      .when(this.contactRequestRepository.getReceivedContactResquests(anyString(), anyInt(), anyInt()))
+      .thenReturn(list);
+    Mockito.when(this.workPositionRepository.getUserCurrentPositions(anyString())).thenReturn(positionList);
+
+    var res = this.service.getReceivedContactRequests(email, 0, 10);
+    assertNotNull(res);
+  }
+
+  @Test
+  public void ShouldFailReturnContactRequestsWhenUserNotFound() {
+    var email = "email";
+
+    var request = new ContactRequest();
+    request.setRequester(ezRandom.nextObject(User.class));
+    var list = new ArrayList<ContactRequest>();
+    list.add(request);
+
+    Mockito.when(this.contactRequestRepository.getReceivedContactResquestTotalQuantity(anyString())).thenReturn(0);
+    Mockito.when(this.userRepository.findByEmail(anyString())).thenReturn(Optional.empty());
+
+    assertThrows(ApiException.class, () -> this.service.getReceivedContactRequests(email, 0, 10));
   }
 }

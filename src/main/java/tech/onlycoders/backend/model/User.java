@@ -41,9 +41,6 @@ public class User extends Person {
   @Relationship(type = "CONFIGURES", direction = Relationship.Direction.OUTGOING)
   public Set<NotificationConfig> configs = new HashSet<>();
 
-  @Relationship(type = "SENDS", direction = Relationship.Direction.OUTGOING)
-  public Set<ContactRequest> requests = new HashSet<>();
-
   @Relationship(type = "LIVES", direction = Relationship.Direction.OUTGOING)
   public Country country;
 
