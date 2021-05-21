@@ -336,7 +336,7 @@ public class UserServiceTest {
   }
 
   @Test
-  public void ShouldFailWithConflictWhenSendContactRequest() throws ApiException {
+  public void ShouldFailWithConflictWhenSendContactRequest() {
     var user1 = ezRandom.nextObject(User.class);
     var user2 = ezRandom.nextObject(User.class);
     var reqDto = ezRandom.nextObject(CreateContactRequestDto.class);
@@ -543,5 +543,20 @@ public class UserServiceTest {
     Mockito.when(this.userRepository.findByEmail(anyString())).thenReturn(Optional.empty());
 
     assertThrows(ApiException.class, () -> this.service.getReceivedContactRequests(email, 0, 10));
+  }
+
+  @Test
+  public void ShouldGetContactsOfUser() {
+    var canonicalName = ezRandom.nextObject(String.class);
+    var usersList = new ArrayList<User>();
+    usersList.add(new User());
+    var size = 20;
+    var page = 0;
+
+    Mockito.when(this.userRepository.getContacts(canonicalName)).thenReturn(usersList);
+    Mockito.when(this.userRepository.countContacts(canonicalName)).thenReturn(1);
+
+    var result = this.service.getMyContacts(canonicalName, page, size);
+    assertNotNull(result);
   }
 }
