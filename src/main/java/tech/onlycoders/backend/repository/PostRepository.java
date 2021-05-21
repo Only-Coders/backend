@@ -1,12 +1,10 @@
 package tech.onlycoders.backend.repository;
 
 import java.util.List;
-import java.util.Optional;
 import org.springframework.data.neo4j.repository.Neo4jRepository;
 import org.springframework.data.neo4j.repository.query.Query;
 import org.springframework.stereotype.Repository;
 import tech.onlycoders.backend.model.Post;
-import tech.onlycoders.backend.model.User;
 
 @Repository
 public interface PostRepository extends Neo4jRepository<Post, String> {

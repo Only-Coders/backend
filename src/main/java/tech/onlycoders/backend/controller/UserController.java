@@ -6,7 +6,6 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
-import java.util.List;
 import javax.validation.Valid;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
@@ -15,7 +14,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import tech.onlycoders.backend.bean.auth.UserDetails;
-import tech.onlycoders.backend.dto.ApiErrorResponse;
 import tech.onlycoders.backend.dto.PaginateDto;
 import tech.onlycoders.backend.dto.contactrequest.request.CreateContactRequestDto;
 import tech.onlycoders.backend.dto.contactrequest.response.ReadContactRequestDto;
@@ -30,10 +28,7 @@ import tech.onlycoders.backend.dto.user.response.ReadUserLiteDto;
 import tech.onlycoders.backend.dto.workplace.request.CreateWorkplaceDto;
 import tech.onlycoders.backend.dto.workposition.response.ReadWorkPositionDto;
 import tech.onlycoders.backend.exception.ApiException;
-import tech.onlycoders.backend.service.InstituteService;
-import tech.onlycoders.backend.service.SkillService;
-import tech.onlycoders.backend.service.UserService;
-import tech.onlycoders.backend.service.WorkplaceService;
+import tech.onlycoders.backend.service.*;
 
 @RestController
 @RequestMapping("/api/users")
@@ -42,17 +37,20 @@ public class UserController {
 
   private final UserService userService;
   private final WorkplaceService workplaceService;
+  private final TagService tagService;
   private final InstituteService instituteService;
   private final SkillService skillService;
 
   public UserController(
     UserService userService,
     WorkplaceService workplaceService,
+    TagService tagService,
     InstituteService instituteService,
     SkillService skillService
   ) {
     this.userService = userService;
     this.workplaceService = workplaceService;
+    this.tagService = tagService;
     this.instituteService = instituteService;
     this.skillService = skillService;
   }
@@ -62,30 +60,6 @@ public class UserController {
       @ApiResponse(
         responseCode = "200",
         content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ReadUserDto.class)) }
-      ),
-      @ApiResponse(
-        responseCode = "400",
-        content = {
-          @Content(mediaType = "application/json", schema = @Schema(implementation = ApiErrorResponse.class))
-        }
-      ),
-      @ApiResponse(
-        responseCode = "401",
-        content = {
-          @Content(mediaType = "application/json", schema = @Schema(implementation = ApiErrorResponse.class))
-        }
-      ),
-      @ApiResponse(
-        responseCode = "403",
-        content = {
-          @Content(mediaType = "application/json", schema = @Schema(implementation = ApiErrorResponse.class))
-        }
-      ),
-      @ApiResponse(
-        responseCode = "404",
-        content = {
-          @Content(mediaType = "application/json", schema = @Schema(implementation = ApiErrorResponse.class))
-        }
       )
     }
   )
@@ -104,30 +78,6 @@ public class UserController {
         content = {
           @Content(mediaType = "application/json", schema = @Schema(implementation = ReadWorkPositionDto.class))
         }
-      ),
-      @ApiResponse(
-        responseCode = "400",
-        content = {
-          @Content(mediaType = "application/json", schema = @Schema(implementation = ApiErrorResponse.class))
-        }
-      ),
-      @ApiResponse(
-        responseCode = "401",
-        content = {
-          @Content(mediaType = "application/json", schema = @Schema(implementation = ApiErrorResponse.class))
-        }
-      ),
-      @ApiResponse(
-        responseCode = "403",
-        content = {
-          @Content(mediaType = "application/json", schema = @Schema(implementation = ApiErrorResponse.class))
-        }
-      ),
-      @ApiResponse(
-        responseCode = "404",
-        content = {
-          @Content(mediaType = "application/json", schema = @Schema(implementation = ApiErrorResponse.class))
-        }
       )
     }
   )
@@ -143,39 +93,11 @@ public class UserController {
     }
     var userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     var email = userDetails.getEmail();
-    var result = this.userService.addWork(email, workExperienceDto);
+    var result = this.workplaceService.addWorkExperience(email, workExperienceDto);
     return ResponseEntity.ok(result);
   }
 
-  @ApiResponses(
-    value = {
-      @ApiResponse(responseCode = "200", content = { @Content(mediaType = "application/json") }),
-      @ApiResponse(
-        responseCode = "400",
-        content = {
-          @Content(mediaType = "application/json", schema = @Schema(implementation = ApiErrorResponse.class))
-        }
-      ),
-      @ApiResponse(
-        responseCode = "401",
-        content = {
-          @Content(mediaType = "application/json", schema = @Schema(implementation = ApiErrorResponse.class))
-        }
-      ),
-      @ApiResponse(
-        responseCode = "403",
-        content = {
-          @Content(mediaType = "application/json", schema = @Schema(implementation = ApiErrorResponse.class))
-        }
-      ),
-      @ApiResponse(
-        responseCode = "404",
-        content = {
-          @Content(mediaType = "application/json", schema = @Schema(implementation = ApiErrorResponse.class))
-        }
-      )
-    }
-  )
+  @ApiResponses(value = { @ApiResponse(responseCode = "200", content = { @Content(mediaType = "application/json") }) })
   @PreAuthorize("hasAuthority('USER')")
   @PostMapping("/institutes")
   @Operation(summary = "Adds a school experience.")
@@ -190,39 +112,11 @@ public class UserController {
     }
     var userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     var email = userDetails.getEmail();
-    var result = this.userService.addSchool(email, educationExperienceDto);
+    var result = this.instituteService.addUserDegree(email, educationExperienceDto);
     return ResponseEntity.ok(result);
   }
 
-  @ApiResponses(
-    value = {
-      @ApiResponse(responseCode = "200", content = { @Content(mediaType = "application/json") }),
-      @ApiResponse(
-        responseCode = "400",
-        content = {
-          @Content(mediaType = "application/json", schema = @Schema(implementation = ApiErrorResponse.class))
-        }
-      ),
-      @ApiResponse(
-        responseCode = "401",
-        content = {
-          @Content(mediaType = "application/json", schema = @Schema(implementation = ApiErrorResponse.class))
-        }
-      ),
-      @ApiResponse(
-        responseCode = "403",
-        content = {
-          @Content(mediaType = "application/json", schema = @Schema(implementation = ApiErrorResponse.class))
-        }
-      ),
-      @ApiResponse(
-        responseCode = "404",
-        content = {
-          @Content(mediaType = "application/json", schema = @Schema(implementation = ApiErrorResponse.class))
-        }
-      )
-    }
-  )
+  @ApiResponses(value = { @ApiResponse(responseCode = "200", content = { @Content(mediaType = "application/json") }) })
   @PreAuthorize("hasAuthority('USER')")
   @PostMapping("/skills")
   @Operation(summary = "Adds a skill to the user.")
@@ -233,78 +127,22 @@ public class UserController {
       var readSkillDto = this.skillService.createSkill(CreateSkillDto.builder().name(addSkillDto.getName()).build());
       addSkillDto.setCanonicalName(readSkillDto.getCanonicalName());
     }
-    this.userService.addSkill(email, addSkillDto.getCanonicalName());
+    this.skillService.addSkillToUser(email, addSkillDto.getCanonicalName());
     return ResponseEntity.ok().build();
   }
 
-  @ApiResponses(
-    value = {
-      @ApiResponse(responseCode = "200", content = { @Content(mediaType = "application/json") }),
-      @ApiResponse(
-        responseCode = "400",
-        content = {
-          @Content(mediaType = "application/json", schema = @Schema(implementation = ApiErrorResponse.class))
-        }
-      ),
-      @ApiResponse(
-        responseCode = "401",
-        content = {
-          @Content(mediaType = "application/json", schema = @Schema(implementation = ApiErrorResponse.class))
-        }
-      ),
-      @ApiResponse(
-        responseCode = "403",
-        content = {
-          @Content(mediaType = "application/json", schema = @Schema(implementation = ApiErrorResponse.class))
-        }
-      ),
-      @ApiResponse(
-        responseCode = "404",
-        content = {
-          @Content(mediaType = "application/json", schema = @Schema(implementation = ApiErrorResponse.class))
-        }
-      )
-    }
-  )
+  @ApiResponses(value = { @ApiResponse(responseCode = "200", content = { @Content(mediaType = "application/json") }) })
   @PreAuthorize("hasAuthority('USER')")
   @PostMapping("/tags/{canonicalName}")
   @Operation(summary = "Adds a tag to the user.")
   ResponseEntity<?> addTag(@PathVariable @NotBlank String canonicalName) throws ApiException {
     var userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     var email = userDetails.getEmail();
-    this.userService.addTag(email, canonicalName);
+    this.tagService.addTagToUser(email, canonicalName);
     return ResponseEntity.ok().build();
   }
 
-  @ApiResponses(
-    value = {
-      @ApiResponse(responseCode = "200", content = { @Content(mediaType = "application/json") }),
-      @ApiResponse(
-        responseCode = "400",
-        content = {
-          @Content(mediaType = "application/json", schema = @Schema(implementation = ApiErrorResponse.class))
-        }
-      ),
-      @ApiResponse(
-        responseCode = "401",
-        content = {
-          @Content(mediaType = "application/json", schema = @Schema(implementation = ApiErrorResponse.class))
-        }
-      ),
-      @ApiResponse(
-        responseCode = "403",
-        content = {
-          @Content(mediaType = "application/json", schema = @Schema(implementation = ApiErrorResponse.class))
-        }
-      ),
-      @ApiResponse(
-        responseCode = "404",
-        content = {
-          @Content(mediaType = "application/json", schema = @Schema(implementation = ApiErrorResponse.class))
-        }
-      )
-    }
-  )
+  @ApiResponses(value = { @ApiResponse(responseCode = "200", content = { @Content(mediaType = "application/json") }) })
   @PreAuthorize("hasAuthority('USER')")
   @PostMapping("/contact-request")
   @Operation(summary = "sends a contact request.")
@@ -315,35 +153,7 @@ public class UserController {
     return ResponseEntity.ok().build();
   }
 
-  @ApiResponses(
-    value = {
-      @ApiResponse(responseCode = "200", content = { @Content(mediaType = "application/json") }),
-      @ApiResponse(
-        responseCode = "400",
-        content = {
-          @Content(mediaType = "application/json", schema = @Schema(implementation = ApiErrorResponse.class))
-        }
-      ),
-      @ApiResponse(
-        responseCode = "401",
-        content = {
-          @Content(mediaType = "application/json", schema = @Schema(implementation = ApiErrorResponse.class))
-        }
-      ),
-      @ApiResponse(
-        responseCode = "403",
-        content = {
-          @Content(mediaType = "application/json", schema = @Schema(implementation = ApiErrorResponse.class))
-        }
-      ),
-      @ApiResponse(
-        responseCode = "404",
-        content = {
-          @Content(mediaType = "application/json", schema = @Schema(implementation = ApiErrorResponse.class))
-        }
-      )
-    }
-  )
+  @ApiResponses(value = { @ApiResponse(responseCode = "200", content = { @Content(mediaType = "application/json") }) })
   @PreAuthorize("hasAuthority('USER')")
   @DeleteMapping("/contact-request/{canonicalName}")
   @Operation(summary = "deletes a  contact request.")
@@ -354,35 +164,7 @@ public class UserController {
     return ResponseEntity.ok().build();
   }
 
-  @ApiResponses(
-    value = {
-      @ApiResponse(responseCode = "200", content = { @Content(mediaType = "application/json") }),
-      @ApiResponse(
-        responseCode = "400",
-        content = {
-          @Content(mediaType = "application/json", schema = @Schema(implementation = ApiErrorResponse.class))
-        }
-      ),
-      @ApiResponse(
-        responseCode = "401",
-        content = {
-          @Content(mediaType = "application/json", schema = @Schema(implementation = ApiErrorResponse.class))
-        }
-      ),
-      @ApiResponse(
-        responseCode = "403",
-        content = {
-          @Content(mediaType = "application/json", schema = @Schema(implementation = ApiErrorResponse.class))
-        }
-      ),
-      @ApiResponse(
-        responseCode = "404",
-        content = {
-          @Content(mediaType = "application/json", schema = @Schema(implementation = ApiErrorResponse.class))
-        }
-      )
-    }
-  )
+  @ApiResponses(value = { @ApiResponse(responseCode = "200", content = { @Content(mediaType = "application/json") }) })
   @PreAuthorize("hasAuthority('USER')")
   @PostMapping("/following/{canonicalName}")
   @Operation(summary = "Follows a user.")
@@ -393,35 +175,7 @@ public class UserController {
     return ResponseEntity.ok().build();
   }
 
-  @ApiResponses(
-    value = {
-      @ApiResponse(responseCode = "200", content = { @Content(mediaType = "application/json") }),
-      @ApiResponse(
-        responseCode = "400",
-        content = {
-          @Content(mediaType = "application/json", schema = @Schema(implementation = ApiErrorResponse.class))
-        }
-      ),
-      @ApiResponse(
-        responseCode = "401",
-        content = {
-          @Content(mediaType = "application/json", schema = @Schema(implementation = ApiErrorResponse.class))
-        }
-      ),
-      @ApiResponse(
-        responseCode = "403",
-        content = {
-          @Content(mediaType = "application/json", schema = @Schema(implementation = ApiErrorResponse.class))
-        }
-      ),
-      @ApiResponse(
-        responseCode = "404",
-        content = {
-          @Content(mediaType = "application/json", schema = @Schema(implementation = ApiErrorResponse.class))
-        }
-      )
-    }
-  )
+  @ApiResponses(value = { @ApiResponse(responseCode = "200", content = { @Content(mediaType = "application/json") }) })
   @PreAuthorize("hasAuthority('USER')")
   @DeleteMapping("/following/{canonicalName}")
   @Operation(summary = "Unfollows a user.")
@@ -432,35 +186,7 @@ public class UserController {
     return ResponseEntity.ok().build();
   }
 
-  @ApiResponses(
-    value = {
-      @ApiResponse(responseCode = "200", content = { @Content(mediaType = "application/json") }),
-      @ApiResponse(
-        responseCode = "400",
-        content = {
-          @Content(mediaType = "application/json", schema = @Schema(implementation = ApiErrorResponse.class))
-        }
-      ),
-      @ApiResponse(
-        responseCode = "401",
-        content = {
-          @Content(mediaType = "application/json", schema = @Schema(implementation = ApiErrorResponse.class))
-        }
-      ),
-      @ApiResponse(
-        responseCode = "403",
-        content = {
-          @Content(mediaType = "application/json", schema = @Schema(implementation = ApiErrorResponse.class))
-        }
-      ),
-      @ApiResponse(
-        responseCode = "404",
-        content = {
-          @Content(mediaType = "application/json", schema = @Schema(implementation = ApiErrorResponse.class))
-        }
-      )
-    }
-  )
+  @ApiResponses(value = { @ApiResponse(responseCode = "200", content = { @Content(mediaType = "application/json") }) })
   @PreAuthorize("hasAuthority('USER')")
   @PostMapping("/favorite-posts/{postId}")
   @Operation(summary = "Saves a favorite post to the user.")
@@ -476,30 +202,6 @@ public class UserController {
       @ApiResponse(
         responseCode = "200",
         content = { @Content(mediaType = "application/json", schema = @Schema(implementation = PaginatedPosts.class)) }
-      ),
-      @ApiResponse(
-        responseCode = "400",
-        content = {
-          @Content(mediaType = "application/json", schema = @Schema(implementation = ApiErrorResponse.class))
-        }
-      ),
-      @ApiResponse(
-        responseCode = "401",
-        content = {
-          @Content(mediaType = "application/json", schema = @Schema(implementation = ApiErrorResponse.class))
-        }
-      ),
-      @ApiResponse(
-        responseCode = "403",
-        content = {
-          @Content(mediaType = "application/json", schema = @Schema(implementation = ApiErrorResponse.class))
-        }
-      ),
-      @ApiResponse(
-        responseCode = "404",
-        content = {
-          @Content(mediaType = "application/json", schema = @Schema(implementation = ApiErrorResponse.class))
-        }
       )
     }
   )
@@ -523,30 +225,6 @@ public class UserController {
         content = {
           @Content(mediaType = "application/json", schema = @Schema(implementation = PaginatedContactRequests.class))
         }
-      ),
-      @ApiResponse(
-        responseCode = "400",
-        content = {
-          @Content(mediaType = "application/json", schema = @Schema(implementation = ApiErrorResponse.class))
-        }
-      ),
-      @ApiResponse(
-        responseCode = "401",
-        content = {
-          @Content(mediaType = "application/json", schema = @Schema(implementation = ApiErrorResponse.class))
-        }
-      ),
-      @ApiResponse(
-        responseCode = "403",
-        content = {
-          @Content(mediaType = "application/json", schema = @Schema(implementation = ApiErrorResponse.class))
-        }
-      ),
-      @ApiResponse(
-        responseCode = "404",
-        content = {
-          @Content(mediaType = "application/json", schema = @Schema(implementation = ApiErrorResponse.class))
-        }
       )
     }
   )
@@ -567,30 +245,6 @@ public class UserController {
       @ApiResponse(
         responseCode = "200",
         content = { @Content(mediaType = "application/json", schema = @Schema(implementation = PaginatedUsers.class)) }
-      ),
-      @ApiResponse(
-        responseCode = "400",
-        content = {
-          @Content(mediaType = "application/json", schema = @Schema(implementation = ApiErrorResponse.class))
-        }
-      ),
-      @ApiResponse(
-        responseCode = "401",
-        content = {
-          @Content(mediaType = "application/json", schema = @Schema(implementation = ApiErrorResponse.class))
-        }
-      ),
-      @ApiResponse(
-        responseCode = "403",
-        content = {
-          @Content(mediaType = "application/json", schema = @Schema(implementation = ApiErrorResponse.class))
-        }
-      ),
-      @ApiResponse(
-        responseCode = "404",
-        content = {
-          @Content(mediaType = "application/json", schema = @Schema(implementation = ApiErrorResponse.class))
-        }
       )
     }
   )

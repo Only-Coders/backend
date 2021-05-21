@@ -1,25 +1,32 @@
 package tech.onlycoders.backend.service;
 
 import java.util.List;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import tech.onlycoders.backend.dto.PaginateDto;
 import tech.onlycoders.backend.dto.tag.request.CreateTagDto;
 import tech.onlycoders.backend.dto.tag.response.ReadTagDto;
+import tech.onlycoders.backend.exception.ApiException;
 import tech.onlycoders.backend.mapper.TagMapper;
 import tech.onlycoders.backend.model.Tag;
 import tech.onlycoders.backend.repository.TagRepository;
+import tech.onlycoders.backend.repository.UserRepository;
 import tech.onlycoders.backend.utils.CanonicalFactory;
 import tech.onlycoders.backend.utils.PaginationUtils;
 
 @Service
+@Transactional
 public class TagService {
 
   private final TagRepository tagRepository;
   private final TagMapper tagMapper;
+  private final UserRepository userRepository;
 
-  public TagService(TagRepository tagRepository, TagMapper tagMapper) {
+  public TagService(TagRepository tagRepository, TagMapper tagMapper, UserRepository userRepository) {
     this.tagRepository = tagRepository;
     this.tagMapper = tagMapper;
+    this.userRepository = userRepository;
   }
 
   public ReadTagDto createTag(CreateTagDto createTagDto) {
@@ -60,5 +67,15 @@ public class TagService {
     pagination.setTotalPages(pageQuantity);
     pagination.setTotalElements(totalQuantity);
     return pagination;
+  }
+
+  public void addTagToUser(String email, String canonicalName) throws ApiException {
+    var tag =
+      this.tagRepository.findById(canonicalName)
+        .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "error.tag-not-found"));
+    var user =
+      this.userRepository.findByEmail(email)
+        .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "error.user-not-found"));
+    this.userRepository.followTag(user.getId(), tag.getCanonicalName());
   }
 }

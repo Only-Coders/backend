@@ -2,11 +2,13 @@ package tech.onlycoders.backend.service;
 
 import java.util.List;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import tech.onlycoders.backend.dto.country.response.ReadCountryDto;
 import tech.onlycoders.backend.mapper.CountryMapper;
 import tech.onlycoders.backend.repository.CountryRepository;
 
 @Service
+@Transactional
 public class CountryService {
 
   private final CountryRepository countryRepository;

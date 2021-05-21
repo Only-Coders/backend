@@ -4,10 +4,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.core.Queue;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import tech.onlycoders.notificator.dto.MessageDTO;
 
 @Service
 @Slf4j
+@Transactional
 public class NotificatorService {
 
   private final RabbitTemplate template;

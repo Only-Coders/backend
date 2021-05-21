@@ -17,7 +17,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import tech.onlycoders.backend.bean.auth.UserDetails;
-import tech.onlycoders.backend.dto.ApiErrorResponse;
 import tech.onlycoders.backend.dto.auth.request.AuthRequestDto;
 import tech.onlycoders.backend.dto.auth.response.AuthResponseDto;
 import tech.onlycoders.backend.dto.user.request.CreateUserDto;
@@ -59,24 +58,6 @@ public class AuthController {
       @ApiResponse(
         responseCode = "200",
         content = { @Content(mediaType = "application/json", schema = @Schema(implementation = AuthResponseDto.class)) }
-      ),
-      @ApiResponse(
-        responseCode = "400",
-        content = {
-          @Content(mediaType = "application/json", schema = @Schema(implementation = ApiErrorResponse.class))
-        }
-      ),
-      @ApiResponse(
-        responseCode = "401",
-        content = {
-          @Content(mediaType = "application/json", schema = @Schema(implementation = ApiErrorResponse.class))
-        }
-      ),
-      @ApiResponse(
-        responseCode = "403",
-        content = {
-          @Content(mediaType = "application/json", schema = @Schema(implementation = ApiErrorResponse.class))
-        }
       )
     }
   )
@@ -96,24 +77,6 @@ public class AuthController {
       @ApiResponse(
         responseCode = "200",
         content = { @Content(mediaType = "application/json", schema = @Schema(implementation = AuthResponseDto.class)) }
-      ),
-      @ApiResponse(
-        responseCode = "400",
-        content = {
-          @Content(mediaType = "application/json", schema = @Schema(implementation = ApiErrorResponse.class))
-        }
-      ),
-      @ApiResponse(
-        responseCode = "401",
-        content = {
-          @Content(mediaType = "application/json", schema = @Schema(implementation = ApiErrorResponse.class))
-        }
-      ),
-      @ApiResponse(
-        responseCode = "403",
-        content = {
-          @Content(mediaType = "application/json", schema = @Schema(implementation = ApiErrorResponse.class))
-        }
       )
     }
   )
@@ -138,12 +101,6 @@ public class AuthController {
       @ApiResponse(
         responseCode = "200",
         content = { @Content(mediaType = "application/json", schema = @Schema(implementation = AuthResponseDto.class)) }
-      ),
-      @ApiResponse(
-        responseCode = "401",
-        content = {
-          @Content(mediaType = "application/json", schema = @Schema(implementation = ApiErrorResponse.class))
-        }
       )
     }
   )
@@ -160,30 +117,6 @@ public class AuthController {
       @ApiResponse(
         responseCode = "200",
         content = { @Content(mediaType = "application/json", schema = @Schema(implementation = AuthResponseDto.class)) }
-      ),
-      @ApiResponse(
-        responseCode = "400",
-        content = {
-          @Content(mediaType = "application/json", schema = @Schema(implementation = ApiErrorResponse.class))
-        }
-      ),
-      @ApiResponse(
-        responseCode = "401",
-        content = {
-          @Content(mediaType = "application/json", schema = @Schema(implementation = ApiErrorResponse.class))
-        }
-      ),
-      @ApiResponse(
-        responseCode = "403",
-        content = {
-          @Content(mediaType = "application/json", schema = @Schema(implementation = ApiErrorResponse.class))
-        }
-      ),
-      @ApiResponse(
-        responseCode = "409",
-        content = {
-          @Content(mediaType = "application/json", schema = @Schema(implementation = ApiErrorResponse.class))
-        }
       )
     }
   )

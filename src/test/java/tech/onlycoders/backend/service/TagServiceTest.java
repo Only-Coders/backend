@@ -1,8 +1,10 @@
 package tech.onlycoders.backend.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.*;
 
+import java.util.Optional;
 import java.util.stream.Collectors;
 import org.jeasy.random.EasyRandom;
 import org.junit.jupiter.api.Test;
@@ -13,12 +15,13 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
 import tech.onlycoders.backend.dto.tag.request.CreateTagDto;
+import tech.onlycoders.backend.exception.ApiException;
 import tech.onlycoders.backend.mapper.TagMapper;
 import tech.onlycoders.backend.model.Tag;
+import tech.onlycoders.backend.model.User;
 import tech.onlycoders.backend.repository.TagRepository;
+import tech.onlycoders.backend.repository.UserRepository;
 import tech.onlycoders.backend.utils.CanonicalFactory;
 
 @ExtendWith(MockitoExtension.class)
@@ -29,6 +32,9 @@ public class TagServiceTest {
 
   @Mock
   private TagRepository tagRepository;
+
+  @Mock
+  private UserRepository userRepository;
 
   private final EasyRandom ezRandom = new EasyRandom();
 
@@ -65,5 +71,33 @@ public class TagServiceTest {
       );
     var result = this.service.createTag(createTagDto);
     assertEquals(CanonicalFactory.getCanonicalName(createTagDto.getCanonicalName()), result.getCanonicalName());
+  }
+
+  @Test
+  public void ShouldAddTag() throws ApiException {
+    var user = ezRandom.nextObject(User.class);
+    var tag = ezRandom.nextObject(Tag.class);
+    var email = ezRandom.nextObject(String.class);
+
+    Mockito.when(this.userRepository.findByEmail(email)).thenReturn(Optional.of(user));
+    Mockito.when(this.tagRepository.findById(tag.getCanonicalName())).thenReturn(Optional.of(tag));
+
+    this.service.addTagToUser(email, tag.getCanonicalName());
+  }
+
+  @Test
+  public void ShouldFailToAddTagWhenTagNotFound() {
+    var tag = ezRandom.nextObject(Tag.class);
+    var email = ezRandom.nextObject(String.class);
+    assertThrows(ApiException.class, () -> this.service.addTagToUser(email, tag.getCanonicalName()));
+  }
+
+  @Test
+  public void ShouldFailToAddTagWhenUserNotFound() {
+    var tag = ezRandom.nextObject(Tag.class);
+    var email = ezRandom.nextObject(String.class);
+    Mockito.when(this.tagRepository.findById(tag.getCanonicalName())).thenReturn(Optional.of(tag));
+
+    assertThrows(ApiException.class, () -> this.service.addTagToUser(email, tag.getCanonicalName()));
   }
 }

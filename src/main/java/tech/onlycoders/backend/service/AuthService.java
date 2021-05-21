@@ -3,6 +3,7 @@ package tech.onlycoders.backend.service;
 import java.util.HashMap;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import tech.onlycoders.backend.bean.FirebaseService;
 import tech.onlycoders.backend.dto.auth.request.AuthRequestDto;
 import tech.onlycoders.backend.dto.auth.response.AuthResponseDto;
@@ -11,6 +12,7 @@ import tech.onlycoders.backend.model.User;
 import tech.onlycoders.backend.repository.PersonRepository;
 
 @Service
+@Transactional
 public class AuthService {
 
   private final PersonRepository personRepository;

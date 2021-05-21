@@ -1,8 +1,10 @@
 package tech.onlycoders.backend.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.*;
 
+import java.util.Optional;
 import java.util.stream.Collectors;
 import org.jeasy.random.EasyRandom;
 import org.junit.jupiter.api.Test;
@@ -16,9 +18,12 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import tech.onlycoders.backend.dto.skill.request.CreateSkillDto;
+import tech.onlycoders.backend.exception.ApiException;
 import tech.onlycoders.backend.mapper.SkillMapper;
 import tech.onlycoders.backend.model.Skill;
+import tech.onlycoders.backend.model.User;
 import tech.onlycoders.backend.repository.SkillRepository;
+import tech.onlycoders.backend.repository.UserRepository;
 import tech.onlycoders.backend.utils.CanonicalFactory;
 
 @ExtendWith(MockitoExtension.class)
@@ -29,6 +34,9 @@ public class SkillServiceTest {
 
   @Mock
   private SkillRepository skillRepository;
+
+  @Mock
+  private UserRepository userRepository;
 
   private final EasyRandom ezRandom = new EasyRandom();
 
@@ -59,5 +67,24 @@ public class SkillServiceTest {
       );
     var result = this.service.createSkill(createSkillDto);
     assertEquals(createSkillDto.getName(), result.getName());
+  }
+
+  @Test
+  public void ShouldAddSkill() throws ApiException {
+    var user = ezRandom.nextObject(User.class);
+    var skill = ezRandom.nextObject(Skill.class);
+    var email = ezRandom.nextObject(String.class);
+
+    Mockito.when(this.userRepository.findByEmail(email)).thenReturn(Optional.of(user));
+    Mockito.when(this.skillRepository.findById(skill.getCanonicalName())).thenReturn(Optional.of(skill));
+
+    this.service.addSkillToUser(email, skill.getCanonicalName());
+  }
+
+  @Test
+  public void ShouldFailToAddSchoolWhenSkillNotFound() {
+    var skill = ezRandom.nextObject(Skill.class);
+    var email = ezRandom.nextObject(String.class);
+    assertThrows(ApiException.class, () -> this.service.addSkillToUser(email, skill.getCanonicalName()));
   }
 }

@@ -1,7 +1,5 @@
 package tech.onlycoders.backend.model;
 
-import java.util.HashSet;
-import java.util.Set;
 import lombok.*;
 import org.springframework.data.neo4j.core.schema.Node;
 import org.springframework.data.neo4j.core.schema.Relationship;

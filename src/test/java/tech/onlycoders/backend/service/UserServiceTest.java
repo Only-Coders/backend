@@ -7,11 +7,9 @@ import static org.mockito.ArgumentMatchers.*;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Optional;
-import java.util.Set;
 import org.jeasy.random.EasyRandom;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mapstruct.factory.Mappers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -20,8 +18,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import tech.onlycoders.backend.dto.auth.response.AuthResponseDto;
 import tech.onlycoders.backend.dto.contactrequest.request.CreateContactRequestDto;
 import tech.onlycoders.backend.dto.user.request.CreateUserDto;
-import tech.onlycoders.backend.dto.user.request.EducationExperienceDto;
-import tech.onlycoders.backend.dto.user.request.WorkExperienceDto;
 import tech.onlycoders.backend.exception.ApiException;
 import tech.onlycoders.backend.mapper.*;
 import tech.onlycoders.backend.model.*;
@@ -149,127 +145,6 @@ public class UserServiceTest {
     var email = ezRandom.nextObject(String.class);
 
     assertThrows(ApiException.class, () -> this.service.createUser(email, createUserDto));
-  }
-
-  @Test
-  public void ShouldAddWorkingExperience() throws ApiException {
-    var user = ezRandom.nextObject(User.class);
-    var organization = ezRandom.nextObject(Workplace.class);
-    var workExperienceDto = ezRandom.nextObject(WorkExperienceDto.class);
-    var email = ezRandom.nextObject(String.class);
-
-    Mockito.when(this.userRepository.findByEmail(email)).thenReturn(Optional.of(user));
-    Mockito.when(this.workplaceRepository.findById(workExperienceDto.getId())).thenReturn(Optional.of(organization));
-
-    this.service.addWork(email, workExperienceDto);
-  }
-
-  @Test
-  public void ShouldFailToAddWorkingExperienceWhenOrganizationNotFound() {
-    var workExperienceDto = ezRandom.nextObject(WorkExperienceDto.class);
-    var email = ezRandom.nextObject(String.class);
-
-    Mockito.when(this.workplaceRepository.findById(workExperienceDto.getId())).thenReturn(Optional.empty());
-
-    assertThrows(ApiException.class, () -> this.service.addWork(email, workExperienceDto));
-  }
-
-  @Test
-  public void ShouldFailToAddWorkingExperienceWhenUserNotFound() {
-    var organization = ezRandom.nextObject(Workplace.class);
-    var workExperienceDto = ezRandom.nextObject(WorkExperienceDto.class);
-    var email = ezRandom.nextObject(String.class);
-
-    Mockito.when(this.workplaceRepository.findById(workExperienceDto.getId())).thenReturn(Optional.of(organization));
-    Mockito.when(this.userRepository.findByEmail(email)).thenReturn(Optional.empty());
-
-    assertThrows(ApiException.class, () -> this.service.addWork(email, workExperienceDto));
-  }
-
-  @Test
-  public void ShouldAddSchool() throws ApiException {
-    var user = ezRandom.nextObject(User.class);
-    var organization = ezRandom.nextObject(Institute.class);
-    var educationExperienceDto = ezRandom.nextObject(EducationExperienceDto.class);
-    var email = ezRandom.nextObject(String.class);
-
-    Mockito.when(this.userRepository.findByEmail(email)).thenReturn(Optional.of(user));
-    Mockito
-      .when(this.instituteRepository.findById(educationExperienceDto.getId()))
-      .thenReturn(Optional.of(organization));
-
-    this.service.addSchool(email, educationExperienceDto);
-  }
-
-  @Test
-  public void ShouldFailToAddSchoolWhenOrganizationNotFound() {
-    var educationExperienceDto = ezRandom.nextObject(EducationExperienceDto.class);
-    var email = ezRandom.nextObject(String.class);
-
-    Mockito.when(this.instituteRepository.findById(educationExperienceDto.getId())).thenReturn(Optional.empty());
-
-    assertThrows(ApiException.class, () -> this.service.addSchool(email, educationExperienceDto));
-  }
-
-  @Test
-  public void ShouldFailToAddSchoolWhenUserNotFound() {
-    var organization = ezRandom.nextObject(Institute.class);
-    var educationExperienceDto = ezRandom.nextObject(EducationExperienceDto.class);
-    var email = ezRandom.nextObject(String.class);
-
-    Mockito
-      .when(this.instituteRepository.findById(educationExperienceDto.getId()))
-      .thenReturn(Optional.of(organization));
-    Mockito.when(this.userRepository.findByEmail(email)).thenReturn(Optional.empty());
-
-    assertThrows(ApiException.class, () -> this.service.addSchool(email, educationExperienceDto));
-  }
-
-  @Test
-  public void ShouldAddSkill() throws ApiException {
-    var user = ezRandom.nextObject(User.class);
-    var skill = ezRandom.nextObject(Skill.class);
-    var email = ezRandom.nextObject(String.class);
-
-    Mockito.when(this.userRepository.findByEmail(email)).thenReturn(Optional.of(user));
-    Mockito.when(this.skillRepository.findById(skill.getCanonicalName())).thenReturn(Optional.of(skill));
-
-    this.service.addSkill(email, skill.getCanonicalName());
-  }
-
-  @Test
-  public void ShouldFailToAddSchoolWhenSkillNotFound() {
-    var skill = ezRandom.nextObject(Skill.class);
-    var email = ezRandom.nextObject(String.class);
-    assertThrows(ApiException.class, () -> this.service.addSkill(email, skill.getCanonicalName()));
-  }
-
-  @Test
-  public void ShouldAddTag() throws ApiException {
-    var user = ezRandom.nextObject(User.class);
-    var tag = ezRandom.nextObject(Tag.class);
-    var email = ezRandom.nextObject(String.class);
-
-    Mockito.when(this.userRepository.findByEmail(email)).thenReturn(Optional.of(user));
-    Mockito.when(this.tagRepository.findById(tag.getCanonicalName())).thenReturn(Optional.of(tag));
-
-    this.service.addTag(email, tag.getCanonicalName());
-  }
-
-  @Test
-  public void ShouldFailToAddTagWhenTagNotFound() {
-    var tag = ezRandom.nextObject(Tag.class);
-    var email = ezRandom.nextObject(String.class);
-    assertThrows(ApiException.class, () -> this.service.addTag(email, tag.getCanonicalName()));
-  }
-
-  @Test
-  public void ShouldFailToAddTagWhenUserNotFound() {
-    var tag = ezRandom.nextObject(Tag.class);
-    var email = ezRandom.nextObject(String.class);
-    Mockito.when(this.tagRepository.findById(tag.getCanonicalName())).thenReturn(Optional.of(tag));
-
-    assertThrows(ApiException.class, () -> this.service.addTag(email, tag.getCanonicalName()));
   }
 
   @Test
@@ -536,8 +411,6 @@ public class UserServiceTest {
 
     var request = new ContactRequest();
     request.setRequester(ezRandom.nextObject(User.class));
-    var list = new ArrayList<ContactRequest>();
-    list.add(request);
 
     Mockito.when(this.contactRequestRepository.getReceivedContactResquestTotalQuantity(anyString())).thenReturn(0);
     Mockito.when(this.userRepository.findByEmail(anyString())).thenReturn(Optional.empty());

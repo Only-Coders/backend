@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Set;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import tech.onlycoders.backend.dto.PaginateDto;
 import tech.onlycoders.backend.dto.post.request.CreatePostDto;
 import tech.onlycoders.backend.dto.post.response.ReadPostDto;
@@ -23,6 +24,7 @@ import tech.onlycoders.notificator.dto.EventType;
 import tech.onlycoders.notificator.dto.MessageDTO;
 
 @Service
+@Transactional
 public class PostService {
 
   private final UserRepository userRepository;

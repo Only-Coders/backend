@@ -1,25 +1,32 @@
 package tech.onlycoders.backend.service;
 
 import org.springframework.data.domain.PageRequest;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import tech.onlycoders.backend.dto.PaginateDto;
 import tech.onlycoders.backend.dto.skill.request.CreateSkillDto;
 import tech.onlycoders.backend.dto.skill.response.ReadSkillDto;
+import tech.onlycoders.backend.exception.ApiException;
 import tech.onlycoders.backend.mapper.SkillMapper;
 import tech.onlycoders.backend.model.Skill;
 import tech.onlycoders.backend.repository.SkillRepository;
+import tech.onlycoders.backend.repository.UserRepository;
 import tech.onlycoders.backend.utils.CanonicalFactory;
 
 @Service
+@Transactional
 public class SkillService {
 
   private final SkillRepository skillRepository;
 
   private final SkillMapper skillMapper;
+  private final UserRepository userRepository;
 
-  public SkillService(SkillRepository skillRepository, SkillMapper skillMapper) {
+  public SkillService(SkillRepository skillRepository, SkillMapper skillMapper, UserRepository userRepository) {
     this.skillRepository = skillRepository;
     this.skillMapper = skillMapper;
+    this.userRepository = userRepository;
   }
 
   public ReadSkillDto createSkill(CreateSkillDto createSkillDto) {
@@ -46,5 +53,15 @@ public class SkillService {
     pagination.setTotalPages(paginatedOrganizations.getTotalPages());
     pagination.setTotalElements(paginatedOrganizations.getNumberOfElements());
     return pagination;
+  }
+
+  public void addSkillToUser(String email, String canonicalName) throws ApiException {
+    var skill =
+      this.skillRepository.findById(canonicalName)
+        .orElseThrow(() -> new ApiException(HttpStatus.INTERNAL_SERVER_ERROR, "error.500"));
+    var user =
+      this.userRepository.findByEmail(email)
+        .orElseThrow(() -> new ApiException(HttpStatus.INTERNAL_SERVER_ERROR, "error.500"));
+    this.userRepository.addSkill(user.getId(), skill.getCanonicalName());
   }
 }

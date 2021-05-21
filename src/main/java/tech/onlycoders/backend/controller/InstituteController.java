@@ -11,7 +11,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import tech.onlycoders.backend.dto.ApiErrorResponse;
 import tech.onlycoders.backend.dto.PaginateDto;
 import tech.onlycoders.backend.dto.institute.request.CreateInstituteDto;
 import tech.onlycoders.backend.dto.institute.response.ReadInstituteDto;
@@ -37,24 +36,6 @@ public class InstituteController {
         content = {
           @Content(mediaType = "application/json", schema = @Schema(implementation = PaginatedInstitutes.class))
         }
-      ),
-      @ApiResponse(
-        responseCode = "400",
-        content = {
-          @Content(mediaType = "application/json", schema = @Schema(implementation = ApiErrorResponse.class))
-        }
-      ),
-      @ApiResponse(
-        responseCode = "401",
-        content = {
-          @Content(mediaType = "application/json", schema = @Schema(implementation = ApiErrorResponse.class))
-        }
-      ),
-      @ApiResponse(
-        responseCode = "403",
-        content = {
-          @Content(mediaType = "application/json", schema = @Schema(implementation = ApiErrorResponse.class))
-        }
       )
     }
   )
@@ -76,24 +57,6 @@ public class InstituteController {
         responseCode = "200",
         content = {
           @Content(mediaType = "application/json", schema = @Schema(implementation = ReadInstituteDto.class))
-        }
-      ),
-      @ApiResponse(
-        responseCode = "400",
-        content = {
-          @Content(mediaType = "application/json", schema = @Schema(implementation = ApiErrorResponse.class))
-        }
-      ),
-      @ApiResponse(
-        responseCode = "401",
-        content = {
-          @Content(mediaType = "application/json", schema = @Schema(implementation = ApiErrorResponse.class))
-        }
-      ),
-      @ApiResponse(
-        responseCode = "403",
-        content = {
-          @Content(mediaType = "application/json", schema = @Schema(implementation = ApiErrorResponse.class))
         }
       )
     }

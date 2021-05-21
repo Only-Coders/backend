@@ -9,7 +9,7 @@ import tech.onlycoders.backend.model.ContactRequest;
 @Repository
 public interface ContactRequestRepository extends Neo4jRepository<ContactRequest, String> {
   @Query("MATCH (a:User{id: $userId}) WITH a MATCH (b:ContactRequest{id: $contactRequestId}) MERGE (a)-[:SENDS]->(b)")
-  void storeContactRequest(String contactRequestId, String userId);
+  void createSendContactRequest(String contactRequestId, String userId);
 
   @Query("MATCH (:User{id: $sourceId})-[]->(cr:ContactRequest)-[]->(target:User{id: $targetId}) detach delete cr")
   void deleteRequest(String sourceId, String targetId);
@@ -25,5 +25,4 @@ public interface ContactRequestRepository extends Neo4jRepository<ContactRequest
 
   @Query("MATCH (:User{id: $sourceId})-[]->(a:ContactRequest)-[]->(:User{id: $targetId}) RETURN count(a)>0")
   boolean hasPendingRequest(String sourceId, String targetId);
-
 }

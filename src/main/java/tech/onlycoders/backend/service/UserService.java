@@ -11,17 +11,15 @@ import tech.onlycoders.backend.dto.contactrequest.request.CreateContactRequestDt
 import tech.onlycoders.backend.dto.contactrequest.response.ReadContactRequestDto;
 import tech.onlycoders.backend.dto.post.response.ReadPostDto;
 import tech.onlycoders.backend.dto.user.request.CreateUserDto;
-import tech.onlycoders.backend.dto.user.request.EducationExperienceDto;
-import tech.onlycoders.backend.dto.user.request.WorkExperienceDto;
 import tech.onlycoders.backend.dto.user.response.ReadUserDto;
 import tech.onlycoders.backend.dto.user.response.ReadUserLiteDto;
-import tech.onlycoders.backend.dto.workposition.response.ReadWorkPositionDto;
 import tech.onlycoders.backend.exception.ApiException;
 import tech.onlycoders.backend.mapper.ContactRequestMapper;
 import tech.onlycoders.backend.mapper.PostMapper;
 import tech.onlycoders.backend.mapper.UserMapper;
 import tech.onlycoders.backend.mapper.WorkPositionMapper;
-import tech.onlycoders.backend.model.*;
+import tech.onlycoders.backend.model.ContactRequest;
+import tech.onlycoders.backend.model.GitProfile;
 import tech.onlycoders.backend.repository.*;
 import tech.onlycoders.backend.utils.PaginationUtils;
 import tech.onlycoders.notificator.dto.EventType;
@@ -31,67 +29,52 @@ import tech.onlycoders.notificator.dto.MessageDTO;
 @Transactional
 public class UserService {
 
+  private final WorkPositionRepository workPositionRepository;
+  private final WorkPositionMapper workPositionMapper;
   private final UserRepository userRepository;
   private final PersonRepository personRepository;
   private final GitPlatformRepository gitPlatformRepository;
-  private final WorkplaceRepository workplaceRepository;
-  private final InstituteRepository instituteRepository;
   private final CountryRepository countryRepository;
-  private final SkillRepository skillRepository;
   private final PostRepository postRepository;
-  private final TagRepository tagRepository;
   private final RoleRepository roleRepository;
   private final ContactRequestRepository contactRequestRepository;
-  private final WorkPositionRepository workPositionRepository;
-  private final DegreeRepository degreeRepository;
 
   private final AuthService authService;
   private final NotificatorService notificatorService;
 
   private final UserMapper userMapper;
   private final PostMapper postMapper;
-  private final WorkPositionMapper workPositionMapper;
   private final ContactRequestMapper contactRequestMapper;
 
   public UserService(
+    WorkPositionRepository workPositionRepository,
+    WorkPositionMapper workPositionMapper,
     UserRepository userRepository,
     PersonRepository personRepository,
     UserMapper userMapper,
     GitPlatformRepository gitPlatformRepository,
-    WorkplaceRepository workplaceRepository,
-    InstituteRepository instituteRepository,
     CountryRepository countryRepository,
-    SkillRepository skillRepository,
-    WorkPositionRepository workPositionRepository,
     AuthService authService,
-    TagRepository tagRepository,
     PostRepository postRepository,
     RoleRepository roleRepository,
     ContactRequestRepository contactRequestRepository,
-    DegreeRepository degreeRepository,
     NotificatorService notificatorService,
     PostMapper postMapper,
-    WorkPositionMapper workPositionMapper,
     ContactRequestMapper contactRequestMapper
   ) {
+    this.workPositionRepository = workPositionRepository;
+    this.workPositionMapper = workPositionMapper;
     this.userRepository = userRepository;
     this.personRepository = personRepository;
     this.userMapper = userMapper;
     this.gitPlatformRepository = gitPlatformRepository;
-    this.workplaceRepository = workplaceRepository;
-    this.instituteRepository = instituteRepository;
     this.countryRepository = countryRepository;
-    this.skillRepository = skillRepository;
-    this.workPositionRepository = workPositionRepository;
     this.authService = authService;
-    this.tagRepository = tagRepository;
     this.postRepository = postRepository;
     this.roleRepository = roleRepository;
     this.contactRequestRepository = contactRequestRepository;
-    this.degreeRepository = degreeRepository;
     this.notificatorService = notificatorService;
     this.postMapper = postMapper;
-    this.workPositionMapper = workPositionMapper;
     this.contactRequestMapper = contactRequestMapper;
   }
 
@@ -136,41 +119,6 @@ public class UserService {
     }
   }
 
-  public ReadWorkPositionDto addWork(String email, WorkExperienceDto workExperienceDto) throws ApiException {
-    var workplace =
-      this.workplaceRepository.findById(workExperienceDto.getId())
-        .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "error.workplace-not-found"));
-    var user =
-      this.userRepository.findByEmail(email)
-        .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "error.user-not-found"));
-    var workPosition = new WorkPosition();
-    workPosition.setWorkplace(workplace);
-    workPosition.setSince(workExperienceDto.getSince());
-    workPosition.setUntil(workExperienceDto.getUntil());
-    workPosition.setPosition(workExperienceDto.getPosition());
-    this.workPositionRepository.save(workPosition);
-    this.workPositionRepository.addUserWorkPosition(workPosition.getId(), user.getId());
-    return this.workPositionMapper.workPositionToReadWorkPositionDto(workPosition);
-  }
-
-  public EducationExperienceDto addSchool(String email, EducationExperienceDto educationExperienceDto)
-    throws ApiException {
-    var institute =
-      this.instituteRepository.findById(educationExperienceDto.getId())
-        .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "error.workplace-not-found"));
-    var user =
-      this.userRepository.findByEmail(email)
-        .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "error.user-not-found"));
-    var degree = new Degree();
-    degree.setInstitute(institute);
-    degree.setSince(educationExperienceDto.getSince());
-    degree.setUntil(educationExperienceDto.getUntil());
-    degree.setDegree(educationExperienceDto.getDegree());
-    degreeRepository.save(degree);
-    degreeRepository.storeDegree(degree.getId(), user.getId());
-    return educationExperienceDto;
-  }
-
   public List<ReadUserLiteDto> getSuggestedUsers(String email, Integer size) {
     var users = userRepository.findSuggestedUsers(email, size);
     var userDtos = userMapper.listUserToListReadUserLiteDto(new ArrayList<>(users));
@@ -183,26 +131,6 @@ public class UserService {
     }
 
     return userDtos;
-  }
-
-  public void addSkill(String email, String canonicalName) throws ApiException {
-    var skill =
-      this.skillRepository.findById(canonicalName)
-        .orElseThrow(() -> new ApiException(HttpStatus.INTERNAL_SERVER_ERROR, "error.500"));
-    var user =
-      this.userRepository.findByEmail(email)
-        .orElseThrow(() -> new ApiException(HttpStatus.INTERNAL_SERVER_ERROR, "error.500"));
-    this.userRepository.addSkill(user.getId(), skill.getCanonicalName());
-  }
-
-  public void addTag(String email, String canonicalName) throws ApiException {
-    var tag =
-      this.tagRepository.findById(canonicalName)
-        .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "error.tag-not-found"));
-    var user =
-      this.userRepository.findByEmail(email)
-        .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "error.user-not-found"));
-    this.userRepository.followTag(user.getId(), tag.getCanonicalName());
   }
 
   public void sendContactRequest(String email, CreateContactRequestDto contactRequestDto) throws ApiException {
@@ -221,7 +149,7 @@ public class UserService {
     var contactRequest = ContactRequest.builder().message(contactRequestDto.getMessage()).target(contact).build();
 
     contactRequestRepository.save(contactRequest);
-    contactRequestRepository.storeContactRequest(contactRequest.getId(), user.getId());
+    contactRequestRepository.createSendContactRequest(contactRequest.getId(), user.getId());
 
     var message = String.format(
       "%s %s te ha enviado una solicitud de contacto!",
@@ -301,9 +229,9 @@ public class UserService {
         .orElseThrow(() -> new ApiException(HttpStatus.INTERNAL_SERVER_ERROR, "error.500"));
     }
     var pagesQuantity = PaginationUtils.getPagesQuantity(totalQuantity, size);
-    var contactResquests = this.contactRequestRepository.getReceivedContactResquests(email, page * size, size);
+    var contactRequests = this.contactRequestRepository.getReceivedContactResquests(email, page * size, size);
 
-    var requestDtos = contactRequestMapper.contactRequestListToReadContactRequestDtoList(contactResquests);
+    var requestDtos = contactRequestMapper.contactRequestListToReadContactRequestDtoList(contactRequests);
     for (ReadContactRequestDto request : requestDtos) {
       var position = workPositionRepository.getUserCurrentPositions(request.getRequester().getCanonicalName());
       if (position.size() > 0) {

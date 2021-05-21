@@ -2,6 +2,7 @@ package tech.onlycoders.backend.service;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import tech.onlycoders.backend.bean.FirebaseService;
 import tech.onlycoders.backend.dto.admin.request.CreateAdminDto;
 import tech.onlycoders.backend.dto.admin.response.ReadAdminDto;
@@ -12,6 +13,7 @@ import tech.onlycoders.backend.repository.PersonRepository;
 import tech.onlycoders.backend.repository.RoleRepository;
 
 @Service
+@Transactional
 public class AdminService {
 
   private final AdminMapper adminMapper;
