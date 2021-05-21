@@ -211,6 +211,10 @@ public class UserService {
       this.userRepository.findByCanonicalName(contactRequestDto.getCanonicalName())
         .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "error.user-not-found"));
 
+    if (contactRequestRepository.hasPendingRequest(user.getId(), contact.getId())) {
+      throw new ApiException(HttpStatus.CONFLICT, "error.pending-request");
+    }
+
     var contactRequest = ContactRequest.builder().message(contactRequestDto.getMessage()).target(contact).build();
 
     contactRequestRepository.save(contactRequest);
