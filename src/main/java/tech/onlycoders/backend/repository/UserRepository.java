@@ -14,14 +14,13 @@ public interface UserRepository extends Neo4jRepository<User, String> {
   Optional<User> findByCanonicalName(String canonicalName);
 
   @Query(
-    "CALL {MATCH (p:User)-[:IS_INTERESTED]->(t:Tag)<-[:IS_INTERESTED]-(me:User{email:$email})-[:LIVES]->(c:Country)\n" +
-    "            WHERE (p)-[:LIVES]->(c)\n" +
-    "            RETURN p , count(t) AS quantity\n" +
-    "    UNION\n" +
-    "\n" +
-    "    MATCH (me:User{email:$email})-[:LIVES]->(c:Country)<-[:LIVES]-(p)\n" +
-    "            RETURN p, 0 AS quantity\n" +
-    "    \n" +
+    "CALL {MATCH (p:User)-[:IS_INTERESTED]->(t:Tag)<-[:IS_INTERESTED]-(me:User{email:$email})-[:LIVES]->(c:Country) " +
+    "WHERE (p)-[:LIVES]->(c) AND (NOT (p)-[]-(:ContactRequest)-[]-(me) AND NOT (p)-[]-(me)) " +
+    "RETURN p, count(t) AS quantity " +
+    "UNION " +
+    "MATCH (me:User{email:$email})-[:LIVES]->(c:Country)<-[:LIVES]-(p) " +
+    "WHERE NOT (p)-[]-(:ContactRequest)-[]-(me) AND NOT (p)-[]-(me) " +
+    "RETURN p, 0 AS quantity " +
     "} RETURN p ORDER BY quantity DESC LIMIT $size;"
   )
   List<User> findSuggestedUsers(String email, Integer size);
