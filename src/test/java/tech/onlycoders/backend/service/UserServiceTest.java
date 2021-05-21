@@ -5,7 +5,9 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.*;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Optional;
+import java.util.Set;
 import org.jeasy.random.EasyRandom;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -305,7 +307,7 @@ public class UserServiceTest {
   @Test
   public void ShouldReturnSuggestedUsers() {
     var email = ezRandom.nextObject(String.class);
-    var users = new ArrayList<User>();
+    var users = new HashSet<User>();
     users.add(ezRandom.nextObject(User.class));
 
     var workPositions = new ArrayList<WorkPosition>();

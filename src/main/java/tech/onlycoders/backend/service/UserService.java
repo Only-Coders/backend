@@ -1,6 +1,8 @@
 package tech.onlycoders.backend.service;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,10 +22,7 @@ import tech.onlycoders.backend.exception.ApiException;
 import tech.onlycoders.backend.mapper.PostMapper;
 import tech.onlycoders.backend.mapper.UserMapper;
 import tech.onlycoders.backend.mapper.WorkPositionMapper;
-import tech.onlycoders.backend.model.ContactRequest;
-import tech.onlycoders.backend.model.Degree;
-import tech.onlycoders.backend.model.GitProfile;
-import tech.onlycoders.backend.model.WorkPosition;
+import tech.onlycoders.backend.model.*;
 import tech.onlycoders.backend.repository.*;
 import tech.onlycoders.backend.utils.PaginationUtils;
 
@@ -170,7 +169,7 @@ public class UserService {
 
   public List<ReadUserLiteDto> getSuggestedUsers(String email, Integer size) {
     var users = userRepository.findSuggestedUsers(email, size);
-    var userDtos = userMapper.listUserToListReadUserLiteDto(users);
+    var userDtos = userMapper.listUserToListReadUserLiteDto(new ArrayList<>(users));
 
     for (ReadUserLiteDto user : userDtos) {
       var currentPositions = this.workPositionRepository.getUserCurrentPositions(user.canonicalName);

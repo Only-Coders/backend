@@ -2,6 +2,7 @@ package tech.onlycoders.backend.repository;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import org.springframework.data.neo4j.repository.Neo4jRepository;
 import org.springframework.data.neo4j.repository.query.Query;
 import org.springframework.stereotype.Repository;
@@ -14,7 +15,7 @@ public interface UserRepository extends Neo4jRepository<User, String> {
   Optional<User> findByCanonicalName(String canonicalName);
 
   @Query(
-    "CALL {MATCH (p:User)-[:IS_INTERESTED]->(t:Tag)<-[:IS_INTERESTED]-(me:User{email:$email})-[:LIVES]->(c:Country) " +
+    "CALL {MATCH (p:User)-[:IS_INTERESTED]->(t:Tag)<-[:IS_INTERESTED]-(me:User{email: $email})-[:LIVES]->(c:Country) " +
     "WHERE (p)-[:LIVES]->(c) AND (NOT (p)-[]-(:ContactRequest)-[]-(me) AND NOT (p)-[]-(me)) " +
     "RETURN p, count(t) AS quantity " +
     "UNION " +
@@ -23,7 +24,7 @@ public interface UserRepository extends Neo4jRepository<User, String> {
     "RETURN p, 0 AS quantity " +
     "} RETURN p ORDER BY quantity DESC LIMIT $size;"
   )
-  List<User> findSuggestedUsers(String email, Integer size);
+  Set<User> findSuggestedUsers(String email, Integer size);
 
   @Query(
     "MATCH (u:User{canonicalName:$requesterCanonicalName})-[IS_CONNECTED]-(u2:User{canonicalName:$targetCanonicalName}) RETURN count(u2)>0"
