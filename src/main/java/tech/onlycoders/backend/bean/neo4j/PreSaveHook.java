@@ -16,7 +16,7 @@ public class PreSaveHook {
       if (needsCanonicalName(entity)) {
         var randomChars = RandomStringUtils.randomAlphabetic(5);
         var canonicalName = CanonicalFactory.getCanonicalName(
-          entity.getFirstName() + entity.getLastName() + randomChars
+          entity.getFirstName() + entity.getLastName() + "-" + randomChars
         );
         entity.setCanonicalName(canonicalName);
       }
