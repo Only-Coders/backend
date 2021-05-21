@@ -1,4 +1,4 @@
-package tech.onlycoders.backend.dto.notificator;
+package tech.onlycoders.notificator.dto;
 
 public enum EventType {
   NEW_POST, //notify followers and friends

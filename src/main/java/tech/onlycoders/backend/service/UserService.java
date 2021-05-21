@@ -1,5 +1,6 @@
 package tech.onlycoders.backend.service;
 
+import java.util.ArrayList;
 import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -22,12 +23,11 @@ import tech.onlycoders.backend.mapper.ContactRequestMapper;
 import tech.onlycoders.backend.mapper.PostMapper;
 import tech.onlycoders.backend.mapper.UserMapper;
 import tech.onlycoders.backend.mapper.WorkPositionMapper;
-import tech.onlycoders.backend.model.ContactRequest;
-import tech.onlycoders.backend.model.Degree;
-import tech.onlycoders.backend.model.GitProfile;
-import tech.onlycoders.backend.model.WorkPosition;
+import tech.onlycoders.backend.model.*;
 import tech.onlycoders.backend.repository.*;
 import tech.onlycoders.backend.utils.PaginationUtils;
+import tech.onlycoders.notificator.dto.EventType;
+import tech.onlycoders.notificator.dto.MessageDTO;
 
 @Service
 @Transactional
@@ -175,7 +175,7 @@ public class UserService {
 
   public List<ReadUserLiteDto> getSuggestedUsers(String email, Integer size) {
     var users = userRepository.findSuggestedUsers(email, size);
-    var userDtos = userMapper.listUserToListReadUserLiteDto(users);
+    var userDtos = userMapper.listUserToListReadUserLiteDto(new ArrayList<>(users));
 
     for (ReadUserLiteDto user : userDtos) {
       var currentPositions = this.workPositionRepository.getUserCurrentPositions(user.canonicalName);
@@ -215,6 +215,10 @@ public class UserService {
     var contact =
       this.userRepository.findByCanonicalName(contactRequestDto.getCanonicalName())
         .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "error.user-not-found"));
+
+    if (contactRequestRepository.hasPendingRequest(user.getId(), contact.getId())) {
+      throw new ApiException(HttpStatus.CONFLICT, "error.pending-request");
+    }
 
     var contactRequest = ContactRequest.builder().message(contactRequestDto.getMessage()).target(contact).build();
 

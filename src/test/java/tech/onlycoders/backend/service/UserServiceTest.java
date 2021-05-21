@@ -5,7 +5,9 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.*;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Optional;
+import java.util.Set;
 import org.jeasy.random.EasyRandom;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -308,7 +310,7 @@ public class UserServiceTest {
   @Test
   public void ShouldReturnSuggestedUsers() {
     var email = ezRandom.nextObject(String.class);
-    var users = new ArrayList<User>();
+    var users = new HashSet<User>();
     users.add(ezRandom.nextObject(User.class));
 
     var workPositions = new ArrayList<WorkPosition>();
@@ -331,6 +333,19 @@ public class UserServiceTest {
     Mockito.when(this.userRepository.findByCanonicalName(reqDto.getCanonicalName())).thenReturn(Optional.of(user2));
 
     this.service.sendContactRequest(email, reqDto);
+  }
+
+  @Test
+  public void ShouldFailWithConflictWhenSendContactRequest() throws ApiException {
+    var user1 = ezRandom.nextObject(User.class);
+    var user2 = ezRandom.nextObject(User.class);
+    var reqDto = ezRandom.nextObject(CreateContactRequestDto.class);
+
+    Mockito.when(this.userRepository.findByEmail(user1.getEmail())).thenReturn(Optional.of(user1));
+    Mockito.when(this.userRepository.findByCanonicalName(reqDto.getCanonicalName())).thenReturn(Optional.of(user2));
+    Mockito.when(this.contactRequestRepository.hasPendingRequest(user1.getId(), user2.getId())).thenReturn(true);
+
+    assertThrows(ApiException.class, () -> this.service.sendContactRequest(user1.getEmail(), reqDto));
   }
 
   @Test

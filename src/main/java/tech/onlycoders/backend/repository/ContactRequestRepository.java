@@ -22,4 +22,8 @@ public interface ContactRequestRepository extends Neo4jRepository<ContactRequest
     "RETURN cr, collect(r), collect(u) SKIP $skip LIMIT $size"
   )
   List<ContactRequest> getReceivedContactResquests(String email, Integer skip, Integer size);
+
+  @Query("MATCH (:User{id: $sourceId})-[]->(a:ContactRequest)-[]->(:User{id: $targetId}) RETURN count(a)>0")
+  boolean hasPendingRequest(String sourceId, String targetId);
+
 }

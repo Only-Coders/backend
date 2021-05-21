@@ -4,7 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.core.Queue;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Service;
-import tech.onlycoders.backend.dto.notificator.MessageDTO;
+import tech.onlycoders.notificator.dto.MessageDTO;
 
 @Service
 @Slf4j
