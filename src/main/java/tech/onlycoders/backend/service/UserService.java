@@ -223,13 +223,13 @@ public class UserService {
 
   public PaginateDto<ReadContactRequestDto> getReceivedContactRequests(String email, Integer page, Integer size)
     throws ApiException {
-    var totalQuantity = this.contactRequestRepository.getReceivedContactResquestTotalQuantity(email);
+    var totalQuantity = this.contactRequestRepository.getReceivedContactRequestTotalQuantity(email);
     if (totalQuantity == 0) {
       this.userRepository.findByEmail(email)
         .orElseThrow(() -> new ApiException(HttpStatus.INTERNAL_SERVER_ERROR, "error.500"));
     }
     var pagesQuantity = PaginationUtils.getPagesQuantity(totalQuantity, size);
-    var contactRequests = this.contactRequestRepository.getReceivedContactResquests(email, page * size, size);
+    var contactRequests = this.contactRequestRepository.getReceivedContactRequests(email, page * size, size);
 
     var requestDtos = contactRequestMapper.contactRequestListToReadContactRequestDtoList(contactRequests);
     for (ReadContactRequestDto request : requestDtos) {

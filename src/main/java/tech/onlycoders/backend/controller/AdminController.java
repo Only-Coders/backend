@@ -1,5 +1,9 @@
 package tech.onlycoders.backend.controller;
 
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import javax.validation.Valid;
 import org.springframework.http.ResponseEntity;
@@ -26,6 +30,14 @@ public class AdminController {
 
   @PostMapping
   @PreAuthorize("hasAuthority('ADMIN')")
+  @ApiResponses(
+    value = {
+      @ApiResponse(
+        responseCode = "200",
+        content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ReadAdminDto.class)) }
+      )
+    }
+  )
   ResponseEntity<ReadAdminDto> createAdmin(@RequestBody @Valid CreateAdminDto createAdminDto) throws ApiException {
     return ResponseEntity.ok(adminService.createAdmin(createAdminDto));
   }

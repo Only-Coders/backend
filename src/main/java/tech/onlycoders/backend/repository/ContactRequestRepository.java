@@ -15,13 +15,13 @@ public interface ContactRequestRepository extends Neo4jRepository<ContactRequest
   void deleteRequest(String sourceId, String targetId);
 
   @Query("MATCH (u:User)-[]->(cr:ContactRequest)-[]->(:User{email: $email}) RETURN count(cr)")
-  int getReceivedContactResquestTotalQuantity(String email);
+  int getReceivedContactRequestTotalQuantity(String email);
 
   @Query(
     "MATCH (u:User)-[r]->(cr:ContactRequest)-[]->(:User{email: $email}) " +
     "RETURN cr, collect(r), collect(u) SKIP $skip LIMIT $size"
   )
-  List<ContactRequest> getReceivedContactResquests(String email, Integer skip, Integer size);
+  List<ContactRequest> getReceivedContactRequests(String email, Integer skip, Integer size);
 
   @Query("MATCH (:User{id: $sourceId})-[]->(a:ContactRequest)-[]->(:User{id: $targetId}) RETURN count(a)>0")
   boolean hasPendingRequest(String sourceId, String targetId);

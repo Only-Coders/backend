@@ -395,9 +395,9 @@ public class UserServiceTest {
     var positionList = new ArrayList<WorkPosition>();
     positionList.add(position);
 
-    Mockito.when(this.contactRequestRepository.getReceivedContactResquestTotalQuantity(anyString())).thenReturn(1);
+    Mockito.when(this.contactRequestRepository.getReceivedContactRequestTotalQuantity(anyString())).thenReturn(1);
     Mockito
-      .when(this.contactRequestRepository.getReceivedContactResquests(anyString(), anyInt(), anyInt()))
+      .when(this.contactRequestRepository.getReceivedContactRequests(anyString(), anyInt(), anyInt()))
       .thenReturn(list);
     Mockito.when(this.workPositionRepository.getUserCurrentPositions(anyString())).thenReturn(positionList);
 
@@ -412,7 +412,7 @@ public class UserServiceTest {
     var request = new ContactRequest();
     request.setRequester(ezRandom.nextObject(User.class));
 
-    Mockito.when(this.contactRequestRepository.getReceivedContactResquestTotalQuantity(anyString())).thenReturn(0);
+    Mockito.when(this.contactRequestRepository.getReceivedContactRequestTotalQuantity(anyString())).thenReturn(0);
     Mockito.when(this.userRepository.findByEmail(anyString())).thenReturn(Optional.empty());
 
     assertThrows(ApiException.class, () -> this.service.getReceivedContactRequests(email, 0, 10));

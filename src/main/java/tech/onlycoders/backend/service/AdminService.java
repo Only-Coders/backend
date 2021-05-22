@@ -44,7 +44,7 @@ public class AdminService {
       this.firebaseService.createUser(createAdminDto.getEmail());
       var admin = this.adminMapper.createAdminDtoToPerson(createAdminDto);
       var role =
-        this.roleRepository.findById("ADMIn")
+        this.roleRepository.findById("ADMIN")
           .orElseThrow(() -> new ApiException(HttpStatus.INTERNAL_SERVER_ERROR, "error.500"));
       admin.setRole(role);
       adminRepository.save(admin);
