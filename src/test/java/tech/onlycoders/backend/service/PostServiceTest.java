@@ -2,11 +2,12 @@ package tech.onlycoders.backend.service;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.*;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 import org.jeasy.random.EasyRandom;
 import org.junit.jupiter.api.Test;
@@ -157,6 +158,19 @@ public class PostServiceTest {
     Mockito.when(this.postRepository.countUserPublicPosts(requesterCanonicalName)).thenReturn(ezRandom.nextInt());
 
     var result = this.service.getUserPosts(requesterCanonicalName, targetCanonicalName, page, size);
+    assertNotNull(result);
+  }
+
+  @Test
+  @MockitoSettings(strictness = Strictness.LENIENT)
+  public void ShouldReturnFeedPosts() {
+    var list = new HashSet<Post>();
+    list.add(ezRandom.nextObject(Post.class));
+
+    Mockito.when(postRepository.getFeedPostsQuantity(anyString())).thenReturn(1);
+    Mockito.when(postRepository.getFeedPosts(anyString(), anyInt(), anyInt())).thenReturn(list);
+
+    var result = this.service.getFeedPosts("cname", 0, 10);
     assertNotNull(result);
   }
 }
