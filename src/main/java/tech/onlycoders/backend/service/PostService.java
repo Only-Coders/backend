@@ -9,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 import tech.onlycoders.backend.dto.PaginateDto;
 import tech.onlycoders.backend.dto.post.request.CreatePostDto;
 import tech.onlycoders.backend.dto.post.response.ReadPostDto;
+import tech.onlycoders.backend.dto.tag.response.ReadTagDto;
 import tech.onlycoders.backend.exception.ApiException;
 import tech.onlycoders.backend.mapper.PostMapper;
 import tech.onlycoders.backend.model.DisplayedTag;
@@ -160,5 +161,19 @@ public class PostService {
       var totalQuantity = postRepository.countUserPublicPosts(targetCanonicalName);
       return getReadPostDtoPaginateDto(page, size, posts, totalQuantity);
     }
+  }
+
+  public PaginateDto<ReadPostDto> getFeedPosts(String canonicalName, Integer page, Integer size) {
+    var totalQuantity = postRepository.getFeedPostsQuantity(canonicalName);
+    var skip = page * size;
+    var pageQuantity = PaginationUtils.getPagesQuantity(totalQuantity, size);
+    var posts = postRepository.getFeedPosts(canonicalName, skip, size);
+
+    var pagination = new PaginateDto<ReadPostDto>();
+    pagination.setContent(postMapper.setPostToListPostDto(posts));
+    pagination.setCurrentPage(page);
+    pagination.setTotalPages(pageQuantity);
+    pagination.setTotalElements(totalQuantity);
+    return pagination;
   }
 }

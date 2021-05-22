@@ -1,6 +1,7 @@
 package tech.onlycoders.backend.repository;
 
 import java.util.List;
+import java.util.Set;
 import org.springframework.data.neo4j.repository.Neo4jRepository;
 import org.springframework.data.neo4j.repository.query.Query;
 import org.springframework.stereotype.Repository;
@@ -29,4 +30,26 @@ public interface PostRepository extends Neo4jRepository<Post, String> {
 
   @Query("MATCH (u:User{canonicalName:$canonicalName})-[:PUBLISH]->(p:Post{isPublic:true}) RETURN count(p)")
   Integer countUserPublicPosts(String canonicalName);
+
+  @Query(
+    "CALL{ \n" +
+    "    MATCH (:User{canonicalName: $canonicalName})-[:FOLLOWS]->(u:User)-[r:PUBLISH]->(p:Post{isPublic:true}) RETURN p,r,u\n" +
+    "    UNION\n" +
+    "    MATCH (:User{canonicalName: $canonicalName})-[:IS_CONNECTED]-(u:User)-[r:PUBLISH]->(p:Post) RETURN p,r,u\n" +
+    "    UNION\n" +
+    "    MATCH (:User{canonicalName: $canonicalName})-[:IS_INTERESTED]->(:Tag)<-[:HAS]-(p:Post{isPublic:true})<-[r:PUBLISH]-(u:User) RETURN p,r,u\n" +
+    "} RETURN p, collect(r), collect(u) ORDER BY p.createdAt DESC SKIP $skip LIMIT $size"
+  )
+  Set<Post> getFeedPosts(String canonicalName, int skip, Integer size);
+
+  @Query(
+    "CALL{ \n" +
+    "    MATCH (:User{canonicalName: $canonicalName})-[:FOLLOWS]->(u:User)-[r:PUBLISH]->(p:Post{isPublic:true}) RETURN p\n" +
+    "    UNION\n" +
+    "    MATCH (:User{canonicalName: $canonicalName})-[:IS_CONNECTED]-(u:User)-[r:PUBLISH]->(p:Post) RETURN p\n" +
+    "    UNION\n" +
+    "    MATCH (:User{canonicalName: $canonicalName})-[:IS_INTERESTED]->(:Tag)<-[:HAS]-(p:Post{isPublic:true}) RETURN p\n" +
+    "} RETURN count(p)"
+  )
+  int getFeedPostsQuantity(String canonicalName);
 }

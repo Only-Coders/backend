@@ -1,6 +1,7 @@
 package tech.onlycoders.backend.mapper;
 
 import java.util.List;
+import java.util.Set;
 import org.mapstruct.InjectionStrategy;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -21,4 +22,6 @@ public interface PostMapper {
   Post createPostDtoToPost(CreatePostDto createPostDto);
 
   List<ReadPostDto> listPostToListPostDto(List<Post> posts);
+
+  List<ReadPostDto> setPostToListPostDto(Set<Post> posts);
 }
