@@ -6,6 +6,4 @@ import org.springframework.stereotype.Repository;
 import tech.onlycoders.backend.model.GitPlatform;
 
 @Repository
-public interface GitPlatformRepository extends Neo4jRepository<GitPlatform, String> {
-  Optional<GitPlatform> findById(String id);
-}
+public interface GitPlatformRepository extends Neo4jRepository<GitPlatform, String> {}
