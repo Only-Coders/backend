@@ -8,6 +8,7 @@ import tech.onlycoders.backend.bean.FirebaseService;
 import tech.onlycoders.backend.dto.auth.request.AuthRequestDto;
 import tech.onlycoders.backend.dto.auth.response.AuthResponseDto;
 import tech.onlycoders.backend.exception.ApiException;
+import tech.onlycoders.backend.model.Person;
 import tech.onlycoders.backend.model.User;
 import tech.onlycoders.backend.repository.PersonRepository;
 
@@ -31,15 +32,21 @@ public class AuthService {
     var claims = new HashMap<String, Object>();
     if (optionalPerson.isPresent()) {
       var person = optionalPerson.get();
-      claims.put("id", person.getId());
-      claims.put("roles", person.getRole().getName());
-      claims.put("canonicalName", person.getCanonicalName());
-      claims.put("complete", true);
+      extendClaims(claims, person);
     } else {
       claims.put("complete", false);
     }
     var token = this.jwtService.createToken(claims, email);
     return AuthResponseDto.builder().token(token).build();
+  }
+
+  private void extendClaims(HashMap<String, Object> claims, Person person) {
+    claims.put("id", person.getId());
+    claims.put("roles", person.getRole().getName());
+    claims.put("canonicalName", person.getCanonicalName());
+    claims.put("complete", true);
+    claims.put("imageURI", person.getImageURI());
+    claims.put("fullName", person.getFirstName() + " " + person.getLastName());
   }
 
   public AuthResponseDto refreshToken(String token) throws ApiException {
@@ -51,10 +58,7 @@ public class AuthService {
       if (person.getSecurityUpdate() != null && person.getSecurityUpdate().after(pairEmailIAT.getSecond())) {
         throw new ApiException(HttpStatus.UNAUTHORIZED, "error.not-authorized");
       }
-      claims.put("id", person.getId());
-      claims.put("roles", person.getRole().getName());
-      claims.put("canonicalName", person.getCanonicalName());
-      claims.put("complete", true);
+      extendClaims(claims, person);
     } else {
       claims.put("complete", false);
     }
