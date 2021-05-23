@@ -5,7 +5,9 @@ import java.util.Set;
 import org.springframework.data.neo4j.repository.Neo4jRepository;
 import org.springframework.data.neo4j.repository.query.Query;
 import org.springframework.stereotype.Repository;
+import tech.onlycoders.backend.model.DisplayedTag;
 import tech.onlycoders.backend.model.Post;
+import tech.onlycoders.backend.model.User;
 
 @Repository
 public interface PostRepository extends Neo4jRepository<Post, String> {
@@ -33,12 +35,20 @@ public interface PostRepository extends Neo4jRepository<Post, String> {
 
   @Query(
     "CALL{ \n" +
-    "    MATCH (:User{canonicalName: $canonicalName})-[:FOLLOWS]->(u:User)-[r:PUBLISH]->(p:Post{isPublic:true}) RETURN p,r,u\n" +
+    "        MATCH (:User{canonicalName: $canonicalName})-[:FOLLOWS]->(u:User)-[r:PUBLISH]->(p:Post{isPublic:true})\n" +
+    "        RETURN p,r,u\n" +
     "    UNION\n" +
-    "    MATCH (:User{canonicalName: $canonicalName})-[:IS_CONNECTED]-(u:User)-[r:PUBLISH]->(p:Post) RETURN p,r,u\n" +
+    "        MATCH (:User{canonicalName: $canonicalName})-[:IS_CONNECTED]-(u:User)-[r:PUBLISH]->(p:Post)\n" +
+    "        RETURN p,r,u\n" +
     "    UNION\n" +
-    "    MATCH (:User{canonicalName: $canonicalName})-[:IS_INTERESTED]->(:Tag)<-[:HAS]-(p:Post{isPublic:true})<-[r:PUBLISH]-(u:User) RETURN p,r,u\n" +
-    "} RETURN p, collect(r), collect(u) ORDER BY p.createdAt DESC SKIP $skip LIMIT $size"
+    "        MATCH (:User{canonicalName: $canonicalName})-[:IS_INTERESTED]->(:Tag)<-[:HAS]-(p:Post{isPublic:true})<-[r:PUBLISH]-(u:User)\n" +
+    "        RETURN p,r,u\n" +
+    "} \n" +
+    "OPTIONAL MATCH (p)-[rt:HAS]->(t:Tag)\n" +
+    "OPTIONAL MATCH (p)-[rm:MENTIONS]->(m:User)\n" +
+    "RETURN p, collect(r), collect(u), collect(rm), collect(m), collect(rt), collect(t) \n" +
+    "ORDER BY p.createdAt DESC \n" +
+    "SKIP $skip LIMIT $size"
   )
   Set<Post> getFeedPosts(String canonicalName, int skip, Integer size);
 

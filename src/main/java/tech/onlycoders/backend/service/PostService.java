@@ -168,6 +168,10 @@ public class PostService {
     var skip = page * size;
     var pageQuantity = PaginationUtils.getPagesQuantity(totalQuantity, size);
     var posts = postRepository.getFeedPosts(canonicalName, skip, size);
+    //    for (Post post: posts) {
+    //      post.setMentions(postRepository.getPostMentions(post.getId()));
+    //      post.setTags(postRepository.getPostTags(post.getId()));
+    //    }
 
     var pagination = new PaginateDto<ReadPostDto>();
     pagination.setContent(postMapper.setPostToListPostDto(posts));
