@@ -42,7 +42,7 @@ public class FeedController {
     }
   )
   @GetMapping
-  @Operation(summary = "Search Workplaces by name")
+  @Operation(summary = "Get Feed posts")
   ResponseEntity<PaginateDto<ReadPostDto>> getOrganizations(
     @RequestParam(defaultValue = "0", required = false) @Min(0) Integer page,
     @RequestParam(defaultValue = "20", required = false) @Min(1) Integer size
