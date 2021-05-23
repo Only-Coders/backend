@@ -4,6 +4,7 @@ import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.FORBIDDEN;
 
 import java.util.Locale;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import javax.validation.ConstraintViolationException;
 import org.springframework.context.MessageSource;
@@ -34,11 +35,7 @@ public class RestExceptionHandler {
 
   private String getMessage(String language, String errorCode) {
     Locale locale;
-    if (language == null) {
-      locale = new Locale("en");
-    } else {
-      locale = new Locale(language);
-    }
+    locale = new Locale(Objects.requireNonNullElse(language, "en"));
     return msgSrc.getMessage(errorCode, null, locale);
   }
 
@@ -56,7 +53,29 @@ public class RestExceptionHandler {
     return ResponseEntity.status(FORBIDDEN).body(new ApiErrorResponse(FORBIDDEN, message));
   }
 
-  @ExceptionHandler({ ConstraintViolationException.class, MethodArgumentNotValidException.class })
+  @ExceptionHandler(MethodArgumentNotValidException.class)
+  @ResponseStatus(HttpStatus.BAD_REQUEST)
+  public ResponseEntity<ApiErrorResponse> handleException(MethodArgumentNotValidException exception) {
+    var errorMessages = exception
+      .getBindingResult()
+      .getFieldErrors()
+      .stream()
+      .map(
+        fieldError ->
+          ApiValidationError
+            .builder()
+            .field(fieldError.getField())
+            .message(fieldError.getDefaultMessage())
+            .rejectedValue(fieldError.getRejectedValue())
+            .build()
+      )
+      .collect(Collectors.toList());
+    return ResponseEntity
+      .status(BAD_REQUEST)
+      .body(new ApiErrorResponse(BAD_REQUEST, "Validation Error", errorMessages));
+  }
+
+  @ExceptionHandler(ConstraintViolationException.class)
   @ResponseStatus(HttpStatus.BAD_REQUEST)
   public ResponseEntity<ApiErrorResponse> handleException(ConstraintViolationException exception) {
     var errorMessages = exception
