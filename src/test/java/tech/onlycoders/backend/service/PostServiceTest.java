@@ -20,14 +20,14 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import tech.onlycoders.backend.dto.post.request.CreatePostDto;
+import tech.onlycoders.backend.dto.post.response.ReactionQuantityDto;
 import tech.onlycoders.backend.exception.ApiException;
 import tech.onlycoders.backend.mapper.PostMapper;
 import tech.onlycoders.backend.mapper.PostMapperImpl;
 import tech.onlycoders.backend.mapper.TagMapperImpl;
-import tech.onlycoders.backend.model.Post;
-import tech.onlycoders.backend.model.Tag;
-import tech.onlycoders.backend.model.User;
+import tech.onlycoders.backend.model.*;
 import tech.onlycoders.backend.repository.PostRepository;
+import tech.onlycoders.backend.repository.ReactionRepository;
 import tech.onlycoders.backend.repository.TagRepository;
 import tech.onlycoders.backend.repository.UserRepository;
 
@@ -48,6 +48,9 @@ public class PostServiceTest {
 
   @Mock
   private TagRepository tagRepository;
+
+  @Mock
+  private ReactionRepository reactionRepository;
 
   private final EasyRandom ezRandom = new EasyRandom();
 
@@ -169,6 +172,27 @@ public class PostServiceTest {
 
     Mockito.when(postRepository.getFeedPostsQuantity(anyString())).thenReturn(1);
     Mockito.when(postRepository.getFeedPosts(anyString(), anyInt(), anyInt())).thenReturn(list);
+    Mockito.when(postRepository.getPostCommentsQuantity(anyString())).thenReturn(0L);
+    Mockito
+      .when(reactionRepository.getPostUserReaction(anyString(), anyString()))
+      .thenReturn(Reaction.builder().type(ReactionType.APPROVE).build());
+    Mockito.when(reactionRepository.getPostReactionQuantity(anyString(), any(ReactionType.class))).thenReturn(1L);
+
+    var result = this.service.getFeedPosts("cname", 0, 10);
+    assertNotNull(result);
+  }
+
+  @Test
+  @MockitoSettings(strictness = Strictness.LENIENT)
+  public void ShouldReturnFeedPostsWhenNotMyReaction() {
+    var list = new HashSet<Post>();
+    list.add(ezRandom.nextObject(Post.class));
+
+    Mockito.when(postRepository.getFeedPostsQuantity(anyString())).thenReturn(1);
+    Mockito.when(postRepository.getFeedPosts(anyString(), anyInt(), anyInt())).thenReturn(list);
+    Mockito.when(postRepository.getPostCommentsQuantity(anyString())).thenReturn(0L);
+    Mockito.when(reactionRepository.getPostUserReaction(anyString(), anyString())).thenReturn(null);
+    Mockito.when(reactionRepository.getPostReactionQuantity(anyString(), any(ReactionType.class))).thenReturn(1L);
 
     var result = this.service.getFeedPosts("cname", 0, 10);
     assertNotNull(result);
