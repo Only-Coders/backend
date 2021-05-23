@@ -10,16 +10,8 @@ import tech.onlycoders.backend.model.User;
 
 @Repository
 public interface UserRepository extends Neo4jRepository<User, String> {
-  @Query(
-    "MATCH (p:User) WHERE toLower(p.email) =~ toLower($email) WITH p MATCH (p)-[h:HAS]-(r:Role) RETURN p, collect(h),collect(r)"
-  )
   Optional<User> findByEmail(String email);
 
-  // Optional Match: may or may not have a GitProfile
-  @Query(
-    "MATCH (p:User) WHERE toLower(p.canonicalName) =~ toLower($canonicalName) WITH p OPTIONAL MATCH (p)-[r]-(g:GitPlatform)" +
-    " RETURN p, collect(r),collect(g)"
-  )
   Optional<User> findByCanonicalName(String canonicalName);
 
   @Query(

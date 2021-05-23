@@ -2,20 +2,13 @@ package tech.onlycoders.backend.repository;
 
 import java.util.List;
 import java.util.Set;
-import java.util.Optional;
 import org.springframework.data.neo4j.repository.Neo4jRepository;
 import org.springframework.data.neo4j.repository.query.Query;
 import org.springframework.stereotype.Repository;
-import tech.onlycoders.backend.model.DisplayedTag;
 import tech.onlycoders.backend.model.Post;
-import tech.onlycoders.backend.model.ReactionType;
-import tech.onlycoders.backend.model.User;
 
 @Repository
 public interface PostRepository extends Neo4jRepository<Post, String> {
-  @Query("MATCH (p:Post{id: $id}) return p")
-  Optional<Post> findById(String id);
-
   @Query("MATCH (u:User{email:$email})-[:IS_FAVORITE]->(p:Post) RETURN count(p)")
   int getUserFavoritePostTotalQuantity(String email);
 
