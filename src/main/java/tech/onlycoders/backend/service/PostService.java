@@ -1,5 +1,6 @@
 package tech.onlycoders.backend.service;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -8,14 +9,14 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tech.onlycoders.backend.dto.PaginateDto;
 import tech.onlycoders.backend.dto.post.request.CreatePostDto;
+import tech.onlycoders.backend.dto.post.response.ReactionQuantityDto;
 import tech.onlycoders.backend.dto.post.response.ReadPostDto;
+import tech.onlycoders.backend.dto.tag.response.ReadTagDto;
 import tech.onlycoders.backend.exception.ApiException;
 import tech.onlycoders.backend.mapper.PostMapper;
-import tech.onlycoders.backend.model.DisplayedTag;
-import tech.onlycoders.backend.model.Post;
-import tech.onlycoders.backend.model.Tag;
-import tech.onlycoders.backend.model.User;
+import tech.onlycoders.backend.model.*;
 import tech.onlycoders.backend.repository.PostRepository;
+import tech.onlycoders.backend.repository.ReactionRepository;
 import tech.onlycoders.backend.repository.TagRepository;
 import tech.onlycoders.backend.repository.UserRepository;
 import tech.onlycoders.backend.utils.CanonicalFactory;
@@ -30,6 +31,8 @@ public class PostService {
   private final UserRepository userRepository;
   private final PostRepository postRepository;
   private final TagRepository tagRepository;
+  private final ReactionRepository reactionRepository;
+
   private final PostMapper postMapper;
   private final NotificatorService notificatorService;
 
@@ -37,12 +40,14 @@ public class PostService {
     UserRepository userRepository,
     PostRepository postRepository,
     TagRepository tagRepository,
+    ReactionRepository reactionRepository,
     PostMapper postMapper,
     NotificatorService notificatorService
   ) {
     this.userRepository = userRepository;
     this.postRepository = postRepository;
     this.tagRepository = tagRepository;
+    this.reactionRepository = reactionRepository;
     this.postMapper = postMapper;
     this.notificatorService = notificatorService;
   }
@@ -160,5 +165,52 @@ public class PostService {
       var totalQuantity = postRepository.countUserPublicPosts(targetCanonicalName);
       return getReadPostDtoPaginateDto(page, size, posts, totalQuantity);
     }
+  }
+
+  public PaginateDto<ReadPostDto> getFeedPosts(String canonicalName, Integer page, Integer size) {
+    var totalQuantity = postRepository.getFeedPostsQuantity(canonicalName);
+    var skip = page * size;
+    var pageQuantity = PaginationUtils.getPagesQuantity(totalQuantity, size);
+    var posts = postMapper.setPostToListPostDto(postRepository.getFeedPosts(canonicalName, skip, size));
+    for (ReadPostDto post : posts) {
+      post.setReactions(getPostReactionQuantity(post.getId()));
+      post.setCommentQuantity(postRepository.getPostCommentsQuantity(post.getId()));
+      post.setMyReaction(getPostUserReaction(canonicalName, post.getId()));
+    }
+
+    var pagination = new PaginateDto<ReadPostDto>();
+    pagination.setContent(posts);
+    pagination.setCurrentPage(page);
+    pagination.setTotalPages(pageQuantity);
+    pagination.setTotalElements(totalQuantity);
+    return pagination;
+  }
+
+  private ReactionType getPostUserReaction(String canonicalName, String postId) {
+    var reaction = reactionRepository.getPostUserReaction(canonicalName, postId);
+    if (reaction != null) return reaction.getType();
+    return null;
+  }
+
+  private List<ReactionQuantityDto> getPostReactionQuantity(String id) {
+    var reactions = new ArrayList<ReactionQuantityDto>();
+
+    reactions.add(
+      ReactionQuantityDto
+        .builder()
+        .reaction(ReactionType.APPROVE)
+        .quantity(reactionRepository.getPostReactionQuantity(id, ReactionType.APPROVE))
+        .build()
+    );
+
+    reactions.add(
+      ReactionQuantityDto
+        .builder()
+        .reaction(ReactionType.REJECT)
+        .quantity(reactionRepository.getPostReactionQuantity(id, ReactionType.REJECT))
+        .build()
+    );
+
+    return reactions;
   }
 }

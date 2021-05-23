@@ -1,6 +1,7 @@
 package tech.onlycoders.backend.mapper;
 
 import java.util.List;
+import java.util.Set;
 import org.mapstruct.InjectionStrategy;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -10,6 +11,9 @@ import tech.onlycoders.backend.model.Post;
 
 @Mapper(componentModel = "spring", injectionStrategy = InjectionStrategy.CONSTRUCTOR, uses = { TagMapper.class })
 public interface PostMapper {
+  @Mapping(target = "commentQuantity", ignore = true)
+  @Mapping(target = "reactions", ignore = true)
+  @Mapping(target = "myReaction", ignore = true)
   ReadPostDto postToReadPersonDto(Post post);
 
   @Mapping(target = "userFavorites", ignore = true)
@@ -21,4 +25,6 @@ public interface PostMapper {
   Post createPostDtoToPost(CreatePostDto createPostDto);
 
   List<ReadPostDto> listPostToListPostDto(List<Post> posts);
+
+  List<ReadPostDto> setPostToListPostDto(Set<Post> posts);
 }

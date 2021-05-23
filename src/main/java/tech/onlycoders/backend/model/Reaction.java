@@ -1,8 +1,6 @@
 package tech.onlycoders.backend.model;
 
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.springframework.data.neo4j.core.schema.Node;
 import org.springframework.data.neo4j.core.schema.Relationship;
 
@@ -10,6 +8,8 @@ import org.springframework.data.neo4j.core.schema.Relationship;
 @Node
 @Data
 @NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class Reaction extends BaseEntity {
 
   private ReactionType type;
