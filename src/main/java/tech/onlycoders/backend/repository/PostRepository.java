@@ -7,6 +7,7 @@ import org.springframework.data.neo4j.repository.query.Query;
 import org.springframework.stereotype.Repository;
 import tech.onlycoders.backend.model.DisplayedTag;
 import tech.onlycoders.backend.model.Post;
+import tech.onlycoders.backend.model.ReactionType;
 import tech.onlycoders.backend.model.User;
 
 @Repository
@@ -62,4 +63,7 @@ public interface PostRepository extends Neo4jRepository<Post, String> {
     "} RETURN count(p)"
   )
   int getFeedPostsQuantity(String canonicalName);
+
+  @Query("MATCH (:Post{id: $id})<-[:FOR]-(c:Comment) RETURN count(c)")
+  long getPostCommentsQuantity(String id);
 }

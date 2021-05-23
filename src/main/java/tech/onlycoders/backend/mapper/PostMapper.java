@@ -11,6 +11,9 @@ import tech.onlycoders.backend.model.Post;
 
 @Mapper(componentModel = "spring", injectionStrategy = InjectionStrategy.CONSTRUCTOR, uses = { TagMapper.class })
 public interface PostMapper {
+  @Mapping(target = "commentQuantity", ignore = true)
+  @Mapping(target = "reactions", ignore = true)
+  @Mapping(target = "myReaction", ignore = true)
   ReadPostDto postToReadPersonDto(Post post);
 
   @Mapping(target = "userFavorites", ignore = true)
