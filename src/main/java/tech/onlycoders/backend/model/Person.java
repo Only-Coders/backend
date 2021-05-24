@@ -16,6 +16,7 @@ public abstract class Person extends BaseEntity {
 
   private String firstName;
   private String lastName;
+  private String fullName; // Calculated field
   private String email;
   private String imageURI;
   private String canonicalName;

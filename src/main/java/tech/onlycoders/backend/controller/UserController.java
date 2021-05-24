@@ -75,6 +75,26 @@ public class UserController {
     value = {
       @ApiResponse(
         responseCode = "200",
+        content = { @Content(mediaType = "application/json", schema = @Schema(implementation = PaginatedUsers.class)) }
+      )
+    }
+  )
+  @PreAuthorize("hasAuthority('USER')")
+  @GetMapping
+  @Operation(summary = "Search users by full name")
+  ResponseEntity<PaginateDto<ReadUserLiteDto>> findUsersByName(
+    @RequestParam String partialName,
+    @RequestParam(defaultValue = "0") @Min(0) Integer page,
+    @RequestParam(defaultValue = "20") @Min(1) Integer size
+  ) throws ApiException {
+    var persistedPerson = this.userService.findByPartialName(partialName, page, size);
+    return ResponseEntity.ok(persistedPerson);
+  }
+
+  @ApiResponses(
+    value = {
+      @ApiResponse(
+        responseCode = "200",
         content = {
           @Content(mediaType = "application/json", schema = @Schema(implementation = ReadWorkPositionDto.class))
         }

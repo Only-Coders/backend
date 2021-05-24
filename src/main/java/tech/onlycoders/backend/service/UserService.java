@@ -20,7 +20,9 @@ import tech.onlycoders.backend.mapper.UserMapper;
 import tech.onlycoders.backend.mapper.WorkPositionMapper;
 import tech.onlycoders.backend.model.ContactRequest;
 import tech.onlycoders.backend.model.GitProfile;
+import tech.onlycoders.backend.model.User;
 import tech.onlycoders.backend.repository.*;
+import tech.onlycoders.backend.utils.CanonicalFactory;
 import tech.onlycoders.backend.utils.PaginationUtils;
 import tech.onlycoders.notificator.dto.EventType;
 import tech.onlycoders.notificator.dto.MessageDTO;
@@ -254,6 +256,22 @@ public class UserService {
     var users = this.userRepository.getContacts(canonicalName);
 
     var totalQuantity = this.userRepository.countContacts(canonicalName);
+    return getReadUserLiteDtoPaginateDto(page, size, users, totalQuantity);
+  }
+
+  public PaginateDto<ReadUserLiteDto> findByPartialName(String partialName, Integer page, Integer size) {
+    var regex = "(?i)" + CanonicalFactory.getCanonicalName(partialName) + ".*";
+    var users = this.userRepository.findByPartialName(regex, page, size);
+    var totalQuantity = this.userRepository.countByPartialName(regex);
+    return getReadUserLiteDtoPaginateDto(page, size, users, totalQuantity);
+  }
+
+  private PaginateDto<ReadUserLiteDto> getReadUserLiteDtoPaginateDto(
+    Integer page,
+    Integer size,
+    List<User> users,
+    Integer totalQuantity
+  ) {
     var pagesQuantity = PaginationUtils.getPagesQuantity(totalQuantity, size);
 
     var paginated = new PaginateDto<ReadUserLiteDto>();

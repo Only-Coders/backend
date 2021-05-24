@@ -15,6 +15,8 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 import tech.onlycoders.backend.dto.auth.response.AuthResponseDto;
 import tech.onlycoders.backend.dto.contactrequest.request.CreateContactRequestDto;
 import tech.onlycoders.backend.dto.user.request.CreateUserDto;
@@ -430,6 +432,22 @@ public class UserServiceTest {
     Mockito.when(this.userRepository.countContacts(canonicalName)).thenReturn(1);
 
     var result = this.service.getMyContacts(canonicalName, page, size);
+    assertNotNull(result);
+  }
+
+  @Test
+  @MockitoSettings(strictness = Strictness.LENIENT)
+  void findByPartialName() {
+    var canonicalName = ezRandom.nextObject(String.class);
+    var usersList = new ArrayList<User>();
+    usersList.add(new User());
+    var size = 20;
+    var page = 0;
+
+    Mockito.when(this.userRepository.findByPartialName(canonicalName, page, size)).thenReturn(usersList);
+    Mockito.when(this.userRepository.countByPartialName(canonicalName)).thenReturn(1);
+
+    var result = this.service.findByPartialName(canonicalName, page, size);
     assertNotNull(result);
   }
 }
