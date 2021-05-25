@@ -8,6 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 import tech.onlycoders.backend.dto.PaginateDto;
 import tech.onlycoders.backend.dto.auth.response.AuthResponseDto;
 import tech.onlycoders.backend.dto.contactrequest.request.CreateContactRequestDto;
+import tech.onlycoders.backend.dto.contactrequest.request.ResponseContactRequestDto;
 import tech.onlycoders.backend.dto.contactrequest.response.ReadContactRequestDto;
 import tech.onlycoders.backend.dto.post.response.ReadPostDto;
 import tech.onlycoders.backend.dto.user.request.CreateUserDto;
@@ -263,5 +264,23 @@ public class UserService {
     paginated.setContent(userMapper.listUserToListReadUserLiteDto(users));
 
     return paginated;
+  }
+
+  public void responseContactRequest(String email, ResponseContactRequestDto response) throws ApiException {
+    var user =
+      this.userRepository.findByEmail(email)
+        .orElseThrow(() -> new ApiException(HttpStatus.INTERNAL_SERVER_ERROR, "error.user-not-found"));
+
+    var requester =
+      this.userRepository.findByCanonicalName(response.getRequesterCanonicalName())
+        .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "error.user-not-found"));
+
+    if (!contactRequestRepository.hasPendingRequest(requester.getId(), user.getId())) throw new ApiException(
+      HttpStatus.NOT_FOUND,
+      "error.request-not-found"
+    );
+
+    if (response.getAcceptContact()) userRepository.addContact(email, response.getRequesterCanonicalName());
+    contactRequestRepository.deleteRequest(requester.getId(), user.getId());
   }
 }

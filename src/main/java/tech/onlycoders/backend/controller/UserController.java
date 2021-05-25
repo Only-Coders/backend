@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 import tech.onlycoders.backend.bean.auth.UserDetails;
 import tech.onlycoders.backend.dto.PaginateDto;
 import tech.onlycoders.backend.dto.contactrequest.request.CreateContactRequestDto;
+import tech.onlycoders.backend.dto.contactrequest.request.ResponseContactRequestDto;
 import tech.onlycoders.backend.dto.contactrequest.response.ReadContactRequestDto;
 import tech.onlycoders.backend.dto.institute.request.CreateInstituteDto;
 import tech.onlycoders.backend.dto.post.response.ReadPostDto;
@@ -238,6 +239,19 @@ public class UserController {
     var userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     var email = userDetails.getEmail();
     return ResponseEntity.ok(this.userService.getReceivedContactRequests(email, page, size));
+  }
+
+  @ApiResponses(value = { @ApiResponse(responseCode = "200", content = { @Content(mediaType = "application/json") }) })
+  @PreAuthorize("hasAuthority('USER')")
+  @PutMapping("/received-contact-requests")
+  @Operation(summary = "Response received contact requests")
+  ResponseEntity<PaginateDto<ReadContactRequestDto>> ResponseContactRequest(
+    @RequestBody ResponseContactRequestDto response
+  ) throws ApiException {
+    var userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    var email = userDetails.getEmail();
+    this.userService.responseContactRequest(email, response);
+    return ResponseEntity.ok().build();
   }
 
   @ApiResponses(
