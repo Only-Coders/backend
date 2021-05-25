@@ -59,4 +59,12 @@ public interface UserRepository extends Neo4jRepository<User, String> {
 
   @Query("MATCH (u:User) WHERE u.fullName =~ $likeName RETURN count(u)")
   Integer countByPartialName(String likeName);
+
+  @Query(
+    "MATCH (:User{canonicalName:$canonicalName})-[:PUBLISH]->(:Post)<-[:TO]-(r:Reaction{type:'APPROVE'}) return count(r)"
+  )
+  Integer countUserMedals(String canonicalName);
+
+  @Query("MATCH (:User{canonicalName:$canonicalName})<-[FOLLOWS]-(u:User) return count(u)")
+  Integer countUserFollowers(String canonicalName);
 }

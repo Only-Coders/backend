@@ -7,6 +7,7 @@ import static org.mockito.ArgumentMatchers.*;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import org.jeasy.random.EasyRandom;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -106,6 +107,13 @@ public class UserServiceTest {
     Mockito
       .when(this.userRepository.findByCanonicalName(anyString()))
       .thenReturn(Optional.of(ezRandom.nextObject(User.class)));
+    Mockito.when(this.userRepository.countContacts(anyString())).thenReturn(ezRandom.nextInt());
+    Mockito.when(this.userRepository.countUserFollowers(anyString())).thenReturn(ezRandom.nextInt());
+    Mockito.when(this.userRepository.countUserMedals(anyString())).thenReturn(ezRandom.nextInt());
+    Mockito.when(this.postRepository.countUserPosts(anyString())).thenReturn(ezRandom.nextInt());
+    Mockito
+      .when(this.workPositionRepository.getUserCurrentPositions(anyString()))
+      .thenReturn(ezRandom.objects(WorkPosition.class, 10).collect(Collectors.toList()));
     var profile = this.service.getProfile(canonicalName);
     assertNotNull(profile);
   }

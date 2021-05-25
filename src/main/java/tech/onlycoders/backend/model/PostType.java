@@ -4,5 +4,6 @@ public enum PostType {
   TEXT,
   IMAGE,
   LINK,
-  ARTICLE
+  ARTICLE,
+  FILE
 }

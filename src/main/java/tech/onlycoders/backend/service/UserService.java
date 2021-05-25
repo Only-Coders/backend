@@ -84,7 +84,21 @@ public class UserService {
     var user =
       this.userRepository.findByCanonicalName(canonicalName)
         .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "error.profile-not-found"));
-    return userMapper.userToReadPersonDto(user);
+    var medals = this.userRepository.countUserMedals(canonicalName);
+    var followers = this.userRepository.countUserFollowers(canonicalName);
+    var contacts = this.userRepository.countContacts(canonicalName);
+    var posts = this.postRepository.countUserPosts(canonicalName);
+    var currentPosition = this.workPositionRepository.getUserCurrentPositions(canonicalName);
+    var dto = userMapper.userToReadPersonDto(user);
+    dto.setMedalQty(medals);
+    dto.setFollowerQty(followers);
+    dto.setContactQty(contacts);
+    dto.setPostQty(posts);
+    if (!currentPosition.isEmpty()) {
+      var workPositionDto = this.workPositionMapper.workPositionToReadWorkPositionDto(currentPosition.get(0));
+      dto.setCurrentPosition(workPositionDto);
+    }
+    return dto;
   }
 
   public AuthResponseDto createUser(String email, CreateUserDto createUserDto) throws ApiException {
