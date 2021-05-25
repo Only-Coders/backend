@@ -19,11 +19,10 @@ public class Neo4jConfig {
     return entity -> {
       if (needsCanonicalName(entity)) {
         var randomChars = RandomStringUtils.randomAlphabetic(5);
-        var canonicalName = CanonicalFactory.getCanonicalName(
-          entity.getFirstName() + entity.getLastName() + "-" + randomChars
-        );
-        entity.setCanonicalName(canonicalName);
+        var canonicalName = CanonicalFactory.getCanonicalName(entity.getFirstName() + entity.getLastName());
+        entity.setCanonicalName(canonicalName + "-" + randomChars);
       }
+      entity.setFullName(entity.getFirstName() + " " + entity.getLastName());
       return entity;
     };
   }

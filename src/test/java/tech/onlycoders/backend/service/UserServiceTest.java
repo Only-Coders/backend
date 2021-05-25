@@ -7,6 +7,7 @@ import static org.mockito.ArgumentMatchers.*;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import org.jeasy.random.EasyRandom;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -15,6 +16,8 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 import tech.onlycoders.backend.dto.auth.response.AuthResponseDto;
 import tech.onlycoders.backend.dto.contactrequest.request.CreateContactRequestDto;
 import tech.onlycoders.backend.dto.contactrequest.request.ResponseContactRequestDto;
@@ -105,6 +108,13 @@ public class UserServiceTest {
     Mockito
       .when(this.userRepository.findByCanonicalName(anyString()))
       .thenReturn(Optional.of(ezRandom.nextObject(User.class)));
+    Mockito.when(this.userRepository.countContacts(anyString())).thenReturn(ezRandom.nextInt());
+    Mockito.when(this.userRepository.countUserFollowers(anyString())).thenReturn(ezRandom.nextInt());
+    Mockito.when(this.userRepository.countUserMedals(anyString())).thenReturn(ezRandom.nextInt());
+    Mockito.when(this.postRepository.countUserPosts(anyString())).thenReturn(ezRandom.nextInt());
+    Mockito
+      .when(this.workPositionRepository.getUserCurrentPositions(anyString()))
+      .thenReturn(ezRandom.objects(WorkPosition.class, 10).collect(Collectors.toList()));
     var profile = this.service.getProfile(canonicalName);
     assertNotNull(profile);
   }
@@ -477,5 +487,21 @@ public class UserServiceTest {
     Mockito.when(this.contactRequestRepository.hasPendingRequest(anyString(), anyString())).thenReturn(false);
 
     assertThrows(Exception.class, () -> this.service.responseContactRequest("email", response));
+  }
+  
+  @Test
+  @MockitoSettings(strictness = Strictness.LENIENT)
+  void findByPartialName() {
+    var canonicalName = ezRandom.nextObject(String.class);
+    var usersList = new ArrayList<User>();
+    usersList.add(new User());
+    var size = 20;
+    var page = 0;
+
+    Mockito.when(this.userRepository.findByPartialName(canonicalName, page, size)).thenReturn(usersList);
+    Mockito.when(this.userRepository.countByPartialName(canonicalName)).thenReturn(1);
+
+    var result = this.service.findByPartialName(canonicalName, page, size);
+    assertNotNull(result);
   }
 }

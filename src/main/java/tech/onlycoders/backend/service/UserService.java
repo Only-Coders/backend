@@ -21,7 +21,9 @@ import tech.onlycoders.backend.mapper.UserMapper;
 import tech.onlycoders.backend.mapper.WorkPositionMapper;
 import tech.onlycoders.backend.model.ContactRequest;
 import tech.onlycoders.backend.model.GitProfile;
+import tech.onlycoders.backend.model.User;
 import tech.onlycoders.backend.repository.*;
+import tech.onlycoders.backend.utils.CanonicalFactory;
 import tech.onlycoders.backend.utils.PaginationUtils;
 import tech.onlycoders.notificator.dto.EventType;
 import tech.onlycoders.notificator.dto.MessageDTO;
@@ -83,7 +85,21 @@ public class UserService {
     var user =
       this.userRepository.findByCanonicalName(canonicalName)
         .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "error.profile-not-found"));
-    return userMapper.userToReadPersonDto(user);
+    var medals = this.userRepository.countUserMedals(canonicalName);
+    var followers = this.userRepository.countUserFollowers(canonicalName);
+    var contacts = this.userRepository.countContacts(canonicalName);
+    var posts = this.postRepository.countUserPosts(canonicalName);
+    var currentPosition = this.workPositionRepository.getUserCurrentPositions(canonicalName);
+    var dto = userMapper.userToReadPersonDto(user);
+    dto.setMedalQty(medals);
+    dto.setFollowerQty(followers);
+    dto.setContactQty(contacts);
+    dto.setPostQty(posts);
+    if (!currentPosition.isEmpty()) {
+      var workPositionDto = this.workPositionMapper.workPositionToReadWorkPositionDto(currentPosition.get(0));
+      dto.setCurrentPosition(workPositionDto);
+    }
+    return dto;
   }
 
   public AuthResponseDto createUser(String email, CreateUserDto createUserDto) throws ApiException {
@@ -255,6 +271,22 @@ public class UserService {
     var users = this.userRepository.getContacts(canonicalName);
 
     var totalQuantity = this.userRepository.countContacts(canonicalName);
+    return getReadUserLiteDtoPaginateDto(page, size, users, totalQuantity);
+  }
+
+  public PaginateDto<ReadUserLiteDto> findByPartialName(String partialName, Integer page, Integer size) {
+    var regex = "(?i)" + CanonicalFactory.getCanonicalName(partialName) + ".*";
+    var users = this.userRepository.findByPartialName(regex, page, size);
+    var totalQuantity = this.userRepository.countByPartialName(regex);
+    return getReadUserLiteDtoPaginateDto(page, size, users, totalQuantity);
+  }
+
+  private PaginateDto<ReadUserLiteDto> getReadUserLiteDtoPaginateDto(
+    Integer page,
+    Integer size,
+    List<User> users,
+    Integer totalQuantity
+  ) {
     var pagesQuantity = PaginationUtils.getPagesQuantity(totalQuantity, size);
 
     var paginated = new PaginateDto<ReadUserLiteDto>();

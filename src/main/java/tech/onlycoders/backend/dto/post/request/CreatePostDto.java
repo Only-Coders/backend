@@ -15,7 +15,7 @@ import tech.onlycoders.backend.model.PostType;
 @NoArgsConstructor
 public class CreatePostDto {
 
-  @NotBlank(message = "message is mandatory")
+  @NotNull(message = "message is mandatory")
   private String message;
 
   @NotNull(message = "type is mandatory")
