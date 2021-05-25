@@ -20,6 +20,7 @@ import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import tech.onlycoders.backend.dto.auth.response.AuthResponseDto;
 import tech.onlycoders.backend.dto.contactrequest.request.CreateContactRequestDto;
+import tech.onlycoders.backend.dto.contactrequest.request.ResponseContactRequestDto;
 import tech.onlycoders.backend.dto.user.request.CreateUserDto;
 import tech.onlycoders.backend.exception.ApiException;
 import tech.onlycoders.backend.mapper.*;
@@ -443,6 +444,51 @@ public class UserServiceTest {
     assertNotNull(result);
   }
 
+  @Test
+  public void ShouldAcceptContactRequest() throws ApiException {
+    var response = new ResponseContactRequestDto();
+    response.setRequesterCanonicalName("ds");
+    response.setAcceptContact(true);
+
+    Mockito.when(this.userRepository.findByEmail(anyString())).thenReturn(Optional.of(ezRandom.nextObject(User.class)));
+    Mockito
+      .when(this.userRepository.findByCanonicalName(anyString()))
+      .thenReturn(Optional.of(ezRandom.nextObject(User.class)));
+    Mockito.when(this.contactRequestRepository.hasPendingRequest(anyString(), anyString())).thenReturn(true);
+
+    this.service.responseContactRequest("email", response);
+  }
+
+  @Test
+  public void ShouldRejectContactRequest() throws ApiException {
+    var response = new ResponseContactRequestDto();
+    response.setRequesterCanonicalName("ds");
+    response.setAcceptContact(false);
+
+    Mockito.when(this.userRepository.findByEmail(anyString())).thenReturn(Optional.of(ezRandom.nextObject(User.class)));
+    Mockito
+      .when(this.userRepository.findByCanonicalName(anyString()))
+      .thenReturn(Optional.of(ezRandom.nextObject(User.class)));
+    Mockito.when(this.contactRequestRepository.hasPendingRequest(anyString(), anyString())).thenReturn(true);
+
+    this.service.responseContactRequest("email", response);
+  }
+
+  @Test
+  public void ShouldFailResponseContactRequestWhenRequestNotExists() throws ApiException {
+    var response = new ResponseContactRequestDto();
+    response.setRequesterCanonicalName("ds");
+    response.setAcceptContact(false);
+
+    Mockito.when(this.userRepository.findByEmail(anyString())).thenReturn(Optional.of(ezRandom.nextObject(User.class)));
+    Mockito
+      .when(this.userRepository.findByCanonicalName(anyString()))
+      .thenReturn(Optional.of(ezRandom.nextObject(User.class)));
+    Mockito.when(this.contactRequestRepository.hasPendingRequest(anyString(), anyString())).thenReturn(false);
+
+    assertThrows(Exception.class, () -> this.service.responseContactRequest("email", response));
+  }
+  
   @Test
   @MockitoSettings(strictness = Strictness.LENIENT)
   void findByPartialName() {
