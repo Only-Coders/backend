@@ -12,7 +12,7 @@ import org.springframework.data.neo4j.core.support.DateLong;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public abstract class Person extends BaseEntity {
+public class Person extends BaseEntity {
 
   private String firstName;
   private String lastName;
