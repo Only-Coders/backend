@@ -72,4 +72,7 @@ public interface UserRepository extends Neo4jRepository<User, String> {
 
   @Query("MATCH (:User{canonicalName:$canonicalName})<-[FOLLOWS]-(u:User) return count(u)")
   Integer countUserFollowers(String canonicalName);
+
+  @Query("MATCH (:User{email: $email})-[f:IS_FAVORITE]->(:Post{id: $postId}) DELETE f")
+  void removeFavoritePost(String email, String postId);
 }

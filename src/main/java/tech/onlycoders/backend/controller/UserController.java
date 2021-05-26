@@ -218,6 +218,17 @@ public class UserController {
     return ResponseEntity.ok().build();
   }
 
+  @ApiResponses(value = { @ApiResponse(responseCode = "200", content = { @Content(mediaType = "application/json") }) })
+  @PreAuthorize("hasAuthority('USER')")
+  @DeleteMapping("/favorite-posts/{postId}")
+  @Operation(summary = "Saves a favorite post to the user.")
+  ResponseEntity<?> deleteFavoritePost(@PathVariable @NotBlank String postId) throws ApiException {
+    var userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    var email = userDetails.getEmail();
+    this.userService.removeFavoritePost(email, postId);
+    return ResponseEntity.ok().build();
+  }
+
   @ApiResponses(
     value = {
       @ApiResponse(
