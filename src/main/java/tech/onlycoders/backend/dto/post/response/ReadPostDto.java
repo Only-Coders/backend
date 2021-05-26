@@ -1,5 +1,6 @@
 package tech.onlycoders.backend.dto.post.response;
 
+import java.util.Date;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -27,4 +28,5 @@ public class ReadPostDto {
   private List<ReactionQuantityDto> reactions;
   private Long commentQuantity;
   private ReactionType myReaction;
+  private Date createdAt;
 }
