@@ -488,7 +488,7 @@ public class UserServiceTest {
 
     assertThrows(Exception.class, () -> this.service.responseContactRequest("email", response));
   }
-  
+
   @Test
   @MockitoSettings(strictness = Strictness.LENIENT)
   void findByPartialName() {
@@ -503,5 +503,10 @@ public class UserServiceTest {
 
     var result = this.service.findByPartialName(canonicalName, page, size);
     assertNotNull(result);
+  }
+
+  @Test
+  void ShouldDeleteFavoritePost() {
+    this.service.removeFavoritePost("email", "id");
   }
 }

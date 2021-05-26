@@ -315,4 +315,8 @@ public class UserService {
     if (response.getAcceptContact()) userRepository.addContact(email, response.getRequesterCanonicalName());
     contactRequestRepository.deleteRequest(requester.getId(), user.getId());
   }
+
+  public void removeFavoritePost(String email, String postId) {
+    this.userRepository.removeFavoritePost(email, postId);
+  }
 }
