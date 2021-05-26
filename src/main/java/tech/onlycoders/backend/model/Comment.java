@@ -2,9 +2,7 @@ package tech.onlycoders.backend.model;
 
 import java.util.HashSet;
 import java.util.Set;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.springframework.data.neo4j.core.schema.Node;
 import org.springframework.data.neo4j.core.schema.Relationship;
 
@@ -12,6 +10,8 @@ import org.springframework.data.neo4j.core.schema.Relationship;
 @Node
 @Data
 @NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class Comment extends BaseEntity {
 
   private String message;

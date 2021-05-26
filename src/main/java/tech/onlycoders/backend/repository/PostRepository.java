@@ -5,6 +5,7 @@ import java.util.Set;
 import org.springframework.data.neo4j.repository.Neo4jRepository;
 import org.springframework.data.neo4j.repository.query.Query;
 import org.springframework.stereotype.Repository;
+import tech.onlycoders.backend.model.Comment;
 import tech.onlycoders.backend.model.Post;
 
 @Repository
@@ -63,4 +64,7 @@ public interface PostRepository extends Neo4jRepository<Post, String> {
 
   @Query("MATCH (:Post{id: $id})<-[:FOR]-(c:Comment) RETURN count(c)")
   long getPostCommentsQuantity(String id);
+
+  @Query("MATCH (p:Post{id: $postId}) with p MATCH (c:Comment{id: $commentId}) CREATE (p)<-[r:FOR]-(c)")
+  void addComment(String postId, String commentId);
 }

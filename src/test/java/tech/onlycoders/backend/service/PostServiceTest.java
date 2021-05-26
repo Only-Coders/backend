@@ -7,7 +7,6 @@ import static org.mockito.ArgumentMatchers.*;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
 import org.jeasy.random.EasyRandom;
 import org.junit.jupiter.api.Test;
@@ -19,17 +18,14 @@ import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
+import tech.onlycoders.backend.dto.comment.request.CreateCommentDto;
 import tech.onlycoders.backend.dto.post.request.CreatePostDto;
-import tech.onlycoders.backend.dto.post.response.ReactionQuantityDto;
 import tech.onlycoders.backend.exception.ApiException;
 import tech.onlycoders.backend.mapper.PostMapper;
 import tech.onlycoders.backend.mapper.PostMapperImpl;
 import tech.onlycoders.backend.mapper.TagMapperImpl;
 import tech.onlycoders.backend.model.*;
-import tech.onlycoders.backend.repository.PostRepository;
-import tech.onlycoders.backend.repository.ReactionRepository;
-import tech.onlycoders.backend.repository.TagRepository;
-import tech.onlycoders.backend.repository.UserRepository;
+import tech.onlycoders.backend.repository.*;
 
 @ExtendWith(MockitoExtension.class)
 public class PostServiceTest {
@@ -38,7 +34,7 @@ public class PostServiceTest {
   private PostService service;
 
   @Mock
-  private UserRepository personRepository;
+  private UserRepository userRepository;
 
   @Mock
   private NotificatorService notificatorService;
@@ -52,6 +48,9 @@ public class PostServiceTest {
   @Mock
   private ReactionRepository reactionRepository;
 
+  @Mock
+  private CommentRepository commentRepository;
+
   private final EasyRandom ezRandom = new EasyRandom();
 
   @Spy
@@ -62,7 +61,7 @@ public class PostServiceTest {
     var requestDto = ezRandom.nextObject(CreatePostDto.class);
     var publisher = new User();
     var tag = new Tag();
-    Mockito.when(personRepository.findByCanonicalName(anyString())).thenReturn(Optional.of(publisher));
+    Mockito.when(userRepository.findByCanonicalName(anyString())).thenReturn(Optional.of(publisher));
     Mockito.when(tagRepository.findByCanonicalName(anyString())).thenReturn(Optional.of(tag));
     Mockito.when(postRepository.save(any(Post.class))).thenReturn(new Post());
 
@@ -74,7 +73,7 @@ public class PostServiceTest {
   public void ShouldCreatePostAndTagWhenTagDoesntExist() throws ApiException {
     var requestDto = ezRandom.nextObject(CreatePostDto.class);
     var publisher = new User();
-    Mockito.when(personRepository.findByCanonicalName(anyString())).thenReturn(Optional.of(publisher));
+    Mockito.when(userRepository.findByCanonicalName(anyString())).thenReturn(Optional.of(publisher));
     Mockito.when(tagRepository.findByCanonicalName(anyString())).thenReturn(Optional.empty());
     Mockito.when(postRepository.save(any(Post.class))).thenReturn(new Post());
 
@@ -85,7 +84,7 @@ public class PostServiceTest {
   @Test
   public void ShouldFailWhenPublisherDoesntExist() {
     var requestDto = ezRandom.nextObject(CreatePostDto.class);
-    Mockito.when(personRepository.findByCanonicalName(anyString())).thenReturn(Optional.empty());
+    Mockito.when(userRepository.findByCanonicalName(anyString())).thenReturn(Optional.empty());
 
     assertThrows(ApiException.class, () -> service.createPost("canonicalName", requestDto));
   }
@@ -96,8 +95,8 @@ public class PostServiceTest {
     requestDto.setMentionCanonicalNames(new ArrayList<>());
     requestDto.getMentionCanonicalNames().add("wrong");
     var publisher = new User();
-    Mockito.when(personRepository.findByCanonicalName("canonicalName")).thenReturn(Optional.of(publisher));
-    Mockito.when(personRepository.findByCanonicalName("wrong")).thenReturn(Optional.empty());
+    Mockito.when(userRepository.findByCanonicalName("canonicalName")).thenReturn(Optional.of(publisher));
+    Mockito.when(userRepository.findByCanonicalName("wrong")).thenReturn(Optional.empty());
 
     assertThrows(ApiException.class, () -> service.createPost("canonicalName", requestDto));
   }
@@ -137,7 +136,7 @@ public class PostServiceTest {
     var targetCanonicalName = ezRandom.nextObject(String.class);
     var size = 20;
     var page = 0;
-    Mockito.when(this.personRepository.userIsContact(requesterCanonicalName, targetCanonicalName)).thenReturn(true);
+    Mockito.when(this.userRepository.userIsContact(requesterCanonicalName, targetCanonicalName)).thenReturn(true);
     Mockito
       .when(this.postRepository.getPosts(requesterCanonicalName, page, size))
       .thenReturn(ezRandom.objects(Post.class, 10).collect(Collectors.toList()));
@@ -154,7 +153,7 @@ public class PostServiceTest {
     var targetCanonicalName = ezRandom.nextObject(String.class);
     var size = 20;
     var page = 0;
-    Mockito.when(this.personRepository.userIsContact(requesterCanonicalName, targetCanonicalName)).thenReturn(false);
+    Mockito.when(this.userRepository.userIsContact(requesterCanonicalName, targetCanonicalName)).thenReturn(false);
     Mockito
       .when(this.postRepository.getUserPublicPosts(requesterCanonicalName, page, size))
       .thenReturn(ezRandom.objects(Post.class, 10).collect(Collectors.toList()));
@@ -196,5 +195,18 @@ public class PostServiceTest {
 
     var result = this.service.getFeedPosts("cname", 0, 10);
     assertNotNull(result);
+  }
+
+  @Test
+  public void ShouldAddComment() throws ApiException {
+    var post = ezRandom.nextObject(Post.class);
+    var user = ezRandom.nextObject(User.class);
+    var commentDto = new CreateCommentDto();
+    commentDto.setMessage("message");
+
+    Mockito.when(this.userRepository.findByCanonicalName(anyString())).thenReturn(Optional.of(user));
+    Mockito.when(this.postRepository.findById(anyString())).thenReturn(Optional.of(post));
+
+    this.service.addComment("canonical", "postId", commentDto);
   }
 }

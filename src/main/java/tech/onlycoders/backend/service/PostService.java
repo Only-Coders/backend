@@ -8,6 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tech.onlycoders.backend.dto.PaginateDto;
+import tech.onlycoders.backend.dto.comment.request.CreateCommentDto;
 import tech.onlycoders.backend.dto.post.request.CreatePostDto;
 import tech.onlycoders.backend.dto.post.response.ReactionQuantityDto;
 import tech.onlycoders.backend.dto.post.response.ReadPostDto;
@@ -15,10 +16,7 @@ import tech.onlycoders.backend.dto.tag.response.ReadTagDto;
 import tech.onlycoders.backend.exception.ApiException;
 import tech.onlycoders.backend.mapper.PostMapper;
 import tech.onlycoders.backend.model.*;
-import tech.onlycoders.backend.repository.PostRepository;
-import tech.onlycoders.backend.repository.ReactionRepository;
-import tech.onlycoders.backend.repository.TagRepository;
-import tech.onlycoders.backend.repository.UserRepository;
+import tech.onlycoders.backend.repository.*;
 import tech.onlycoders.backend.utils.CanonicalFactory;
 import tech.onlycoders.backend.utils.PaginationUtils;
 import tech.onlycoders.notificator.dto.EventType;
@@ -32,6 +30,7 @@ public class PostService {
   private final PostRepository postRepository;
   private final TagRepository tagRepository;
   private final ReactionRepository reactionRepository;
+  private final CommentRepository commentRepository;
 
   private final PostMapper postMapper;
   private final NotificatorService notificatorService;
@@ -41,6 +40,7 @@ public class PostService {
     PostRepository postRepository,
     TagRepository tagRepository,
     ReactionRepository reactionRepository,
+    CommentRepository commentRepository,
     PostMapper postMapper,
     NotificatorService notificatorService
   ) {
@@ -48,6 +48,8 @@ public class PostService {
     this.postRepository = postRepository;
     this.tagRepository = tagRepository;
     this.reactionRepository = reactionRepository;
+    this.commentRepository = commentRepository;
+
     this.postMapper = postMapper;
     this.notificatorService = notificatorService;
   }
@@ -212,5 +214,20 @@ public class PostService {
     );
 
     return reactions;
+  }
+
+  public void addComment(String canonicalName, String id, CreateCommentDto createCommentDto) throws ApiException {
+    var commenter = userRepository
+      .findByCanonicalName(canonicalName)
+      .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "error.user-not-found"));
+
+    var post = postRepository
+      .findById(id)
+      .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "error.post-not-found"));
+
+    var comment = Comment.builder().person(commenter).message(createCommentDto.getMessage()).build();
+    commentRepository.save(comment);
+
+    postRepository.addComment(post.getId(), comment.getId());
   }
 }
