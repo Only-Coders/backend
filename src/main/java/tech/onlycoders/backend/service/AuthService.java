@@ -11,17 +11,25 @@ import tech.onlycoders.backend.exception.ApiException;
 import tech.onlycoders.backend.model.Person;
 import tech.onlycoders.backend.model.User;
 import tech.onlycoders.backend.repository.PersonRepository;
+import tech.onlycoders.backend.repository.UserRepository;
 
 @Service
 @Transactional
 public class AuthService {
 
   private final PersonRepository personRepository;
+  private final UserRepository userRepository;
   private final JwtService jwtService;
   private final FirebaseService firebaseService;
 
-  public AuthService(PersonRepository personRepository, JwtService jwtService, FirebaseService firebaseService) {
+  public AuthService(
+    PersonRepository personRepository,
+    UserRepository userRepository,
+    JwtService jwtService,
+    FirebaseService firebaseService
+  ) {
     this.personRepository = personRepository;
+    this.userRepository = userRepository;
     this.jwtService = jwtService;
     this.firebaseService = firebaseService;
   }
@@ -33,6 +41,12 @@ public class AuthService {
     if (optionalPerson.isPresent()) {
       var person = optionalPerson.get();
       extendClaims(claims, person);
+      if (person.getRole().getName().equals("USER")) {
+        var user =
+          this.userRepository.findById(person.getId())
+            .orElseThrow(() -> new ApiException(HttpStatus.INTERNAL_SERVER_ERROR, "error.500"));
+        claims.put("defaultPrivacy", user.getDefaultPrivacyIsPublic());
+      }
     } else {
       claims.put("complete", false);
     }
@@ -59,6 +73,12 @@ public class AuthService {
         throw new ApiException(HttpStatus.UNAUTHORIZED, "error.not-authorized");
       }
       extendClaims(claims, person);
+      if (person.getRole().getName().equals("USER")) {
+        var user =
+          this.userRepository.findById(person.getId())
+            .orElseThrow(() -> new ApiException(HttpStatus.INTERNAL_SERVER_ERROR, "error.500"));
+        claims.put("defaultPrivacy", user.getDefaultPrivacyIsPublic());
+      }
     } else {
       claims.put("complete", false);
     }
