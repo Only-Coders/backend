@@ -209,6 +209,9 @@ public class PostServiceTest {
     var commentDto = new CreateCommentDto();
     commentDto.setMessage("message");
 
+    Mockito.when(postRepository.getPostPublisherCanonicalName(anyString())).thenReturn("cname");
+    Mockito.when(postRepository.postIsPublic(anyString())).thenReturn(true);
+    Mockito.when(userRepository.userIsContact(anyString(), anyString())).thenReturn(true);
     Mockito.when(this.userRepository.findByCanonicalName(anyString())).thenReturn(Optional.of(user));
     Mockito.when(this.postRepository.findById(anyString())).thenReturn(Optional.of(post));
     Mockito.when(this.reactionRepository.getCommentUserReaction(anyString(), anyString())).thenReturn(null);
