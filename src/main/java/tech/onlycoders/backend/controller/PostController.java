@@ -67,6 +67,15 @@ public class PostController {
       return ResponseEntity.ok(postService.getUserPosts(userDetails.getCanonicalName(), canonicalName, page, size));
     }
   }
+
+  @DeleteMapping
+  @ApiResponses(value = { @ApiResponse(responseCode = "200", content = { @Content(mediaType = "application/json") }) })
+  @PreAuthorize("hasAuthority('USER')")
+  ResponseEntity<?> removePost(@RequestBody @Valid Integer postId) throws ApiException {
+    var userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    postService.removePost(userDetails.getCanonicalName(), postId);
+    return ResponseEntity.ok().build();
+  }
 }
 
 class PaginatedPosts extends PaginateDto<ReadPostDto> {}

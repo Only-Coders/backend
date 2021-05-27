@@ -13,4 +13,9 @@ public interface ReactionRepository extends Neo4jRepository<Reaction, String> {
 
   @Query("MATCH (:Post{id: $id})<-[:TO]-(r:Reaction)<-[:MAKES]-(:User{canonicalName: $canonicalName}) RETURN r")
   Reaction getPostUserReaction(String canonicalName, String id);
+
+  @Query(
+    "MATCH (u:User{canonicalName:$canonicalName})-[:PUBLISH]->(p:Post{id:$postId})<-[:TO]-(r:Reaction) DETACH DELETE r"
+  )
+  void removeReaction(String canonicalName, Integer postId);
 }

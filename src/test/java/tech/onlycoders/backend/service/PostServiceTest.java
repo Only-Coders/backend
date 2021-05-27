@@ -19,6 +19,8 @@ import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import tech.onlycoders.backend.dto.post.request.CreatePostDto;
 import tech.onlycoders.backend.dto.post.response.ReactionQuantityDto;
 import tech.onlycoders.backend.exception.ApiException;
@@ -196,5 +198,19 @@ public class PostServiceTest {
 
     var result = this.service.getFeedPosts("cname", 0, 10);
     assertNotNull(result);
+  }
+
+  @Test
+  @MockitoSettings(strictness = Strictness.LENIENT)
+  public void ShouldDeletePost() {
+    var canonicalName = ezRandom.nextObject(String.class);
+    var postId = ezRandom.nextObject(Integer.class);
+
+    Mockito.doNothing().when(reactionRepository).removeReaction(anyString(), anyInt());
+    Mockito.doNothing().when(postRepository).removeCommentsPost(anyString(), anyInt());
+    Mockito.doNothing().when(postRepository).removeReports(anyString(), anyInt());
+    Mockito.doNothing().when(postRepository).removePost(anyString(), anyInt());
+
+    this.service.removePost(canonicalName, postId);
   }
 }
