@@ -4,10 +4,8 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.anyString;
 
-import java.util.Date;
 import java.util.Optional;
 import org.jeasy.random.EasyRandom;
-import org.joda.time.DateTime;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -22,9 +20,11 @@ import tech.onlycoders.backend.exception.ApiException;
 import tech.onlycoders.backend.model.Admin;
 import tech.onlycoders.backend.model.Role;
 import tech.onlycoders.backend.model.User;
+import tech.onlycoders.backend.model.WorkPosition;
 import tech.onlycoders.backend.repository.AdminRepository;
 import tech.onlycoders.backend.repository.PersonRepository;
 import tech.onlycoders.backend.repository.UserRepository;
+import tech.onlycoders.backend.repository.WorkPositionRepository;
 
 @ExtendWith(MockitoExtension.class)
 public class AuthServiceTest {
@@ -36,9 +36,6 @@ public class AuthServiceTest {
   private AuthService service;
 
   @Mock
-  private PersonRepository personRepository;
-
-  @Mock
   private UserRepository userRepository;
 
   @Mock
@@ -46,6 +43,9 @@ public class AuthServiceTest {
 
   @Mock
   private AdminRepository adminRepository;
+
+  @Mock
+  private WorkPositionRepository workPositionRepository;
 
   private final EasyRandom ezRandom = new EasyRandom();
 
@@ -104,9 +104,11 @@ public class AuthServiceTest {
   public void ShouldRefreshTokenWhenUserHasBeenRegistered() throws ApiException {
     var authRequest = ezRandom.nextObject(AuthRequestDto.class);
     var person = ezRandom.nextObject(User.class);
+    var workPosition = ezRandom.nextObject(WorkPosition.class);
     person.setRole(Role.builder().name("USER").build());
     person.setSecurityUpdate(null);
     Mockito.when(this.userRepository.findByEmail(person.getEmail())).thenReturn(Optional.of(person));
+    Mockito.when(this.workPositionRepository.getUserCurrentPosition(anyString())).thenReturn(Optional.of(workPosition));
     Mockito.when(this.firebaseService.verifyFirebaseToken(anyString())).thenReturn(person.getEmail());
     var authResponseDto = this.service.authenticate(authRequest);
     this.service.refreshToken(authResponseDto.getToken());

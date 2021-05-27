@@ -12,6 +12,7 @@ import tech.onlycoders.backend.model.User;
 import tech.onlycoders.backend.repository.AdminRepository;
 import tech.onlycoders.backend.repository.PersonRepository;
 import tech.onlycoders.backend.repository.UserRepository;
+import tech.onlycoders.backend.repository.WorkPositionRepository;
 
 @Service
 @Transactional
@@ -21,18 +22,21 @@ public class AuthService {
   private final JwtService jwtService;
   private final FirebaseService firebaseService;
   private final AdminRepository adminRepository;
+  private final WorkPositionRepository workPositionRepository;
 
   public AuthService(
     PersonRepository personRepository,
     UserRepository userRepository,
     JwtService jwtService,
     FirebaseService firebaseService,
-    AdminRepository adminRepository
+    AdminRepository adminRepository,
+    WorkPositionRepository workPositionRepository
   ) {
     this.userRepository = userRepository;
     this.jwtService = jwtService;
     this.firebaseService = firebaseService;
     this.adminRepository = adminRepository;
+    this.workPositionRepository = workPositionRepository;
   }
 
   public AuthResponseDto authenticate(AuthRequestDto authRequestDto) throws ApiException {
@@ -52,31 +56,35 @@ public class AuthService {
     HashMap<String, Object> claims = new HashMap<>();
     if (optionalAdmin.isPresent()) {
       var admin = optionalAdmin.get();
-      claims = extendClaims(admin);
+      extendClaims(admin, claims);
     }
     return claims;
   }
 
   private HashMap<String, Object> userAuthentication(String email) {
     var optionalUser = this.userRepository.findByEmail(email);
-    HashMap<String, Object> claims = new HashMap<>();
+    final HashMap<String, Object> claims = new HashMap<>();
     if (optionalUser.isPresent()) {
       var user = optionalUser.get();
-      claims = extendClaims(user);
+      extendClaims(user, claims);
+      this.workPositionRepository.getUserCurrentPosition(user.getCanonicalName())
+        .ifPresentOrElse(
+          workPosition ->
+            claims.put("currentPosition", workPosition.getPosition() + " - " + workPosition.getWorkplace().getName()),
+          () -> claims.put("currentPosition", "")
+        );
       claims.put("defaultPrivacy", user.getDefaultPrivacyIsPublic());
     }
     return claims;
   }
 
-  private HashMap<String, Object> extendClaims(Person person) {
-    var claims = new HashMap<String, Object>();
+  private void extendClaims(Person person, HashMap<String, Object> claims) {
     claims.put("id", person.getId());
     claims.put("roles", person.getRole().getName());
     claims.put("canonicalName", person.getCanonicalName());
     claims.put("complete", true);
     claims.put("imageURI", person.getImageURI());
     claims.put("fullName", person.getFirstName() + " " + person.getLastName());
-    return claims;
   }
 
   public AuthResponseDto refreshToken(String token) throws ApiException {
