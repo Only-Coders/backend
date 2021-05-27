@@ -21,9 +21,7 @@ import org.mockito.quality.Strictness;
 import tech.onlycoders.backend.dto.comment.request.CreateCommentDto;
 import tech.onlycoders.backend.dto.post.request.CreatePostDto;
 import tech.onlycoders.backend.exception.ApiException;
-import tech.onlycoders.backend.mapper.PostMapper;
-import tech.onlycoders.backend.mapper.PostMapperImpl;
-import tech.onlycoders.backend.mapper.TagMapperImpl;
+import tech.onlycoders.backend.mapper.*;
 import tech.onlycoders.backend.model.*;
 import tech.onlycoders.backend.repository.*;
 
@@ -55,6 +53,9 @@ public class PostServiceTest {
 
   @Spy
   private final PostMapper postMapper = new PostMapperImpl(new TagMapperImpl());
+
+  @Spy
+  private final CommentMapper commentMapper = new CommentMapperImpl();
 
   @Test
   public void ShouldCreatePostWhenDataIsOk() throws ApiException {
@@ -198,6 +199,7 @@ public class PostServiceTest {
   }
 
   @Test
+  @MockitoSettings(strictness = Strictness.LENIENT)
   public void ShouldAddComment() throws ApiException {
     var post = ezRandom.nextObject(Post.class);
     var user = ezRandom.nextObject(User.class);
@@ -206,7 +208,12 @@ public class PostServiceTest {
 
     Mockito.when(this.userRepository.findByCanonicalName(anyString())).thenReturn(Optional.of(user));
     Mockito.when(this.postRepository.findById(anyString())).thenReturn(Optional.of(post));
+    Mockito.when(this.reactionRepository.getCommentUserReaction(anyString(), anyString())).thenReturn(null);
+    Mockito
+      .when(this.reactionRepository.getCommentReactionQuantity(anyString(), any(ReactionType.class)))
+      .thenReturn(0L);
 
-    this.service.addComment("canonical", "postId", commentDto);
+    var comment = this.service.addComment("canonical", "postId", commentDto);
+    assertNotNull(comment);
   }
 }

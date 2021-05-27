@@ -8,12 +8,13 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tech.onlycoders.backend.dto.PaginateDto;
+import tech.onlycoders.backend.dto.ReactionQuantityDto;
 import tech.onlycoders.backend.dto.comment.request.CreateCommentDto;
+import tech.onlycoders.backend.dto.comment.response.ReadCommentDto;
 import tech.onlycoders.backend.dto.post.request.CreatePostDto;
-import tech.onlycoders.backend.dto.post.response.ReactionQuantityDto;
 import tech.onlycoders.backend.dto.post.response.ReadPostDto;
-import tech.onlycoders.backend.dto.tag.response.ReadTagDto;
 import tech.onlycoders.backend.exception.ApiException;
+import tech.onlycoders.backend.mapper.CommentMapper;
 import tech.onlycoders.backend.mapper.PostMapper;
 import tech.onlycoders.backend.model.*;
 import tech.onlycoders.backend.repository.*;
@@ -33,6 +34,7 @@ public class PostService {
   private final CommentRepository commentRepository;
 
   private final PostMapper postMapper;
+  private final CommentMapper commentMapper;
   private final NotificatorService notificatorService;
 
   public PostService(
@@ -42,6 +44,7 @@ public class PostService {
     ReactionRepository reactionRepository,
     CommentRepository commentRepository,
     PostMapper postMapper,
+    CommentMapper commentMapper,
     NotificatorService notificatorService
   ) {
     this.userRepository = userRepository;
@@ -51,6 +54,7 @@ public class PostService {
     this.commentRepository = commentRepository;
 
     this.postMapper = postMapper;
+    this.commentMapper = commentMapper;
     this.notificatorService = notificatorService;
   }
 
@@ -216,7 +220,8 @@ public class PostService {
     return reactions;
   }
 
-  public void addComment(String canonicalName, String id, CreateCommentDto createCommentDto) throws ApiException {
+  public ReadCommentDto addComment(String canonicalName, String id, CreateCommentDto createCommentDto)
+    throws ApiException {
     var commenter = userRepository
       .findByCanonicalName(canonicalName)
       .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "error.user-not-found"));
@@ -225,9 +230,43 @@ public class PostService {
       .findById(id)
       .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "error.post-not-found"));
 
-    var comment = Comment.builder().person(commenter).message(createCommentDto.getMessage()).build();
+    var comment = Comment.builder().publisher(commenter).message(createCommentDto.getMessage()).build();
     commentRepository.save(comment);
 
     postRepository.addComment(post.getId(), comment.getId());
+
+    var commentDto = commentMapper.commentToReadCommentDto(comment);
+    commentDto.setReactions(getCommentReactionQuantity(comment.getId()));
+    commentDto.setMyReaction(getCommentUserReaction(canonicalName, comment.getId()));
+
+    return commentDto;
+  }
+
+  private List<ReactionQuantityDto> getCommentReactionQuantity(String id) {
+    var reactions = new ArrayList<ReactionQuantityDto>();
+
+    reactions.add(
+      ReactionQuantityDto
+        .builder()
+        .reaction(ReactionType.APPROVE)
+        .quantity(reactionRepository.getCommentReactionQuantity(id, ReactionType.APPROVE))
+        .build()
+    );
+
+    reactions.add(
+      ReactionQuantityDto
+        .builder()
+        .reaction(ReactionType.REJECT)
+        .quantity(reactionRepository.getCommentReactionQuantity(id, ReactionType.REJECT))
+        .build()
+    );
+
+    return reactions;
+  }
+
+  private ReactionType getCommentUserReaction(String canonicalName, String commentId) {
+    var reaction = reactionRepository.getCommentUserReaction(canonicalName, commentId);
+    if (reaction != null) return reaction.getType();
+    return null;
   }
 }

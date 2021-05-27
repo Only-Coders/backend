@@ -17,7 +17,7 @@ public class Comment extends BaseEntity {
   private String message;
 
   @Relationship(type = "WRITES", direction = Relationship.Direction.INCOMING)
-  public Person person;
+  public Person publisher;
 
   @Relationship(type = "TO", direction = Relationship.Direction.INCOMING)
   public Set<Reaction> reactions = new HashSet<>();

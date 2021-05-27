@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import tech.onlycoders.backend.bean.auth.UserDetails;
 import tech.onlycoders.backend.dto.PaginateDto;
 import tech.onlycoders.backend.dto.comment.request.CreateCommentDto;
+import tech.onlycoders.backend.dto.comment.response.ReadCommentDto;
 import tech.onlycoders.backend.dto.post.request.CreatePostDto;
 import tech.onlycoders.backend.dto.post.response.ReadPostDto;
 import tech.onlycoders.backend.exception.ApiException;
@@ -74,16 +75,17 @@ public class PostController {
     value = {
       @ApiResponse(
         responseCode = "200",
-        content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ReadPostDto.class)) }
+        content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ReadCommentDto.class)) }
       )
     }
   )
   @PreAuthorize("hasAuthority('USER')")
-  ResponseEntity<?> newComment(@PathVariable String id, @RequestBody @Valid CreateCommentDto createCommentDto)
-    throws ApiException {
+  ResponseEntity<ReadCommentDto> newComment(
+    @PathVariable String id,
+    @RequestBody @Valid CreateCommentDto createCommentDto
+  ) throws ApiException {
     var userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-    postService.addComment(userDetails.getCanonicalName(), id, createCommentDto);
-    return ResponseEntity.ok().build();
+    return ResponseEntity.ok(postService.addComment(userDetails.getCanonicalName(), id, createCommentDto));
   }
 }
 
