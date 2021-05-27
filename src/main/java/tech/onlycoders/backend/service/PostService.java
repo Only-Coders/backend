@@ -220,6 +220,7 @@ public class PostService {
     return reactions;
   }
 
+
   public ReadCommentDto addComment(String canonicalName, String id, CreateCommentDto createCommentDto)
     throws ApiException {
     var commenter = userRepository
@@ -268,5 +269,12 @@ public class PostService {
     var reaction = reactionRepository.getCommentUserReaction(canonicalName, commentId);
     if (reaction != null) return reaction.getType();
     return null;
+  }
+  
+  public void removePost(String canonicalName, Integer postId) {
+    reactionRepository.removeReaction(canonicalName, postId);
+    postRepository.removeCommentsPost(canonicalName, postId);
+    postRepository.removeReports(canonicalName, postId);
+    postRepository.removePost(canonicalName, postId);
   }
 }
