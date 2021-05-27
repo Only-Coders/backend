@@ -6,6 +6,7 @@ import static org.mockito.ArgumentMatchers.*;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import org.jeasy.random.EasyRandom;
@@ -231,5 +232,39 @@ public class PostServiceTest {
     Mockito.doNothing().when(postRepository).removePost(anyString(), anyInt());
 
     this.service.removePost(canonicalName, postId);
+  }
+
+  @Test
+  @MockitoSettings(strictness = Strictness.LENIENT)
+  public void ShouldReturnPostComments() throws ApiException {
+    var list = new ArrayList<Comment>();
+    list.add(new Comment());
+
+    Mockito.when(commentRepository.getPostCommentsQuantity(anyString())).thenReturn(0);
+    Mockito.when(commentRepository.getPostComments(anyString(), anyInt(), anyInt())).thenReturn(list);
+    Mockito.when(this.reactionRepository.getCommentUserReaction(anyString(), anyString())).thenReturn(null);
+    Mockito
+      .when(this.reactionRepository.getCommentReactionQuantity(anyString(), any(ReactionType.class)))
+      .thenReturn(0L);
+    Mockito.when(postRepository.getPostPublisherCanonicalName(anyString())).thenReturn("cname");
+    Mockito.when(postRepository.postIsPublic(anyString())).thenReturn(true);
+    Mockito.when(userRepository.userIsContact(anyString(), anyString())).thenReturn(true);
+
+    var result = service.getPostComments("asd", "postid", 0, 10);
+
+    assertNotNull(result);
+  }
+
+  @Test
+  @MockitoSettings(strictness = Strictness.LENIENT)
+  public void ShouldFailReturnPostCommentsWhenUserIsNotAllowed() throws ApiException {
+    var list = new ArrayList<Comment>();
+    list.add(new Comment());
+
+    Mockito.when(postRepository.getPostPublisherCanonicalName(anyString())).thenReturn("cname");
+    Mockito.when(postRepository.postIsPublic(anyString())).thenReturn(false);
+    Mockito.when(userRepository.userIsContact(anyString(), anyString())).thenReturn(false);
+
+    assertThrows(Exception.class, () -> service.getPostComments("asd", "postid", 0, 10));
   }
 }

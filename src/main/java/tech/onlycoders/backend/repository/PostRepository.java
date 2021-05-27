@@ -65,10 +65,9 @@ public interface PostRepository extends Neo4jRepository<Post, String> {
   @Query("MATCH (:Post{id: $id})<-[:FOR]-(c:Comment) RETURN count(c)")
   long getPostCommentsQuantity(String id);
 
-
   @Query("MATCH (p:Post{id: $postId}) with p MATCH (c:Comment{id: $commentId}) CREATE (p)<-[r:FOR]-(c)")
   void addComment(String postId, String commentId);
-  
+
   @Query("MATCH (u:User{canonicalName:$canonicalName})-[:PUBLISH]->(p:Post{id:$postId}) DETACH DELETE p")
   void removePost(String canonicalName, Integer postId);
 
@@ -82,4 +81,9 @@ public interface PostRepository extends Neo4jRepository<Post, String> {
   )
   void removeReports(String canonicalName, Integer postId);
 
+  @Query("MATCH (u:User)-[:PUBLISH]->(:Post{id: $postId}) RETURN u.canonicalName")
+  String getPostPublisherCanonicalName(String postId);
+
+  @Query("MATCH (p:Post{id: $postId}) RETURN p.isPublic")
+  boolean postIsPublic(String postId);
 }

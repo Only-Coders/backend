@@ -86,6 +86,7 @@ public class PostController {
   ) throws ApiException {
     var userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     return ResponseEntity.ok(postService.addComment(userDetails.getCanonicalName(), id, createCommentDto));
+  }
 
   @DeleteMapping
   @ApiResponses(value = { @ApiResponse(responseCode = "200", content = { @Content(mediaType = "application/json") }) })
@@ -95,6 +96,29 @@ public class PostController {
     postService.removePost(userDetails.getCanonicalName(), postId);
     return ResponseEntity.ok().build();
   }
+
+  @GetMapping("{id}/comments")
+  @ApiResponses(
+    value = {
+      @ApiResponse(
+        responseCode = "200",
+        content = {
+          @Content(mediaType = "application/json", schema = @Schema(implementation = PaginatedComments.class))
+        }
+      )
+    }
+  )
+  @PreAuthorize("hasAuthority('USER')")
+  ResponseEntity<PaginateDto<ReadCommentDto>> getPostComments(
+    @PathVariable String id,
+    @RequestParam(defaultValue = "0", required = false) @Min(0) Integer page,
+    @RequestParam(defaultValue = "20", required = false) @Min(1) Integer size
+  ) throws ApiException {
+    var userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    return ResponseEntity.ok(postService.getPostComments(userDetails.getCanonicalName(), id, page, size));
+  }
 }
 
 class PaginatedPosts extends PaginateDto<ReadPostDto> {}
+
+class PaginatedComments extends PaginateDto<ReadCommentDto> {}

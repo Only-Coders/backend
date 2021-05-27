@@ -14,4 +14,6 @@ public interface CommentMapper {
   @Mapping(target = "reactions", ignore = true)
   @Mapping(target = "myReaction", ignore = true)
   ReadCommentDto commentToReadCommentDto(Comment comment);
+
+  List<ReadCommentDto> listCommentToListCommentDto(List<Comment> postComments);
 }

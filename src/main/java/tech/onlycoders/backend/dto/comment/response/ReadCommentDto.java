@@ -16,7 +16,7 @@ import tech.onlycoders.backend.model.ReactionType;
 @NoArgsConstructor
 public class ReadCommentDto {
 
-  private String Id;
+  private String id;
   private ReadUserLiteDto publisher;
   private String message;
   private List<ReactionQuantityDto> reactions;

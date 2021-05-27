@@ -220,9 +220,10 @@ public class PostService {
     return reactions;
   }
 
-
   public ReadCommentDto addComment(String canonicalName, String id, CreateCommentDto createCommentDto)
     throws ApiException {
+    validateIsAuthorized(canonicalName, id);
+
     var commenter = userRepository
       .findByCanonicalName(canonicalName)
       .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "error.user-not-found"));
@@ -270,11 +271,45 @@ public class PostService {
     if (reaction != null) return reaction.getType();
     return null;
   }
-  
+
   public void removePost(String canonicalName, Integer postId) {
     reactionRepository.removeReaction(canonicalName, postId);
     postRepository.removeCommentsPost(canonicalName, postId);
     postRepository.removeReports(canonicalName, postId);
     postRepository.removePost(canonicalName, postId);
+  }
+
+  public PaginateDto<ReadCommentDto> getPostComments(
+    String requesterCanonicalName,
+    String postId,
+    Integer page,
+    Integer size
+  ) throws ApiException {
+    validateIsAuthorized(requesterCanonicalName, postId);
+
+    var totalQuantity = commentRepository.getPostCommentsQuantity(postId);
+    var skip = page * size;
+    var pageQuantity = PaginationUtils.getPagesQuantity(totalQuantity, size);
+    var comments = commentMapper.listCommentToListCommentDto(commentRepository.getPostComments(postId, skip, size));
+    for (ReadCommentDto commentDto : comments) {
+      commentDto.setReactions(getCommentReactionQuantity(commentDto.getId()));
+      commentDto.setMyReaction(getCommentUserReaction(requesterCanonicalName, commentDto.getId()));
+    }
+
+    var pagination = new PaginateDto<ReadCommentDto>();
+    pagination.setContent(comments);
+    pagination.setCurrentPage(page);
+    pagination.setTotalPages(pageQuantity);
+    pagination.setTotalElements(totalQuantity);
+    return pagination;
+  }
+
+  private void validateIsAuthorized(String requesterCanonicalName, String postId) throws ApiException {
+    var publisherCanonicalName = postRepository.getPostPublisherCanonicalName(postId);
+    if (
+      !publisherCanonicalName.equals(requesterCanonicalName) &&
+      !userRepository.userIsContact(requesterCanonicalName, requesterCanonicalName) &&
+      !postRepository.postIsPublic(postId)
+    ) throw new ApiException(HttpStatus.FORBIDDEN, "error.not-authorized");
   }
 }
