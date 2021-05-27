@@ -19,8 +19,10 @@ import org.springframework.test.util.ReflectionTestUtils;
 import tech.onlycoders.backend.bean.FirebaseService;
 import tech.onlycoders.backend.dto.auth.request.AuthRequestDto;
 import tech.onlycoders.backend.exception.ApiException;
+import tech.onlycoders.backend.model.Admin;
 import tech.onlycoders.backend.model.Role;
 import tech.onlycoders.backend.model.User;
+import tech.onlycoders.backend.repository.AdminRepository;
 import tech.onlycoders.backend.repository.PersonRepository;
 import tech.onlycoders.backend.repository.UserRepository;
 
@@ -41,6 +43,9 @@ public class AuthServiceTest {
 
   @Mock
   private FirebaseService firebaseService;
+
+  @Mock
+  private AdminRepository adminRepository;
 
   private final EasyRandom ezRandom = new EasyRandom();
 
@@ -64,8 +69,7 @@ public class AuthServiceTest {
     var person = ezRandom.nextObject(User.class);
     person.setRole(Role.builder().name("USER").build());
     var authRequest = ezRandom.nextObject(AuthRequestDto.class);
-    Mockito.when(this.userRepository.findById(person.getId())).thenReturn(Optional.of(person));
-    Mockito.when(this.personRepository.findByEmail(person.getEmail())).thenReturn(Optional.of(person));
+    Mockito.when(this.userRepository.findByEmail(person.getEmail())).thenReturn(Optional.of(person));
     Mockito.when(this.firebaseService.verifyFirebaseToken(anyString())).thenReturn(person.getEmail());
     var token = this.service.authenticate(authRequest);
     assertNotNull(token);
@@ -81,7 +85,7 @@ public class AuthServiceTest {
   @Test
   public void ShouldReturnAnAccessTokenWhenEmailIsVerifiedAndUserIsNotRegistered() throws ApiException {
     var authRequest = ezRandom.nextObject(AuthRequestDto.class);
-    Mockito.when(this.personRepository.findByEmail(anyString())).thenReturn(Optional.empty());
+    Mockito.when(this.userRepository.findByEmail(anyString())).thenReturn(Optional.empty());
     Mockito.when(this.firebaseService.verifyFirebaseToken(anyString())).thenReturn("some@email.com");
     var token = this.service.authenticate(authRequest);
     assertNotNull(token);
@@ -90,7 +94,7 @@ public class AuthServiceTest {
   @Test
   public void ShouldRefreshTokenWhenUserHasNotBeenRegistered() throws ApiException {
     var authRequest = ezRandom.nextObject(AuthRequestDto.class);
-    Mockito.when(this.personRepository.findByEmail(anyString())).thenReturn(Optional.empty());
+    Mockito.when(this.userRepository.findByEmail(anyString())).thenReturn(Optional.empty());
     Mockito.when(this.firebaseService.verifyFirebaseToken(anyString())).thenReturn("some@email.com");
     var authResponseDto = this.service.authenticate(authRequest);
     this.service.refreshToken(authResponseDto.getToken());
@@ -102,29 +106,22 @@ public class AuthServiceTest {
     var person = ezRandom.nextObject(User.class);
     person.setRole(Role.builder().name("USER").build());
     person.setSecurityUpdate(null);
-    Mockito.when(this.userRepository.findById(person.getId())).thenReturn(Optional.of(person));
-    Mockito.when(this.personRepository.findByEmail(person.getEmail())).thenReturn(Optional.of(person));
+    Mockito.when(this.userRepository.findByEmail(person.getEmail())).thenReturn(Optional.of(person));
     Mockito.when(this.firebaseService.verifyFirebaseToken(anyString())).thenReturn(person.getEmail());
     var authResponseDto = this.service.authenticate(authRequest);
     this.service.refreshToken(authResponseDto.getToken());
   }
 
   @Test
-  public void ShouldFailToRefreshTokenWhenUserHasDoneASecurityLogout() throws ApiException {
+  public void ShouldRefreshTokenWhenAdminHasBeenRegistered() throws ApiException {
     var authRequest = ezRandom.nextObject(AuthRequestDto.class);
-
-    Date dt = new Date();
-    DateTime dtOrg = new DateTime(dt);
-    DateTime dtPlusOne = dtOrg.plusDays(1);
-
-    var person = ezRandom.nextObject(User.class);
-    person.setRole(Role.builder().name("USER").build());
-    person.setSecurityUpdate(dtPlusOne.toDate());
-
-    Mockito.when(this.personRepository.findByEmail(person.getEmail())).thenReturn(Optional.of(person));
+    var person = ezRandom.nextObject(Admin.class);
+    person.setEmail("admin@onlycoders.tech");
+    person.setRole(Role.builder().name("ADMIN").build());
+    person.setSecurityUpdate(null);
+    Mockito.when(this.adminRepository.findByEmail(person.getEmail())).thenReturn(Optional.of(person));
     Mockito.when(this.firebaseService.verifyFirebaseToken(anyString())).thenReturn(person.getEmail());
-    Mockito.when(this.userRepository.findById(person.getId())).thenReturn(Optional.of(person));
     var authResponseDto = this.service.authenticate(authRequest);
-    assertThrows(ApiException.class, () -> this.service.refreshToken(authResponseDto.getToken()));
+    this.service.refreshToken(authResponseDto.getToken());
   }
 }

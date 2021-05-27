@@ -43,6 +43,9 @@ public class AdminService {
   }
 
   public ReadAdminDto createAdmin(CreateAdminDto createAdminDto) throws ApiException {
+    if (!createAdminDto.getEmail().endsWith("onlycoders.tech")) {
+      throw new ApiException(HttpStatus.BAD_REQUEST, "error.email-not-allowed");
+    }
     var optionalPerson = this.personRepository.findByEmail(createAdminDto.getEmail());
     if (optionalPerson.isPresent()) {
       throw new ApiException(HttpStatus.CONFLICT, "error.email-taken");
