@@ -1,6 +1,7 @@
 package tech.onlycoders.backend.repository;
 
 import java.util.List;
+import java.util.Optional;
 import org.springframework.data.neo4j.repository.Neo4jRepository;
 import org.springframework.data.neo4j.repository.query.Query;
 import org.springframework.stereotype.Repository;
@@ -13,7 +14,13 @@ public interface WorkPositionRepository extends Neo4jRepository<WorkPosition, St
 
   @Query(
     "MATCH (u:User{canonicalName: $canonicalName})-[:WORKS]->(p:WorkPosition)-[o:ON]->(w) " +
-    "WHERE NOT EXISTS(p.until) RETURN p, collect(o), collect(w)  ORDER BY p.since DESC"
+    "WHERE NOT EXISTS(p.until) RETURN p, collect(o), collect(w) ORDER BY p.since DESC"
   )
   List<WorkPosition> getUserCurrentPositions(String canonicalName);
+
+  @Query(
+    "MATCH (u:User{canonicalName: $canonicalName})-[:WORKS]->(p:WorkPosition)-[o:ON]->(w) " +
+    "WHERE NOT EXISTS(p.until) RETURN p, collect(o), collect(w) ORDER BY p.since DESC limit 1;"
+  )
+  Optional<WorkPosition> getUserCurrentPosition(String canonicalName);
 }

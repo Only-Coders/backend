@@ -55,6 +55,7 @@ public class AdminServiceTest {
   @Test
   public void ShouldFailWhenFirebaseReturnsException() throws ApiException {
     var createAdminDto = ezRandom.nextObject(CreateAdminDto.class);
+    createAdminDto.setEmail("admin@onlycoders.tech");
     Mockito.doThrow(ApiException.class).when(this.firebaseService).createUser(anyString());
     assertThrows(ApiException.class, () -> this.service.createAdmin(createAdminDto));
   }
@@ -62,6 +63,7 @@ public class AdminServiceTest {
   @Test
   public void ShouldFailWhenUserAlreadyExists() {
     var createAdminDto = ezRandom.nextObject(CreateAdminDto.class);
+    createAdminDto.setEmail("admin@onlycoders.tech");
     Mockito.when(this.personRepository.findByEmail(anyString())).thenReturn(Optional.of(new Admin()));
     assertThrows(ApiException.class, () -> this.service.createAdmin(createAdminDto));
   }
@@ -69,12 +71,19 @@ public class AdminServiceTest {
   @Test
   public void ShouldCreateAdmin() throws ApiException {
     var createAdminDto = ezRandom.nextObject(CreateAdminDto.class);
+    createAdminDto.setEmail("admin@onlycoders.tech");
     Mockito.when(this.personRepository.findByEmail(anyString())).thenReturn(Optional.empty());
     Mockito.when(this.roleRepository.findById(anyString())).thenReturn(Optional.of(new Role()));
     var result = this.service.createAdmin(createAdminDto);
     assertEquals(result.getEmail(), createAdminDto.getEmail());
     assertEquals(result.getFirstName(), createAdminDto.getFirstName());
     assertEquals(result.getLastName(), createAdminDto.getLastName());
+  }
+
+  @Test
+  public void ShouldFailToCreateAdminWhenDomainIsNotAllowed() {
+    var createAdminDto = ezRandom.nextObject(CreateAdminDto.class);
+    assertThrows(ApiException.class, () -> this.service.createAdmin(createAdminDto));
   }
 
   @Test
