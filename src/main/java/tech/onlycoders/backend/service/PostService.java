@@ -213,4 +213,11 @@ public class PostService {
 
     return reactions;
   }
+
+  public void removePost(String canonicalName, Integer postId) {
+    reactionRepository.removeReaction(canonicalName, postId);
+    postRepository.removeCommentsPost(canonicalName, postId);
+    postRepository.removeReports(canonicalName, postId);
+    postRepository.removePost(canonicalName, postId);
+  }
 }
