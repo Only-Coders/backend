@@ -8,17 +8,16 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tech.onlycoders.backend.dto.PaginateDto;
+import tech.onlycoders.backend.dto.ReactionQuantityDto;
+import tech.onlycoders.backend.dto.comment.request.CreateCommentDto;
+import tech.onlycoders.backend.dto.comment.response.ReadCommentDto;
 import tech.onlycoders.backend.dto.post.request.CreatePostDto;
-import tech.onlycoders.backend.dto.post.response.ReactionQuantityDto;
 import tech.onlycoders.backend.dto.post.response.ReadPostDto;
-import tech.onlycoders.backend.dto.tag.response.ReadTagDto;
 import tech.onlycoders.backend.exception.ApiException;
+import tech.onlycoders.backend.mapper.CommentMapper;
 import tech.onlycoders.backend.mapper.PostMapper;
 import tech.onlycoders.backend.model.*;
-import tech.onlycoders.backend.repository.PostRepository;
-import tech.onlycoders.backend.repository.ReactionRepository;
-import tech.onlycoders.backend.repository.TagRepository;
-import tech.onlycoders.backend.repository.UserRepository;
+import tech.onlycoders.backend.repository.*;
 import tech.onlycoders.backend.utils.CanonicalFactory;
 import tech.onlycoders.backend.utils.PaginationUtils;
 import tech.onlycoders.notificator.dto.EventType;
@@ -32,8 +31,10 @@ public class PostService {
   private final PostRepository postRepository;
   private final TagRepository tagRepository;
   private final ReactionRepository reactionRepository;
+  private final CommentRepository commentRepository;
 
   private final PostMapper postMapper;
+  private final CommentMapper commentMapper;
   private final NotificatorService notificatorService;
 
   public PostService(
@@ -41,14 +42,19 @@ public class PostService {
     PostRepository postRepository,
     TagRepository tagRepository,
     ReactionRepository reactionRepository,
+    CommentRepository commentRepository,
     PostMapper postMapper,
+    CommentMapper commentMapper,
     NotificatorService notificatorService
   ) {
     this.userRepository = userRepository;
     this.postRepository = postRepository;
     this.tagRepository = tagRepository;
     this.reactionRepository = reactionRepository;
+    this.commentRepository = commentRepository;
+
     this.postMapper = postMapper;
+    this.commentMapper = commentMapper;
     this.notificatorService = notificatorService;
   }
 
@@ -214,10 +220,96 @@ public class PostService {
     return reactions;
   }
 
+  public ReadCommentDto addComment(String canonicalName, String id, CreateCommentDto createCommentDto)
+    throws ApiException {
+    validateIsAuthorized(canonicalName, id);
+
+    var commenter = userRepository
+      .findByCanonicalName(canonicalName)
+      .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "error.user-not-found"));
+
+    var post = postRepository
+      .findById(id)
+      .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "error.post-not-found"));
+
+    var comment = Comment.builder().publisher(commenter).message(createCommentDto.getMessage()).build();
+    commentRepository.save(comment);
+
+    postRepository.addComment(post.getId(), comment.getId());
+
+    var commentDto = commentMapper.commentToReadCommentDto(comment);
+    commentDto.setReactions(getCommentReactionQuantity(comment.getId()));
+    commentDto.setMyReaction(getCommentUserReaction(canonicalName, comment.getId()));
+
+    return commentDto;
+  }
+
+  private List<ReactionQuantityDto> getCommentReactionQuantity(String id) {
+    var reactions = new ArrayList<ReactionQuantityDto>();
+
+    reactions.add(
+      ReactionQuantityDto
+        .builder()
+        .reaction(ReactionType.APPROVE)
+        .quantity(reactionRepository.getCommentReactionQuantity(id, ReactionType.APPROVE))
+        .build()
+    );
+
+    reactions.add(
+      ReactionQuantityDto
+        .builder()
+        .reaction(ReactionType.REJECT)
+        .quantity(reactionRepository.getCommentReactionQuantity(id, ReactionType.REJECT))
+        .build()
+    );
+
+    return reactions;
+  }
+
+  private ReactionType getCommentUserReaction(String canonicalName, String commentId) {
+    var reaction = reactionRepository.getCommentUserReaction(canonicalName, commentId);
+    if (reaction != null) return reaction.getType();
+    return null;
+  }
+
   public void removePost(String canonicalName, Integer postId) {
     reactionRepository.removeReaction(canonicalName, postId);
     postRepository.removeCommentsPost(canonicalName, postId);
     postRepository.removeReports(canonicalName, postId);
     postRepository.removePost(canonicalName, postId);
+  }
+
+  public PaginateDto<ReadCommentDto> getPostComments(
+    String requesterCanonicalName,
+    String postId,
+    Integer page,
+    Integer size
+  ) throws ApiException {
+    validateIsAuthorized(requesterCanonicalName, postId);
+
+    var totalQuantity = commentRepository.getPostCommentsQuantity(postId);
+    var skip = page * size;
+    var pageQuantity = PaginationUtils.getPagesQuantity(totalQuantity, size);
+    var comments = commentMapper.listCommentToListCommentDto(commentRepository.getPostComments(postId, skip, size));
+    for (ReadCommentDto commentDto : comments) {
+      commentDto.setReactions(getCommentReactionQuantity(commentDto.getId()));
+      commentDto.setMyReaction(getCommentUserReaction(requesterCanonicalName, commentDto.getId()));
+    }
+
+    var pagination = new PaginateDto<ReadCommentDto>();
+    pagination.setContent(comments);
+    pagination.setCurrentPage(page);
+    pagination.setTotalPages(pageQuantity);
+    pagination.setTotalElements(totalQuantity);
+    return pagination;
+  }
+
+  private void validateIsAuthorized(String requesterCanonicalName, String postId) throws ApiException {
+    var publisherCanonicalName = postRepository.getPostPublisherCanonicalName(postId);
+    if (
+      !publisherCanonicalName.equals(requesterCanonicalName) &&
+      !userRepository.userIsContact(requesterCanonicalName, requesterCanonicalName) &&
+      !postRepository.postIsPublic(postId)
+    ) throw new ApiException(HttpStatus.FORBIDDEN, "error.not-authorized");
   }
 }

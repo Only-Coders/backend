@@ -1,4 +1,4 @@
-package tech.onlycoders.backend.dto.post.response;
+package tech.onlycoders.backend.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
