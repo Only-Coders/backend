@@ -156,10 +156,21 @@ public class UserController {
   @PreAuthorize("hasAuthority('USER')")
   @PostMapping("/tags/{canonicalName}")
   @Operation(summary = "Adds a tag to the user.")
-  ResponseEntity<?> addTag(@PathVariable @NotBlank String canonicalName) throws ApiException {
+  ResponseEntity<?> followTag(@PathVariable @NotBlank String canonicalName) throws ApiException {
     var userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     var email = userDetails.getEmail();
     this.tagService.addTagToUser(email, canonicalName);
+    return ResponseEntity.ok().build();
+  }
+
+  @ApiResponses(value = { @ApiResponse(responseCode = "200", content = { @Content(mediaType = "application/json") }) })
+  @PreAuthorize("hasAuthority('USER')")
+  @DeleteMapping("/tags/{canonicalName}")
+  @Operation(summary = "Remove a tag from the user.")
+  ResponseEntity<?> unFollowTag(@PathVariable @NotBlank String canonicalName) throws ApiException {
+    var userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    var email = userDetails.getEmail();
+    this.tagService.removeTagFromUser(email, canonicalName);
     return ResponseEntity.ok().build();
   }
 
