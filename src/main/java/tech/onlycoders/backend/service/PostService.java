@@ -303,12 +303,11 @@ public class PostService {
 
   private ReactionType getCommentUserReaction(String canonicalName, String commentId) {
     var reaction = reactionRepository.getCommentUserReaction(canonicalName, commentId);
-    if (reaction != null) return reaction.getType();
-    return null;
+    return reaction.map(Reaction::getType).orElse(null);
   }
 
   public void removePost(String canonicalName, String postId) {
-    reactionRepository.removeReaction(canonicalName, postId);
+    reactionRepository.removePostReaction(canonicalName, postId);
     postRepository.removeCommentsPost(canonicalName, postId);
     postRepository.removeReports(canonicalName, postId);
     postRepository.removePost(canonicalName, postId);
@@ -377,8 +376,7 @@ public class PostService {
     this.reactionRepository.getPostUserReaction(canonicalName, post.getId())
       .ifPresentOrElse(
         reaction -> {
-          reaction.setType(createReactionDto.getReactionType());
-          this.reactionRepository.save(reaction);
+          this.reactionRepository.updateReaction(reaction.getId(), createReactionDto.getReactionType());
         },
         () -> {
           var reaction = Reaction.builder().person(user).type(createReactionDto.getReactionType()).build();
@@ -389,6 +387,6 @@ public class PostService {
   }
 
   public void deletePostReaction(String canonicalName, String postId) {
-    this.reactionRepository.removeReaction(canonicalName, postId);
+    this.reactionRepository.removePostReaction(canonicalName, postId);
   }
 }

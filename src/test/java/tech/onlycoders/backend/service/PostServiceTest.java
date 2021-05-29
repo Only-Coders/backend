@@ -242,7 +242,7 @@ public class PostServiceTest {
 
     Mockito.when(commentRepository.getPostCommentsQuantity(anyString())).thenReturn(0);
     Mockito.when(commentRepository.getPostComments(anyString(), anyInt(), anyInt())).thenReturn(list);
-    Mockito.when(this.reactionRepository.getCommentUserReaction(anyString(), anyString())).thenReturn(null);
+    Mockito.when(this.reactionRepository.getCommentUserReaction(anyString(), anyString())).thenReturn(Optional.empty());
     Mockito
       .when(this.reactionRepository.getCommentReactionQuantity(anyString(), any(ReactionType.class)))
       .thenReturn(0L);
