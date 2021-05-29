@@ -40,6 +40,9 @@ public interface PostRepository extends Neo4jRepository<Post, String> {
     "        MATCH (:User{canonicalName: $canonicalName})-[:IS_CONNECTED]-(u:User)-[r:PUBLISH]->(p:Post)\n" +
     "        RETURN p,r,u\n" +
     "    UNION\n" +
+    "        MATCH (u:User{canonicalName: $canonicalName})-[r:PUBLISH]->(p:Post)\n" +
+    "        RETURN p,r,u\n" +
+    "    UNION\n" +
     "        MATCH (:User{canonicalName: $canonicalName})-[:IS_INTERESTED]->(:Tag)<-[:HAS]-(p:Post{isPublic:true})<-[r:PUBLISH]-(u:User)\n" +
     "        RETURN p,r,u\n" +
     "} \n" +
