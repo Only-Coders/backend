@@ -14,7 +14,7 @@ import tech.onlycoders.backend.service.PostService;
 import tech.onlycoders.backend.service.UserService;
 
 @RestController
-@RequestMapping("/api/comment")
+@RequestMapping("/api/comments")
 @SecurityRequirement(name = "bearerAuth")
 public class CommentController {
 
