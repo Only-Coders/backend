@@ -20,6 +20,7 @@ import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import tech.onlycoders.backend.dto.comment.request.CreateCommentDto;
 import tech.onlycoders.backend.dto.post.request.CreatePostDto;
+import tech.onlycoders.backend.dto.post.request.CreateReactionDto;
 import tech.onlycoders.backend.exception.ApiException;
 import tech.onlycoders.backend.mapper.*;
 import tech.onlycoders.backend.model.*;
@@ -226,7 +227,7 @@ public class PostServiceTest {
     var canonicalName = ezRandom.nextObject(String.class);
     var postId = ezRandom.nextObject(String.class);
 
-    Mockito.doNothing().when(reactionRepository).removeReaction(anyString(), anyString());
+    Mockito.doNothing().when(reactionRepository).removePostReaction(anyString(), anyString());
     Mockito.doNothing().when(postRepository).removeCommentsPost(anyString(), anyString());
     Mockito.doNothing().when(postRepository).removeReports(anyString(), anyString());
     Mockito.doNothing().when(postRepository).removePost(anyString(), anyString());
@@ -257,9 +258,6 @@ public class PostServiceTest {
   @Test
   @MockitoSettings(strictness = Strictness.LENIENT)
   public void ShouldFailReturnPostCommentsWhenUserIsNotAllowed() {
-    var list = new ArrayList<Comment>();
-    list.add(new Comment());
-
     Mockito.when(postRepository.getPostPublisherCanonicalName(anyString())).thenReturn("cname");
     Mockito.when(postRepository.postIsPublic(anyString())).thenReturn(false);
     Mockito.when(userRepository.userIsContact(anyString(), anyString())).thenReturn(false);
@@ -283,5 +281,71 @@ public class PostServiceTest {
     Mockito.when(postRepository.removeComment(anyString(), anyString())).thenReturn(Boolean.TRUE);
 
     this.service.removeComment(canonicalName, commentId);
+  }
+
+  @Test
+  public void ShouldReactToPost() throws ApiException {
+    var post = ezRandom.nextObject(Post.class);
+    var user = ezRandom.nextObject(User.class);
+    var createReactionDto = ezRandom.nextObject(CreateReactionDto.class);
+
+    Mockito.when(postRepository.findById(post.getId())).thenReturn(Optional.of(post));
+    Mockito.when(userRepository.findByCanonicalName(user.getCanonicalName())).thenReturn(Optional.of(user));
+
+    Mockito
+      .when(reactionRepository.getPostUserReaction(user.getCanonicalName(), post.getId()))
+      .thenReturn(Optional.empty());
+
+    service.reactToPost(user.getCanonicalName(), post.getId(), createReactionDto);
+  }
+
+  @Test
+  public void ShouldUpdatePostReaction() throws ApiException {
+    var reaction = ezRandom.nextObject(Reaction.class);
+    var post = ezRandom.nextObject(Post.class);
+    var user = ezRandom.nextObject(User.class);
+    var createReactionDto = ezRandom.nextObject(CreateReactionDto.class);
+
+    Mockito.when(postRepository.findById(post.getId())).thenReturn(Optional.of(post));
+    Mockito.when(userRepository.findByCanonicalName(user.getCanonicalName())).thenReturn(Optional.of(user));
+
+    Mockito
+      .when(reactionRepository.getPostUserReaction(user.getCanonicalName(), post.getId()))
+      .thenReturn(Optional.of(reaction));
+
+    service.reactToPost(user.getCanonicalName(), post.getId(), createReactionDto);
+  }
+
+  @Test
+  public void ShouldFailToReactToPostPostNotFound() {
+    var post = ezRandom.nextObject(Post.class);
+    var user = ezRandom.nextObject(User.class);
+    var createReactionDto = ezRandom.nextObject(CreateReactionDto.class);
+
+    Mockito.when(postRepository.findById(post.getId())).thenReturn(Optional.empty());
+
+    assertThrows(Exception.class, () -> service.reactToPost(user.getCanonicalName(), post.getId(), createReactionDto));
+  }
+
+  @Test
+  public void ShouldFailToReactToPostUserNotFound() {
+    var post = ezRandom.nextObject(Post.class);
+    var user = ezRandom.nextObject(User.class);
+    var createReactionDto = ezRandom.nextObject(CreateReactionDto.class);
+
+    Mockito.when(postRepository.findById(post.getId())).thenReturn(Optional.of(post));
+    Mockito.when(userRepository.findByCanonicalName(user.getCanonicalName())).thenReturn(Optional.empty());
+
+    assertThrows(Exception.class, () -> service.reactToPost(user.getCanonicalName(), post.getId(), createReactionDto));
+  }
+
+  @Test
+  public void ShouldDeletePostReaction() {
+    var post = ezRandom.nextObject(Post.class);
+    var user = ezRandom.nextObject(User.class);
+
+    Mockito.doNothing().when(reactionRepository).removePostReaction(user.getCanonicalName(), post.getId());
+
+    service.deletePostReaction(user.getCanonicalName(), post.getId());
   }
 }
