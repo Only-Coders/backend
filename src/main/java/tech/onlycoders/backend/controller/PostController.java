@@ -17,6 +17,7 @@ import tech.onlycoders.backend.dto.PaginateDto;
 import tech.onlycoders.backend.dto.comment.request.CreateCommentDto;
 import tech.onlycoders.backend.dto.comment.response.ReadCommentDto;
 import tech.onlycoders.backend.dto.post.request.CreatePostDto;
+import tech.onlycoders.backend.dto.post.request.CreateReactionDto;
 import tech.onlycoders.backend.dto.post.response.ReadPostDto;
 import tech.onlycoders.backend.exception.ApiException;
 import tech.onlycoders.backend.service.PostService;
@@ -117,6 +118,51 @@ public class PostController {
   ) throws ApiException {
     var userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     return ResponseEntity.ok(postService.getPostComments(userDetails.getCanonicalName(), id, page, size));
+  }
+
+  @PostMapping("{postId}/reactions")
+  @Operation(
+    summary = "Create a post reaction",
+    description = "If the endpoint is called twice in the same post then the reaction will be merged"
+  )
+  @ApiResponses(
+    value = {
+      @ApiResponse(
+        responseCode = "200",
+        content = {
+          @Content(mediaType = "application/json", schema = @Schema(implementation = PaginatedComments.class))
+        }
+      )
+    }
+  )
+  @PreAuthorize("hasAuthority('USER')")
+  ResponseEntity<?> reactToPost(@PathVariable String postId, @RequestBody CreateReactionDto createReactionDto)
+    throws ApiException {
+    var userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    postService.reactToPost(userDetails.getCanonicalName(), postId, createReactionDto);
+    return ResponseEntity.ok().build();
+  }
+
+  @DeleteMapping("{postId}/reactions")
+  @Operation(
+    summary = "Deletes a post reaction",
+    description = "If a reaction exists for the given post it will get deleted."
+  )
+  @ApiResponses(
+    value = {
+      @ApiResponse(
+        responseCode = "200",
+        content = {
+          @Content(mediaType = "application/json", schema = @Schema(implementation = PaginatedComments.class))
+        }
+      )
+    }
+  )
+  @PreAuthorize("hasAuthority('USER')")
+  ResponseEntity<?> deletePostReaction(@PathVariable String postId) throws ApiException {
+    var userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    postService.deletePostReaction(userDetails.getCanonicalName(), postId);
+    return ResponseEntity.ok().build();
   }
 }
 
