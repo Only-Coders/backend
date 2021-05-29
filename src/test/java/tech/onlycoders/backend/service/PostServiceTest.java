@@ -237,8 +237,7 @@ public class PostServiceTest {
   @Test
   @MockitoSettings(strictness = Strictness.LENIENT)
   public void ShouldReturnPostComments() throws ApiException {
-    var list = new ArrayList<Comment>();
-    list.add(new Comment());
+    var list = ezRandom.objects(Comment.class, 10).collect(Collectors.toList());
 
     Mockito.when(commentRepository.getPostCommentsQuantity(anyString())).thenReturn(0);
     Mockito.when(commentRepository.getPostComments(anyString(), anyInt(), anyInt())).thenReturn(list);

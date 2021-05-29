@@ -1,9 +1,6 @@
 package tech.onlycoders.backend.service;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -202,6 +199,8 @@ public class PostService {
     var pageQuantity = PaginationUtils.getPagesQuantity(totalQuantity, size);
     var readPostDtoList = postMapper.setPostToListPostDto(postRepository.getFeedPosts(canonicalName, skip, size));
 
+    var medalsCache = new HashMap<String, Integer>();
+
     readPostDtoList
       .parallelStream()
       .forEach(
@@ -209,6 +208,8 @@ public class PostService {
           post.setReactions(getPostReactionQuantity(post.getId()));
           post.setCommentQuantity(postRepository.getPostCommentsQuantity(post.getId()));
           post.setMyReaction(getPostUserReaction(canonicalName, post.getId()));
+          var medals = getAmountOfMedals(medalsCache, post.getPublisher().getCanonicalName());
+          post.getPublisher().setAmountOfMedals(medals);
         }
       );
 
@@ -318,10 +319,18 @@ public class PostService {
     var skip = page * size;
     var pageQuantity = PaginationUtils.getPagesQuantity(totalQuantity, size);
     var comments = commentMapper.listCommentToListCommentDto(commentRepository.getPostComments(postId, skip, size));
-    for (ReadCommentDto commentDto : comments) {
-      commentDto.setReactions(getCommentReactionQuantity(commentDto.getId()));
-      commentDto.setMyReaction(getCommentUserReaction(requesterCanonicalName, commentDto.getId()));
-    }
+
+    var medalsCache = new HashMap<String, Integer>();
+    comments
+      .parallelStream()
+      .forEach(
+        readCommentDto -> {
+          readCommentDto.setReactions(getCommentReactionQuantity(readCommentDto.getId()));
+          readCommentDto.setMyReaction(getCommentUserReaction(requesterCanonicalName, readCommentDto.getId()));
+          var medals = getAmountOfMedals(medalsCache, readCommentDto.getPublisher().getCanonicalName());
+          readCommentDto.getPublisher().setAmountOfMedals(medals);
+        }
+      );
 
     var pagination = new PaginateDto<ReadCommentDto>();
     pagination.setContent(comments);
@@ -329,6 +338,16 @@ public class PostService {
     pagination.setTotalPages(pageQuantity);
     pagination.setTotalElements(totalQuantity);
     return pagination;
+  }
+
+  private Integer getAmountOfMedals(HashMap<String, Integer> medalsCache, String userCanonicalName) {
+    synchronized (this) {
+      if (!medalsCache.containsKey(userCanonicalName)) {
+        var medals = userRepository.countUserMedals(userCanonicalName);
+        medalsCache.put(userCanonicalName, medals);
+      }
+      return medalsCache.get(userCanonicalName);
+    }
   }
 
   private void validateIsAuthorized(String requesterCanonicalName, String postId) throws ApiException {
