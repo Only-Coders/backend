@@ -266,4 +266,22 @@ public class PostServiceTest {
 
     assertThrows(Exception.class, () -> service.getPostComments("asd", "postid", 0, 10));
   }
+
+  @Test
+  @MockitoSettings(strictness = Strictness.LENIENT)
+  public void ShouldFailDeleteComment() {
+    Mockito.when(postRepository.removeComment(anyString(), anyString())).thenReturn(Boolean.FALSE);
+    assertThrows(Exception.class, () -> service.removeComment("a", "1"));
+  }
+
+  @Test
+  @MockitoSettings(strictness = Strictness.LENIENT)
+  public void ShouldDeleteComment() throws ApiException {
+    var canonicalName = ezRandom.nextObject(String.class);
+    var commentId = ezRandom.nextObject(String.class);
+
+    Mockito.when(postRepository.removeComment(anyString(), anyString())).thenReturn(Boolean.TRUE);
+
+    this.service.removeComment(canonicalName, commentId);
+  }
 }
