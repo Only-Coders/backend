@@ -166,7 +166,7 @@ public class PostController {
     return ResponseEntity.ok().build();
   }
 
-  @PostMapping("{id}/report")
+  @PostMapping("{id}/reports")
   @ApiResponses(value = { @ApiResponse(responseCode = "200", content = { @Content(mediaType = "application/json") }) })
   @PreAuthorize("hasAuthority('USER')")
   ResponseEntity<?> reportPost(@PathVariable String id, @RequestBody @Valid CreatePostReportDto createPostReportDto)
