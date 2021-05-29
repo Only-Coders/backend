@@ -12,6 +12,7 @@ import tech.onlycoders.backend.dto.ReactionQuantityDto;
 import tech.onlycoders.backend.dto.comment.request.CreateCommentDto;
 import tech.onlycoders.backend.dto.comment.response.ReadCommentDto;
 import tech.onlycoders.backend.dto.post.request.CreatePostDto;
+import tech.onlycoders.backend.dto.post.request.CreateReactionDto;
 import tech.onlycoders.backend.dto.post.response.ReadPostDto;
 import tech.onlycoders.backend.exception.ApiException;
 import tech.onlycoders.backend.mapper.CommentMapper;
@@ -337,5 +338,31 @@ public class PostService {
       !userRepository.userIsContact(requesterCanonicalName, requesterCanonicalName) &&
       !postRepository.postIsPublic(postId)
     ) throw new ApiException(HttpStatus.FORBIDDEN, "error.not-authorized");
+  }
+
+  public void reactToPost(String canonicalName, String postId, CreateReactionDto createReactionDto)
+    throws ApiException {
+    var post =
+      this.postRepository.findById(postId)
+        .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "error.post-not-found"));
+    var user =
+      this.userRepository.findByCanonicalName(canonicalName)
+        .orElseThrow(() -> new ApiException(HttpStatus.INTERNAL_SERVER_ERROR, "error.500"));
+    this.reactionRepository.getPostUserReaction(canonicalName, post.getId())
+      .ifPresentOrElse(
+        reaction -> {
+          reaction.setType(createReactionDto.getReactionType());
+          this.reactionRepository.save(reaction);
+        },
+        () -> {
+          var reaction = Reaction.builder().person(user).type(createReactionDto.getReactionType()).build();
+          this.reactionRepository.save(reaction);
+          this.reactionRepository.linkWithPost(reaction.getId(), post.getId());
+        }
+      );
+  }
+
+  public void deletePostReaction(String canonicalName, String postId) {
+    this.reactionRepository.removeReaction(canonicalName, postId);
   }
 }
