@@ -90,10 +90,10 @@ public class PostController {
     return ResponseEntity.ok(postService.addComment(userDetails.getCanonicalName(), id, createCommentDto));
   }
 
-  @DeleteMapping
+  @DeleteMapping("{postId}")
   @ApiResponses(value = { @ApiResponse(responseCode = "200", content = { @Content(mediaType = "application/json") }) })
   @PreAuthorize("hasAuthority('USER')")
-  ResponseEntity<?> removePost(@RequestBody @Valid String postId) throws ApiException {
+  ResponseEntity<?> removePost(@PathVariable String postId) {
     var userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     postService.removePost(userDetails.getCanonicalName(), postId);
     return ResponseEntity.ok().build();

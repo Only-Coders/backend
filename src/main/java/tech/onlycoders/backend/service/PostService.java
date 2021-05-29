@@ -272,6 +272,13 @@ public class PostService {
     return commentDto;
   }
 
+  public void removeComment(String canonicalName, String commentId) throws ApiException {
+    var deleted = this.postRepository.removeComment(canonicalName, commentId);
+    if (!deleted) {
+      throw new ApiException(HttpStatus.FORBIDDEN, "error.not-authorized");
+    }
+  }
+
   private List<ReactionQuantityDto> getCommentReactionQuantity(String id) {
     var reactions = new ArrayList<ReactionQuantityDto>();
 

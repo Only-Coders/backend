@@ -88,4 +88,13 @@ public interface PostRepository extends Neo4jRepository<Post, String> {
 
   @Query("MATCH (p:Post{id: $postId}) RETURN p.isPublic")
   boolean postIsPublic(String postId);
+
+  @Query(
+    "CALL { " +
+    "  MATCH (c:Comment{id:$commentId})-[]->(Post)<-[:PUBLISH]-(:User{canonicalName: $canonicalName}) RETURN c " +
+    "  UNION " +
+    "  MATCH (c:Comment{id: $commentId})<-[:WRITES]-(:User{canonicalName:$canonicalName}) RETURN c " +
+    "} DETACH DELETE c RETURN COUNT(c)>=1;"
+  )
+  Boolean removeComment(String canonicalName, String commentId);
 }
