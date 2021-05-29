@@ -124,15 +124,26 @@ public class PostService {
     return list;
   }
 
-  public PaginateDto<ReadPostDto> getMyPosts(String email, Integer page, Integer size) {
-    return getReadPostDtoPaginateDto(email, page, size);
+  public PaginateDto<ReadPostDto> getMyPosts(String canonicalName, Integer page, Integer size) {
+    var paginatedDto = getReadPostDtoPaginateDto(canonicalName, page, size);
+    paginatedDto
+      .getContent()
+      .parallelStream()
+      .forEach(
+        post -> {
+          post.setMyReaction(getPostUserReaction(canonicalName, post.getId()));
+          post.setReactions(getPostReactionQuantity(post.getId()));
+          post.setCommentQuantity(postRepository.getPostCommentsQuantity(post.getId()));
+        }
+      );
+    return paginatedDto;
   }
 
-  private PaginateDto<ReadPostDto> getReadPostDtoPaginateDto(String email, Integer page, Integer size) {
+  private PaginateDto<ReadPostDto> getReadPostDtoPaginateDto(String canonicalName, Integer page, Integer size) {
     var skip = page * size;
-    var posts = postRepository.getPosts(email, skip, size);
+    var posts = postRepository.getPosts(canonicalName, skip, size);
 
-    var totalQuantity = postRepository.countUserPosts(email);
+    var totalQuantity = postRepository.countUserPosts(canonicalName);
     return getReadPostDtoPaginateDto(page, size, posts, totalQuantity);
   }
 
@@ -169,7 +180,18 @@ public class PostService {
       var posts = postRepository.getUserPublicPosts(targetCanonicalName, skip, size);
 
       var totalQuantity = postRepository.countUserPublicPosts(targetCanonicalName);
-      return getReadPostDtoPaginateDto(page, size, posts, totalQuantity);
+      var paginatedDto = getReadPostDtoPaginateDto(page, size, posts, totalQuantity);
+      paginatedDto
+        .getContent()
+        .parallelStream()
+        .forEach(
+          post -> {
+            post.setMyReaction(getPostUserReaction(requesterCanonicalName, post.getId()));
+            post.setReactions(getPostReactionQuantity(post.getId()));
+            post.setCommentQuantity(postRepository.getPostCommentsQuantity(post.getId()));
+          }
+        );
+      return paginatedDto;
     }
   }
 
@@ -177,15 +199,20 @@ public class PostService {
     var totalQuantity = postRepository.getFeedPostsQuantity(canonicalName);
     var skip = page * size;
     var pageQuantity = PaginationUtils.getPagesQuantity(totalQuantity, size);
-    var posts = postMapper.setPostToListPostDto(postRepository.getFeedPosts(canonicalName, skip, size));
-    for (ReadPostDto post : posts) {
-      post.setReactions(getPostReactionQuantity(post.getId()));
-      post.setCommentQuantity(postRepository.getPostCommentsQuantity(post.getId()));
-      post.setMyReaction(getPostUserReaction(canonicalName, post.getId()));
-    }
+    var readPostDtoList = postMapper.setPostToListPostDto(postRepository.getFeedPosts(canonicalName, skip, size));
+
+    readPostDtoList
+      .parallelStream()
+      .forEach(
+        post -> {
+          post.setReactions(getPostReactionQuantity(post.getId()));
+          post.setCommentQuantity(postRepository.getPostCommentsQuantity(post.getId()));
+          post.setMyReaction(getPostUserReaction(canonicalName, post.getId()));
+        }
+      );
 
     var pagination = new PaginateDto<ReadPostDto>();
-    pagination.setContent(posts);
+    pagination.setContent(readPostDtoList);
     pagination.setCurrentPage(page);
     pagination.setTotalPages(pageQuantity);
     pagination.setTotalElements(totalQuantity);
@@ -194,18 +221,17 @@ public class PostService {
 
   private ReactionType getPostUserReaction(String canonicalName, String postId) {
     var reaction = reactionRepository.getPostUserReaction(canonicalName, postId);
-    if (reaction != null) return reaction.getType();
-    return null;
+    return reaction.map(Reaction::getType).orElse(null);
   }
 
-  private List<ReactionQuantityDto> getPostReactionQuantity(String id) {
+  private List<ReactionQuantityDto> getPostReactionQuantity(String postId) {
     var reactions = new ArrayList<ReactionQuantityDto>();
 
     reactions.add(
       ReactionQuantityDto
         .builder()
         .reaction(ReactionType.APPROVE)
-        .quantity(reactionRepository.getPostReactionQuantity(id, ReactionType.APPROVE))
+        .quantity(reactionRepository.getPostReactionQuantity(postId, ReactionType.APPROVE))
         .build()
     );
 
@@ -213,7 +239,7 @@ public class PostService {
       ReactionQuantityDto
         .builder()
         .reaction(ReactionType.REJECT)
-        .quantity(reactionRepository.getPostReactionQuantity(id, ReactionType.REJECT))
+        .quantity(reactionRepository.getPostReactionQuantity(postId, ReactionType.REJECT))
         .build()
     );
 
@@ -272,7 +298,7 @@ public class PostService {
     return null;
   }
 
-  public void removePost(String canonicalName, Integer postId) {
+  public void removePost(String canonicalName, String postId) {
     reactionRepository.removeReaction(canonicalName, postId);
     postRepository.removeCommentsPost(canonicalName, postId);
     postRepository.removeReports(canonicalName, postId);

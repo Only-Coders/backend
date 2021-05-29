@@ -1,5 +1,6 @@
 package tech.onlycoders.backend.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -91,7 +92,7 @@ public class PostController {
   @DeleteMapping
   @ApiResponses(value = { @ApiResponse(responseCode = "200", content = { @Content(mediaType = "application/json") }) })
   @PreAuthorize("hasAuthority('USER')")
-  ResponseEntity<?> removePost(@RequestBody @Valid Integer postId) throws ApiException {
+  ResponseEntity<?> removePost(@RequestBody @Valid String postId) throws ApiException {
     var userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     postService.removePost(userDetails.getCanonicalName(), postId);
     return ResponseEntity.ok().build();

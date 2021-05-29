@@ -6,7 +6,6 @@ import static org.mockito.ArgumentMatchers.*;
 
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import org.jeasy.random.EasyRandom;
@@ -19,8 +18,6 @@ import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import tech.onlycoders.backend.dto.comment.request.CreateCommentDto;
 import tech.onlycoders.backend.dto.post.request.CreatePostDto;
 import tech.onlycoders.backend.exception.ApiException;
@@ -178,7 +175,7 @@ public class PostServiceTest {
     Mockito.when(postRepository.getPostCommentsQuantity(anyString())).thenReturn(0L);
     Mockito
       .when(reactionRepository.getPostUserReaction(anyString(), anyString()))
-      .thenReturn(Reaction.builder().type(ReactionType.APPROVE).build());
+      .thenReturn(Optional.of(Reaction.builder().type(ReactionType.APPROVE).build()));
     Mockito.when(reactionRepository.getPostReactionQuantity(anyString(), any(ReactionType.class))).thenReturn(1L);
 
     var result = this.service.getFeedPosts("cname", 0, 10);
@@ -194,7 +191,7 @@ public class PostServiceTest {
     Mockito.when(postRepository.getFeedPostsQuantity(anyString())).thenReturn(1);
     Mockito.when(postRepository.getFeedPosts(anyString(), anyInt(), anyInt())).thenReturn(list);
     Mockito.when(postRepository.getPostCommentsQuantity(anyString())).thenReturn(0L);
-    Mockito.when(reactionRepository.getPostUserReaction(anyString(), anyString())).thenReturn(null);
+    Mockito.when(reactionRepository.getPostUserReaction(anyString(), anyString())).thenReturn(Optional.empty());
     Mockito.when(reactionRepository.getPostReactionQuantity(anyString(), any(ReactionType.class))).thenReturn(1L);
 
     var result = this.service.getFeedPosts("cname", 0, 10);
@@ -227,12 +224,12 @@ public class PostServiceTest {
   @MockitoSettings(strictness = Strictness.LENIENT)
   public void ShouldDeletePost() {
     var canonicalName = ezRandom.nextObject(String.class);
-    var postId = ezRandom.nextObject(Integer.class);
+    var postId = ezRandom.nextObject(String.class);
 
-    Mockito.doNothing().when(reactionRepository).removeReaction(anyString(), anyInt());
-    Mockito.doNothing().when(postRepository).removeCommentsPost(anyString(), anyInt());
-    Mockito.doNothing().when(postRepository).removeReports(anyString(), anyInt());
-    Mockito.doNothing().when(postRepository).removePost(anyString(), anyInt());
+    Mockito.doNothing().when(reactionRepository).removeReaction(anyString(), anyString());
+    Mockito.doNothing().when(postRepository).removeCommentsPost(anyString(), anyString());
+    Mockito.doNothing().when(postRepository).removeReports(anyString(), anyString());
+    Mockito.doNothing().when(postRepository).removePost(anyString(), anyString());
 
     this.service.removePost(canonicalName, postId);
   }
@@ -260,7 +257,7 @@ public class PostServiceTest {
 
   @Test
   @MockitoSettings(strictness = Strictness.LENIENT)
-  public void ShouldFailReturnPostCommentsWhenUserIsNotAllowed() throws ApiException {
+  public void ShouldFailReturnPostCommentsWhenUserIsNotAllowed() {
     var list = new ArrayList<Comment>();
     list.add(new Comment());
 
