@@ -100,4 +100,32 @@ public class TagServiceTest {
 
     assertThrows(ApiException.class, () -> this.service.addTagToUser(email, tag.getCanonicalName()));
   }
+
+  @Test
+  public void ShouldRemoveTag() throws ApiException {
+    var user = ezRandom.nextObject(User.class);
+    var tag = ezRandom.nextObject(Tag.class);
+    var email = ezRandom.nextObject(String.class);
+
+    Mockito.when(this.userRepository.findByEmail(email)).thenReturn(Optional.of(user));
+    Mockito.when(this.tagRepository.findById(tag.getCanonicalName())).thenReturn(Optional.of(tag));
+
+    this.service.removeTagFromUser(email, tag.getCanonicalName());
+  }
+
+  @Test
+  public void ShouldFailToRemoveTagWhenTagNotFound() {
+    var tag = ezRandom.nextObject(Tag.class);
+    var email = ezRandom.nextObject(String.class);
+    assertThrows(ApiException.class, () -> this.service.removeTagFromUser(email, tag.getCanonicalName()));
+  }
+
+  @Test
+  public void ShouldFailToRemoveTagWhenUserNotFound() {
+    var tag = ezRandom.nextObject(Tag.class);
+    var email = ezRandom.nextObject(String.class);
+    Mockito.when(this.tagRepository.findById(tag.getCanonicalName())).thenReturn(Optional.of(tag));
+
+    assertThrows(ApiException.class, () -> this.service.removeTagFromUser(email, tag.getCanonicalName()));
+  }
 }

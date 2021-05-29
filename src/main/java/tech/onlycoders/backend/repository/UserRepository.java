@@ -75,4 +75,7 @@ public interface UserRepository extends Neo4jRepository<User, String> {
 
   @Query("MATCH (:User{email: $email})-[f:IS_FAVORITE]->(:Post{id: $postId}) DELETE f")
   void removeFavoritePost(String email, String postId);
+
+  @Query("MATCH (:User{id: $userId})-[r:IS_INTERESTED]->(:Tag{canonicalName: $canonicalName}) DELETE r")
+  void unFollowTag(String userId, String canonicalName);
 }

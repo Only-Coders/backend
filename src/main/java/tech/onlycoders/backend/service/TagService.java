@@ -78,4 +78,14 @@ public class TagService {
         .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "error.user-not-found"));
     this.userRepository.followTag(user.getId(), tag.getCanonicalName());
   }
+
+  public void removeTagFromUser(String email, String canonicalName) throws ApiException {
+    var tag =
+      this.tagRepository.findById(canonicalName)
+        .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "error.tag-not-found"));
+    var user =
+      this.userRepository.findByEmail(email)
+        .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "error.user-not-found"));
+    this.userRepository.unFollowTag(user.getId(), tag.getCanonicalName());
+  }
 }
