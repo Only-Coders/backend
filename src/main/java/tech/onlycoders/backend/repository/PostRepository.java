@@ -5,7 +5,6 @@ import java.util.Set;
 import org.springframework.data.neo4j.repository.Neo4jRepository;
 import org.springframework.data.neo4j.repository.query.Query;
 import org.springframework.stereotype.Repository;
-import tech.onlycoders.backend.model.Comment;
 import tech.onlycoders.backend.model.Post;
 
 @Repository

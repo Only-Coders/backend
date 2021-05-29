@@ -21,6 +21,7 @@ import tech.onlycoders.backend.dto.contactrequest.response.ReadContactRequestDto
 import tech.onlycoders.backend.dto.institute.request.CreateInstituteDto;
 import tech.onlycoders.backend.dto.post.response.ReadPostDto;
 import tech.onlycoders.backend.dto.skill.request.CreateSkillDto;
+import tech.onlycoders.backend.dto.tag.response.ReadTagDto;
 import tech.onlycoders.backend.dto.user.request.AddSkillDto;
 import tech.onlycoders.backend.dto.user.request.EducationExperienceDto;
 import tech.onlycoders.backend.dto.user.request.WorkExperienceDto;
@@ -150,6 +151,26 @@ public class UserController {
     }
     this.skillService.addSkillToUser(email, addSkillDto.getCanonicalName());
     return ResponseEntity.ok().build();
+  }
+
+  @ApiResponses(
+    value = {
+      @ApiResponse(
+        responseCode = "200",
+        content = { @Content(mediaType = "application/json", schema = @Schema(implementation = PaginatedTags.class)) }
+      )
+    }
+  )
+  @PreAuthorize("hasAuthority('USER')")
+  @GetMapping("/{canonicalName}/tags")
+  @Operation(summary = "Get the tags that the user follows")
+  ResponseEntity<PaginateDto<ReadTagDto>> getUserTags(
+    @PathVariable @NotBlank String canonicalName,
+    @RequestParam(defaultValue = "0") @Min(0) Integer page,
+    @RequestParam(defaultValue = "20") @Min(1) Integer size
+  ) throws ApiException {
+    var tags = this.tagService.getFollowedTags(canonicalName, page, size);
+    return ResponseEntity.ok(tags);
   }
 
   @ApiResponses(value = { @ApiResponse(responseCode = "200", content = { @Content(mediaType = "application/json") }) })

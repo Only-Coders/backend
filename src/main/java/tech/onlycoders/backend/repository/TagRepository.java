@@ -2,6 +2,7 @@ package tech.onlycoders.backend.repository;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.neo4j.repository.Neo4jRepository;
@@ -40,4 +41,15 @@ public interface TagRepository extends Neo4jRepository<Tag, String> {
     "RETURN t ORDER BY quantity DESC SKIP $skip LIMIT $size"
   )
   List<Tag> getTagsPaginated(Integer skip, Integer size);
+
+  @Query(
+    "CALL { " +
+    "  MATCH (x:Person)-[:IS_INTERESTED]->(t:Tag)<-[:IS_INTERESTED]-(:Person{canonicalName: $userCanonicalName}) RETURN t, count(x) as quantity UNION " +
+    "  MATCH (t:Tag)<-[:IS_INTERESTED]-(:Person{canonicalName: $userCanonicalName}) RETURN t, 0 as quantity " +
+    "} RETURN t ORDER BY quantity DESC SKIP $skip LIMIT $size"
+  )
+  Set<Tag> getFollowedTags(String userCanonicalName, Integer skip, Integer size);
+
+  @Query("MATCH (t:Tag)<-[r:IS_INTERESTED]-(:Person{canonicalName: $userCanonicalName}) RETURN count(r)")
+  Integer getAmountOfFollowedTags(String userCanonicalName);
 }
