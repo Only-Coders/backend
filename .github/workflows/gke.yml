@@ -63,8 +63,12 @@ jobs:
           remote_user: viruscontrol
           remote_key: ${{ secrets.DEPLOY_KEY }}
 
-      # Deploy the Docker image to the GKE cluster
-      - name: Slack Notify
-        uses: rtCamp/action-slack-notify@v2.1.3
+      - name: Slack Notification
+        if: always()
+        uses: rtCamp/action-slack-notify@v2
         env:
+          SLACK_COLOR: ${{ job.status }} # or a specific color like 'green' or '#ff00ff'
+          SLACK_ICON: https://cdn.iconscout.com/icon/free/png-64/java-43-569305.png
+          SLACK_TITLE: "Build & Deploy :rocket:"
+          SLACK_USERNAME: Backend
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
