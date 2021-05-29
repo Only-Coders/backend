@@ -13,4 +13,5 @@ public class ReportType extends BaseEntity {
 
   private String key;
   private String name;
+  private String language;
 }
