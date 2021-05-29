@@ -11,5 +11,6 @@ import org.springframework.data.neo4j.core.schema.Node;
 @NoArgsConstructor
 public class ReportType extends BaseEntity {
 
+  private String key;
   private String name;
 }

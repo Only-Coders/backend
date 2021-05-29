@@ -19,6 +19,7 @@ import tech.onlycoders.backend.dto.comment.response.ReadCommentDto;
 import tech.onlycoders.backend.dto.post.request.CreatePostDto;
 import tech.onlycoders.backend.dto.post.request.CreateReactionDto;
 import tech.onlycoders.backend.dto.post.response.ReadPostDto;
+import tech.onlycoders.backend.dto.report.request.CreatePostReportDto;
 import tech.onlycoders.backend.exception.ApiException;
 import tech.onlycoders.backend.service.PostService;
 
@@ -162,6 +163,16 @@ public class PostController {
   ResponseEntity<?> deletePostReaction(@PathVariable String postId) throws ApiException {
     var userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     postService.deletePostReaction(userDetails.getCanonicalName(), postId);
+    return ResponseEntity.ok().build();
+  }
+
+  @PostMapping("{id}/report")
+  @ApiResponses(value = { @ApiResponse(responseCode = "200", content = { @Content(mediaType = "application/json") }) })
+  @PreAuthorize("hasAuthority('USER')")
+  ResponseEntity<?> reportPost(@PathVariable String id, @RequestBody @Valid CreatePostReportDto createPostReportDto)
+    throws ApiException {
+    var userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    postService.reportPost(userDetails.getCanonicalName(), id, createPostReportDto);
     return ResponseEntity.ok().build();
   }
 }

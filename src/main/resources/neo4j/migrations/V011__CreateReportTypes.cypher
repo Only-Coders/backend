@@ -1,0 +1,6 @@
+MERGE (:ReportType {createdAt: timestamp(), updatedAt: timestamp(), key: 'COPYRIGHT_VIOLATION', name: 'Copyright infringement: my copyrighted work is being used illegally without authorization', id: randomUUID(), language: 'en'});
+MERGE (:ReportType {createdAt: timestamp(), updatedAt: timestamp(), key: 'PERSONAL_INFO', name: 'Personal information: content contains my personal information', id: randomUUID(), language: 'en'});
+MERGE (:ReportType {createdAt: timestamp(), updatedAt: timestamp(), key: 'CHILD_ABUSE', name: 'Child sexual abuse material: visual depiction of sexually explicit conduct involving a minor', id: randomUUID(), language: 'en'});
+MERGE (:ReportType {createdAt: timestamp(), updatedAt: timestamp(), key: 'COPYRIGHT_VIOLATION', name: 'Violacion de  Copyright: mi trabajo bajo copyright esta siendo utilizado sin mi autorizacion', id: randomUUID(), language: 'es'});
+MERGE (:ReportType {createdAt: timestamp(), updatedAt: timestamp(), key: 'PERSONAL_INFO', name: 'Información Personal: el contenido contiene informacion personal acerca de mi', id: randomUUID(), language: 'es'});
+MERGE (:ReportType {createdAt: timestamp(), updatedAt: timestamp(), key: 'CHILD_ABUSE', name: 'Material sexual inapropiado: el contenido contiene imagenes o texto inapropiado', id: randomUUID(), language: 'es'});
