@@ -164,6 +164,17 @@ public class PostController {
     postService.deletePostReaction(userDetails.getCanonicalName(), postId);
     return ResponseEntity.ok().build();
   }
+
+  @ApiResponses(value = { @ApiResponse(responseCode = "200", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ReadPostDto.class) ) }) })
+  @PreAuthorize("hasAuthority('USER')")
+  @PutMapping("/{postId}")
+  @Operation(summary = "Response received update post")
+  ResponseEntity<ReadPostDto> updatePost(@PathVariable String postId, @Valid @RequestBody CreatePostDto createPostDto)
+    throws ApiException {
+    var userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    var updatedPost = postService.updatePost(postId, userDetails.getCanonicalName(), createPostDto);
+    return ResponseEntity.ok(updatedPost);
+  }
 }
 
 class PaginatedPosts extends PaginateDto<ReadPostDto> {}

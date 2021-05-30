@@ -389,4 +389,44 @@ public class PostService {
   public void deletePostReaction(String canonicalName, String postId) {
     this.reactionRepository.removePostReaction(canonicalName, postId);
   }
+
+  public ReadPostDto updatePost(String postId, String canonicalName, CreatePostDto createPostDto) throws ApiException {
+    var publisher = userRepository
+      .findByCanonicalName(canonicalName)
+      .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "error.user-not-found"));
+
+    var originalPost = postRepository
+      .findById(postId)
+      .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "error.post-not-found"));
+
+    var mentions = getPersonList(createPostDto.getMentionCanonicalNames());
+
+    var message = String.format(
+      "%s %s te ha mencionado en un nuevo post.",
+      publisher.getFirstName(),
+      publisher.getLastName()
+    );
+
+    mentions.forEach(
+      person ->
+        this.notificatorService.send(
+            MessageDTO.builder().to(person.getEmail()).eventType(EventType.NEW_MENTION).message(message).build()
+          )
+    );
+
+    var tags = getOrSaveTagList(createPostDto.getTagNames());
+
+    originalPost.setPublisher(publisher);
+    originalPost.setMentions(mentions);
+    originalPost.setTags(tags);
+    originalPost.setMessage(createPostDto.getMessage());
+    originalPost.setIsPublic(createPostDto.getIsPublic());
+    originalPost.setReactions(originalPost.getReactions());
+    originalPost.setComments(originalPost.getComments());
+    originalPost.setUrl(createPostDto.getUrl());
+    originalPost.setType(createPostDto.getType());
+    originalPost = postRepository.save(originalPost);
+
+    return postMapper.postToReadPersonDto(originalPost);
+  }
 }
