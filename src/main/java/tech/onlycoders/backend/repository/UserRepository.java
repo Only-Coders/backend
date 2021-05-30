@@ -10,6 +10,7 @@ import tech.onlycoders.backend.model.User;
 
 @Repository
 public interface UserRepository extends Neo4jRepository<User, String> {
+  @Query("MATCH (u:User)-[r]-(p) where toLower(u.email) = toLower($email) return u, collect(r), collect(p)")
   Optional<User> findByEmail(String email);
 
   @Query("MATCH (u:User{canonicalName:$canonicalName})-[r]-(p) return u, collect(r), collect(p)")
