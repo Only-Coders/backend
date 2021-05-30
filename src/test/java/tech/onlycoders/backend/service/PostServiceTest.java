@@ -348,4 +348,17 @@ public class PostServiceTest {
 
     service.deletePostReaction(user.getCanonicalName(), post.getId());
   }
+
+  @Test
+  public void ShouldUpdatePostWhenDataIsOk() throws ApiException {
+    var requestDto = ezRandom.nextObject(CreatePostDto.class);
+    var publisher = new User();
+
+    Mockito.when(userRepository.findByCanonicalName(anyString())).thenReturn(Optional.of(publisher));
+    Mockito.when(postRepository.findById(anyString())).thenReturn(Optional.of(Post.builder().build()));
+    Mockito.when(postRepository.save(any(Post.class))).thenReturn(new Post());
+
+    var res = service.updatePost("postId", "canonicalName", requestDto);
+    assertNotNull(res);
+  }
 }
