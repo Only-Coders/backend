@@ -165,7 +165,7 @@ public class PostController {
     return ResponseEntity.ok().build();
   }
 
-  @ApiResponses(value = { @ApiResponse(responseCode = "200", content = { @Content(mediaType = "application/json") }) })
+  @ApiResponses(value = { @ApiResponse(responseCode = "200", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ReadPostDto.class) ) }) })
   @PreAuthorize("hasAuthority('USER')")
   @PutMapping("/{postId}")
   @Operation(summary = "Response received update post")
