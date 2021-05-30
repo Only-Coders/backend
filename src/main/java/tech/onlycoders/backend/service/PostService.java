@@ -1,9 +1,6 @@
 package tech.onlycoders.backend.service;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -209,6 +206,8 @@ public class PostService {
     var pageQuantity = PaginationUtils.getPagesQuantity(totalQuantity, size);
     var readPostDtoList = postMapper.setPostToListPostDto(postRepository.getFeedPosts(canonicalName, skip, size));
 
+    var medalsCache = new HashMap<String, Integer>();
+
     readPostDtoList
       .parallelStream()
       .forEach(
@@ -216,6 +215,8 @@ public class PostService {
           post.setReactions(getPostReactionQuantity(post.getId()));
           post.setCommentQuantity(postRepository.getPostCommentsQuantity(post.getId()));
           post.setMyReaction(getPostUserReaction(canonicalName, post.getId()));
+          var medals = getAmountOfMedals(medalsCache, post.getPublisher().getCanonicalName());
+          post.getPublisher().setAmountOfMedals(medals);
         }
       );
 
@@ -278,6 +279,13 @@ public class PostService {
     return commentDto;
   }
 
+  public void removeComment(String canonicalName, String commentId) throws ApiException {
+    var deleted = this.postRepository.removeComment(canonicalName, commentId);
+    if (!deleted) {
+      throw new ApiException(HttpStatus.FORBIDDEN, "error.not-authorized");
+    }
+  }
+
   private List<ReactionQuantityDto> getCommentReactionQuantity(String id) {
     var reactions = new ArrayList<ReactionQuantityDto>();
 
@@ -302,12 +310,11 @@ public class PostService {
 
   private ReactionType getCommentUserReaction(String canonicalName, String commentId) {
     var reaction = reactionRepository.getCommentUserReaction(canonicalName, commentId);
-    if (reaction != null) return reaction.getType();
-    return null;
+    return reaction.map(Reaction::getType).orElse(null);
   }
 
   public void removePost(String canonicalName, String postId) {
-    reactionRepository.removeReaction(canonicalName, postId);
+    reactionRepository.removePostReaction(canonicalName, postId);
     postRepository.removeCommentsPost(canonicalName, postId);
     postRepository.removeReports(canonicalName, postId);
     postRepository.removePost(canonicalName, postId);
@@ -325,10 +332,18 @@ public class PostService {
     var skip = page * size;
     var pageQuantity = PaginationUtils.getPagesQuantity(totalQuantity, size);
     var comments = commentMapper.listCommentToListCommentDto(commentRepository.getPostComments(postId, skip, size));
-    for (ReadCommentDto commentDto : comments) {
-      commentDto.setReactions(getCommentReactionQuantity(commentDto.getId()));
-      commentDto.setMyReaction(getCommentUserReaction(requesterCanonicalName, commentDto.getId()));
-    }
+
+    var medalsCache = new HashMap<String, Integer>();
+    comments
+      .parallelStream()
+      .forEach(
+        readCommentDto -> {
+          readCommentDto.setReactions(getCommentReactionQuantity(readCommentDto.getId()));
+          readCommentDto.setMyReaction(getCommentUserReaction(requesterCanonicalName, readCommentDto.getId()));
+          var medals = getAmountOfMedals(medalsCache, readCommentDto.getPublisher().getCanonicalName());
+          readCommentDto.getPublisher().setAmountOfMedals(medals);
+        }
+      );
 
     var pagination = new PaginateDto<ReadCommentDto>();
     pagination.setContent(comments);
@@ -336,6 +351,16 @@ public class PostService {
     pagination.setTotalPages(pageQuantity);
     pagination.setTotalElements(totalQuantity);
     return pagination;
+  }
+
+  private Integer getAmountOfMedals(HashMap<String, Integer> medalsCache, String userCanonicalName) {
+    synchronized (this) {
+      if (!medalsCache.containsKey(userCanonicalName)) {
+        var medals = userRepository.countUserMedals(userCanonicalName);
+        medalsCache.put(userCanonicalName, medals);
+      }
+      return medalsCache.get(userCanonicalName);
+    }
   }
 
   private void validateIsAuthorized(String requesterCanonicalName, String postId) throws ApiException {
@@ -358,8 +383,7 @@ public class PostService {
     this.reactionRepository.getPostUserReaction(canonicalName, post.getId())
       .ifPresentOrElse(
         reaction -> {
-          reaction.setType(createReactionDto.getReactionType());
-          this.reactionRepository.save(reaction);
+          this.reactionRepository.updateReaction(reaction.getId(), createReactionDto.getReactionType());
         },
         () -> {
           var reaction = Reaction.builder().person(user).type(createReactionDto.getReactionType()).build();
@@ -370,7 +394,47 @@ public class PostService {
   }
 
   public void deletePostReaction(String canonicalName, String postId) {
-    this.reactionRepository.removeReaction(canonicalName, postId);
+    this.reactionRepository.removePostReaction(canonicalName, postId);
+  }
+
+  public ReadPostDto updatePost(String postId, String canonicalName, CreatePostDto createPostDto) throws ApiException {
+    var publisher = userRepository
+      .findByCanonicalName(canonicalName)
+      .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "error.user-not-found"));
+
+    var originalPost = postRepository
+      .findById(postId)
+      .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "error.post-not-found"));
+
+    var mentions = getPersonList(createPostDto.getMentionCanonicalNames());
+
+    var message = String.format(
+      "%s %s te ha mencionado en un nuevo post.",
+      publisher.getFirstName(),
+      publisher.getLastName()
+    );
+
+    mentions.forEach(
+      person ->
+        this.notificatorService.send(
+            MessageDTO.builder().to(person.getEmail()).eventType(EventType.NEW_MENTION).message(message).build()
+          )
+    );
+
+    var tags = getOrSaveTagList(createPostDto.getTagNames());
+
+    originalPost.setPublisher(publisher);
+    originalPost.setMentions(mentions);
+    originalPost.setTags(tags);
+    originalPost.setMessage(createPostDto.getMessage());
+    originalPost.setIsPublic(createPostDto.getIsPublic());
+    originalPost.setReactions(originalPost.getReactions());
+    originalPost.setComments(originalPost.getComments());
+    originalPost.setUrl(createPostDto.getUrl());
+    originalPost.setType(createPostDto.getType());
+    originalPost = postRepository.save(originalPost);
+
+    return postMapper.postToReadPersonDto(originalPost);
   }
 
   public void reportPost(String canonicalName, String postId, CreatePostReportDto createPostReportDto)

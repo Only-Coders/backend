@@ -5,7 +5,6 @@ import java.util.Set;
 import org.springframework.data.neo4j.repository.Neo4jRepository;
 import org.springframework.data.neo4j.repository.query.Query;
 import org.springframework.stereotype.Repository;
-import tech.onlycoders.backend.model.Comment;
 import tech.onlycoders.backend.model.Post;
 
 @Repository
@@ -38,6 +37,9 @@ public interface PostRepository extends Neo4jRepository<Post, String> {
     "        RETURN p,r,u\n" +
     "    UNION\n" +
     "        MATCH (:User{canonicalName: $canonicalName})-[:IS_CONNECTED]-(u:User)-[r:PUBLISH]->(p:Post)\n" +
+    "        RETURN p,r,u\n" +
+    "    UNION\n" +
+    "        MATCH (u:User{canonicalName: $canonicalName})-[r:PUBLISH]->(p:Post)\n" +
     "        RETURN p,r,u\n" +
     "    UNION\n" +
     "        MATCH (:User{canonicalName: $canonicalName})-[:IS_INTERESTED]->(:Tag)<-[:HAS]-(p:Post{isPublic:true})<-[r:PUBLISH]-(u:User)\n" +
@@ -86,4 +88,13 @@ public interface PostRepository extends Neo4jRepository<Post, String> {
 
   @Query("MATCH (p:Post{id: $postId}) RETURN p.isPublic")
   boolean postIsPublic(String postId);
+
+  @Query(
+    "CALL { " +
+    "  MATCH (c:Comment{id:$commentId})-[]->(Post)<-[:PUBLISH]-(:User{canonicalName: $canonicalName}) RETURN c " +
+    "  UNION " +
+    "  MATCH (c:Comment{id: $commentId})<-[:WRITES]-(:User{canonicalName:$canonicalName}) RETURN c " +
+    "} DETACH DELETE c RETURN COUNT(c)>=1;"
+  )
+  Boolean removeComment(String canonicalName, String commentId);
 }

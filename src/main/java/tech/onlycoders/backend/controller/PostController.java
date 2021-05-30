@@ -91,10 +91,10 @@ public class PostController {
     return ResponseEntity.ok(postService.addComment(userDetails.getCanonicalName(), id, createCommentDto));
   }
 
-  @DeleteMapping
+  @DeleteMapping("{postId}")
   @ApiResponses(value = { @ApiResponse(responseCode = "200", content = { @Content(mediaType = "application/json") }) })
   @PreAuthorize("hasAuthority('USER')")
-  ResponseEntity<?> removePost(@RequestBody @Valid String postId) throws ApiException {
+  ResponseEntity<?> removePost(@PathVariable String postId) {
     var userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     postService.removePost(userDetails.getCanonicalName(), postId);
     return ResponseEntity.ok().build();
@@ -174,6 +174,17 @@ public class PostController {
     var userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     postService.reportPost(userDetails.getCanonicalName(), id, createPostReportDto);
     return ResponseEntity.ok().build();
+}
+  
+  @ApiResponses(value = { @ApiResponse(responseCode = "200", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ReadPostDto.class) ) }) })
+  @PreAuthorize("hasAuthority('USER')")
+  @PutMapping("/{postId}")
+  @Operation(summary = "Response received update post")
+  ResponseEntity<ReadPostDto> updatePost(@PathVariable String postId, @Valid @RequestBody CreatePostDto createPostDto)
+    throws ApiException {
+    var userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    var updatedPost = postService.updatePost(postId, userDetails.getCanonicalName(), createPostDto);
+    return ResponseEntity.ok(updatedPost);
   }
 }
 

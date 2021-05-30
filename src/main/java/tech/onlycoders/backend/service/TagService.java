@@ -1,6 +1,8 @@
 package tech.onlycoders.backend.service;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -55,18 +57,7 @@ public class TagService {
       tags = this.tagRepository.getTagsByNamePaginated(regex, page * size, size);
     }
 
-    var pageQuantity = PaginationUtils.getPagesQuantity(totalQuantity, size);
-    var readTagDtos = tagMapper.listTagsToListReadTagDto(tags);
-    for (ReadTagDto tag : readTagDtos) {
-      tag.setFollowerQuantity(this.tagRepository.getFollowerQuantity(tag.getCanonicalName()));
-    }
-
-    var pagination = new PaginateDto<ReadTagDto>();
-    pagination.setContent(readTagDtos);
-    pagination.setCurrentPage(page);
-    pagination.setTotalPages(pageQuantity);
-    pagination.setTotalElements(totalQuantity);
-    return pagination;
+    return getReadTagDtoPaginateDto(page, size, tags, totalQuantity);
   }
 
   public void addTagToUser(String email, String canonicalName) throws ApiException {
@@ -87,5 +78,32 @@ public class TagService {
       this.userRepository.findByEmail(email)
         .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "error.user-not-found"));
     this.userRepository.unFollowTag(user.getId(), tag.getCanonicalName());
+  }
+
+  public PaginateDto<ReadTagDto> getFollowedTags(String userCanonicalName, Integer page, Integer size) {
+    Set<Tag> tags = this.tagRepository.getFollowedTags(userCanonicalName, page * size, size);
+    var totalQuantity = this.tagRepository.getAmountOfFollowedTags(userCanonicalName);
+    return getReadTagDtoPaginateDto(page, size, new ArrayList<>(tags), totalQuantity);
+  }
+
+  private PaginateDto<ReadTagDto> getReadTagDtoPaginateDto(
+    Integer page,
+    Integer size,
+    List<Tag> tags,
+    Integer totalQuantity
+  ) {
+    var pageQuantity = PaginationUtils.getPagesQuantity(totalQuantity, size);
+
+    var readTagDtos = tagMapper.listTagsToListReadTagDto(tags);
+    for (ReadTagDto tag : readTagDtos) {
+      tag.setFollowerQuantity(this.tagRepository.getFollowerQuantity(tag.getCanonicalName()));
+    }
+
+    var pagination = new PaginateDto<ReadTagDto>();
+    pagination.setContent(readTagDtos);
+    pagination.setCurrentPage(page);
+    pagination.setTotalPages(pageQuantity);
+    pagination.setTotalElements(totalQuantity);
+    return pagination;
   }
 }
