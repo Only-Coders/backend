@@ -20,6 +20,7 @@ import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import tech.onlycoders.backend.dto.comment.request.CreateCommentDto;
 import tech.onlycoders.backend.dto.post.request.CreatePostDto;
+import tech.onlycoders.backend.dto.report.request.CreatePostReportDto;
 import tech.onlycoders.backend.dto.post.request.CreateReactionDto;
 import tech.onlycoders.backend.exception.ApiException;
 import tech.onlycoders.backend.mapper.*;
@@ -49,6 +50,12 @@ public class PostServiceTest {
 
   @Mock
   private CommentRepository commentRepository;
+
+  @Mock
+  private ReportRepository reportRepository;
+
+  @Mock
+  private ReportTypeRepository reportTypeRepository;
 
   private final EasyRandom ezRandom = new EasyRandom();
 
@@ -265,6 +272,21 @@ public class PostServiceTest {
     assertThrows(Exception.class, () -> service.getPostComments("asd", "postid", 0, 10));
   }
 
+  @Test
+  public void ShouldReportPost() throws ApiException {
+    var publisher = new User();
+    var post = ezRandom.nextObject(Post.class);
+    var type = new ReportType();
+
+    var dto = CreatePostReportDto.builder().reason("asdas").typeID("asfad").build();
+
+    Mockito.when(this.userRepository.findByCanonicalName(anyString())).thenReturn(Optional.of(publisher));
+    Mockito.when(this.postRepository.findById(anyString())).thenReturn(Optional.of(post));
+    Mockito.when(this.reportTypeRepository.findById(anyString())).thenReturn(Optional.of(type));
+
+    this.service.reportPost("cname", "postid", dto);
+  }
+  
   @Test
   @MockitoSettings(strictness = Strictness.LENIENT)
   public void ShouldFailDeleteComment() {

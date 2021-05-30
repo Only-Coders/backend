@@ -11,6 +11,7 @@ import tech.onlycoders.backend.dto.comment.response.ReadCommentDto;
 import tech.onlycoders.backend.dto.post.request.CreatePostDto;
 import tech.onlycoders.backend.dto.post.request.CreateReactionDto;
 import tech.onlycoders.backend.dto.post.response.ReadPostDto;
+import tech.onlycoders.backend.dto.report.request.CreatePostReportDto;
 import tech.onlycoders.backend.exception.ApiException;
 import tech.onlycoders.backend.mapper.CommentMapper;
 import tech.onlycoders.backend.mapper.PostMapper;
@@ -30,6 +31,8 @@ public class PostService {
   private final TagRepository tagRepository;
   private final ReactionRepository reactionRepository;
   private final CommentRepository commentRepository;
+  private final ReportRepository reportRepository;
+  private final ReportTypeRepository reportTypeRepository;
 
   private final PostMapper postMapper;
   private final CommentMapper commentMapper;
@@ -41,6 +44,8 @@ public class PostService {
     TagRepository tagRepository,
     ReactionRepository reactionRepository,
     CommentRepository commentRepository,
+    ReportRepository reportRepository,
+    ReportTypeRepository reportTypeRepository,
     PostMapper postMapper,
     CommentMapper commentMapper,
     NotificatorService notificatorService
@@ -50,6 +55,8 @@ public class PostService {
     this.tagRepository = tagRepository;
     this.reactionRepository = reactionRepository;
     this.commentRepository = commentRepository;
+    this.reportRepository = reportRepository;
+    this.reportTypeRepository = reportTypeRepository;
 
     this.postMapper = postMapper;
     this.commentMapper = commentMapper;
@@ -428,5 +435,24 @@ public class PostService {
     originalPost = postRepository.save(originalPost);
 
     return postMapper.postToReadPersonDto(originalPost);
+  }
+
+  public void reportPost(String canonicalName, String postId, CreatePostReportDto createPostReportDto)
+    throws ApiException {
+    var post =
+      this.postRepository.findById(postId)
+        .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "error.post-not-found"));
+    var user =
+      this.userRepository.findByCanonicalName(canonicalName)
+        .orElseThrow(() -> new ApiException(HttpStatus.INTERNAL_SERVER_ERROR, "error.500"));
+
+    var reportType =
+      this.reportTypeRepository.findById(createPostReportDto.getTypeID())
+        .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "error.report-type-not-found"));
+
+    var report = Report.builder().reason(createPostReportDto.getReason()).type(reportType).build();
+    reportRepository.save(report);
+    reportRepository.linkReportToPost(postId, report.getId());
+    reportRepository.linkReportToUser(canonicalName, report.getId());
   }
 }
