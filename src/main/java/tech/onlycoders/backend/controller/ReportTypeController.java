@@ -1,6 +1,7 @@
 package tech.onlycoders.backend.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -37,7 +38,10 @@ public class ReportTypeController {
       @ApiResponse(
         responseCode = "200",
         content = {
-          @Content(mediaType = "application/json", schema = @Schema(implementation = ReadReportTypeDto.class))
+          @Content(
+            mediaType = "application/json",
+            array = @ArraySchema(schema = @Schema(implementation = ReadReportTypeDto.class))
+          )
         }
       )
     }
