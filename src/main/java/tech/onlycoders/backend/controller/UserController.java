@@ -24,6 +24,7 @@ import tech.onlycoders.backend.dto.skill.request.CreateSkillDto;
 import tech.onlycoders.backend.dto.tag.response.ReadTagDto;
 import tech.onlycoders.backend.dto.user.request.AddSkillDto;
 import tech.onlycoders.backend.dto.user.request.EducationExperienceDto;
+import tech.onlycoders.backend.dto.user.request.UpdateUserBlockedStatusDto;
 import tech.onlycoders.backend.dto.user.request.WorkExperienceDto;
 import tech.onlycoders.backend.dto.user.response.ReadUserDto;
 import tech.onlycoders.backend.dto.user.response.ReadUserLiteDto;
@@ -336,6 +337,18 @@ public class UserController {
     var canonicalName = userDetails.getCanonicalName();
     var contacts = this.userService.getMyContacts(canonicalName, page, size);
     return ResponseEntity.ok(contacts);
+  }
+
+  @ApiResponses(value = { @ApiResponse(responseCode = "200", content = { @Content(mediaType = "application/json") }) })
+  @PreAuthorize("hasAuthority('ADMIN')")
+  @PatchMapping("/{canonicalName}/blocked")
+  @Operation(summary = "update if a user is blocked")
+  ResponseEntity<?> setUserBlockedStatus(
+    @PathVariable @NotBlank String canonicalName,
+    @RequestBody UpdateUserBlockedStatusDto blockedStatusDto
+  ) throws ApiException {
+    this.userService.setUserBlockedStatus(canonicalName, blockedStatusDto);
+    return ResponseEntity.ok().build();
   }
 }
 

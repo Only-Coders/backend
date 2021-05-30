@@ -81,4 +81,7 @@ public interface UserRepository extends Neo4jRepository<User, String> {
 
   @Query("MATCH (:User{id: $userId})-[r:IS_INTERESTED]->(:Tag{canonicalName: $canonicalName}) DELETE r")
   void unFollowTag(String userId, String canonicalName);
+
+  @Query("MATCH (u:User{id: $id}) SET u.blocked = $blocked")
+  void setBlockedStatus(String id, Boolean blocked);
 }

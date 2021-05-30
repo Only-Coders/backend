@@ -22,6 +22,7 @@ import tech.onlycoders.backend.dto.auth.response.AuthResponseDto;
 import tech.onlycoders.backend.dto.contactrequest.request.CreateContactRequestDto;
 import tech.onlycoders.backend.dto.contactrequest.request.ResponseContactRequestDto;
 import tech.onlycoders.backend.dto.user.request.CreateUserDto;
+import tech.onlycoders.backend.dto.user.request.UpdateUserBlockedStatusDto;
 import tech.onlycoders.backend.exception.ApiException;
 import tech.onlycoders.backend.mapper.*;
 import tech.onlycoders.backend.model.*;
@@ -508,5 +509,17 @@ public class UserServiceTest {
   @Test
   void ShouldDeleteFavoritePost() {
     this.service.removeFavoritePost("email", "id");
+  }
+
+  @Test
+  public void ShouldBlockUser() throws ApiException {
+    var blocked = new UpdateUserBlockedStatusDto();
+    blocked.setBlocked(true);
+
+    Mockito
+      .when(this.userRepository.findByCanonicalName(anyString()))
+      .thenReturn(Optional.of(ezRandom.nextObject(User.class)));
+
+    this.service.setUserBlockedStatus("cname", blocked);
   }
 }

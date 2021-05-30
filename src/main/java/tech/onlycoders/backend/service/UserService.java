@@ -12,6 +12,7 @@ import tech.onlycoders.backend.dto.contactrequest.request.ResponseContactRequest
 import tech.onlycoders.backend.dto.contactrequest.response.ReadContactRequestDto;
 import tech.onlycoders.backend.dto.post.response.ReadPostDto;
 import tech.onlycoders.backend.dto.user.request.CreateUserDto;
+import tech.onlycoders.backend.dto.user.request.UpdateUserBlockedStatusDto;
 import tech.onlycoders.backend.dto.user.response.ReadUserDto;
 import tech.onlycoders.backend.dto.user.response.ReadUserLiteDto;
 import tech.onlycoders.backend.exception.ApiException;
@@ -318,5 +319,14 @@ public class UserService {
 
   public void removeFavoritePost(String email, String postId) {
     this.userRepository.removeFavoritePost(email, postId);
+  }
+
+  public void setUserBlockedStatus(String canonicalName, UpdateUserBlockedStatusDto blockedStatusDto)
+    throws ApiException {
+    var user =
+      this.userRepository.findByCanonicalName(canonicalName)
+        .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "error.user-not-found"));
+
+    this.userRepository.setBlockedStatus(user.getId(), blockedStatusDto.getBlocked());
   }
 }

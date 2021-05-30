@@ -42,7 +42,7 @@ public class AuthService {
   public AuthResponseDto authenticate(AuthRequestDto authRequestDto) throws ApiException {
     var email = this.firebaseService.verifyFirebaseToken(authRequestDto.getFirebaseToken());
     HashMap<String, Object> claims;
-    if (email.endsWith("onlycoders.tech")) {
+    if (email.endsWith("onlycoders.tech") || email.equals("onlycoders.tech@gmail.com")) {
       claims = this.adminAuthentication(email);
     } else {
       claims = this.userAuthentication(email);
