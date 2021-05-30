@@ -522,4 +522,10 @@ public class UserServiceTest {
 
     this.service.setUserBlockedStatus("cname", blocked);
   }
+
+  @Test
+  public void ShouldSetUserToDelete() throws ApiException {
+    var res = this.service.setEliminationDate("email");
+    assertNotNull(res);
+  }
 }

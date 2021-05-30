@@ -1,6 +1,8 @@
 package tech.onlycoders.backend.service;
 
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -15,6 +17,7 @@ import tech.onlycoders.backend.dto.user.request.CreateUserDto;
 import tech.onlycoders.backend.dto.user.request.UpdateUserBlockedStatusDto;
 import tech.onlycoders.backend.dto.user.response.ReadUserDto;
 import tech.onlycoders.backend.dto.user.response.ReadUserLiteDto;
+import tech.onlycoders.backend.dto.user.response.ReadUserToDeleteDto;
 import tech.onlycoders.backend.exception.ApiException;
 import tech.onlycoders.backend.mapper.ContactRequestMapper;
 import tech.onlycoders.backend.mapper.PostMapper;
@@ -25,6 +28,7 @@ import tech.onlycoders.backend.model.GitProfile;
 import tech.onlycoders.backend.model.User;
 import tech.onlycoders.backend.repository.*;
 import tech.onlycoders.backend.utils.CanonicalFactory;
+import tech.onlycoders.backend.utils.GlobalVariables;
 import tech.onlycoders.backend.utils.PaginationUtils;
 import tech.onlycoders.notificator.dto.EventType;
 import tech.onlycoders.notificator.dto.MessageDTO;
@@ -328,5 +332,14 @@ public class UserService {
         .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "error.user-not-found"));
 
     this.userRepository.setBlockedStatus(user.getId(), blockedStatusDto.getBlocked());
+  }
+
+  public ReadUserToDeleteDto setEliminationDate(String email) {
+    var calendar = Calendar.getInstance();
+    calendar.setTime(new Date());
+    calendar.add(Calendar.DAY_OF_YEAR, GlobalVariables.DAYS_TO_DELETE_USERS);
+    var eliminationDate = calendar.getTime();
+    this.userRepository.setEliminationDate(email, eliminationDate);
+    return ReadUserToDeleteDto.builder().eliminationDate(eliminationDate).build();
   }
 }

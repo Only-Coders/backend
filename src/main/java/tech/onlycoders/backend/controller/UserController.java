@@ -28,6 +28,7 @@ import tech.onlycoders.backend.dto.user.request.UpdateUserBlockedStatusDto;
 import tech.onlycoders.backend.dto.user.request.WorkExperienceDto;
 import tech.onlycoders.backend.dto.user.response.ReadUserDto;
 import tech.onlycoders.backend.dto.user.response.ReadUserLiteDto;
+import tech.onlycoders.backend.dto.user.response.ReadUserToDeleteDto;
 import tech.onlycoders.backend.dto.workplace.request.CreateWorkplaceDto;
 import tech.onlycoders.backend.dto.workposition.response.ReadWorkPositionDto;
 import tech.onlycoders.backend.exception.ApiException;
@@ -349,6 +350,25 @@ public class UserController {
   ) throws ApiException {
     this.userService.setUserBlockedStatus(canonicalName, blockedStatusDto);
     return ResponseEntity.ok().build();
+  }
+
+  @ApiResponses(
+    value = {
+      @ApiResponse(
+        responseCode = "200",
+        content = {
+          @Content(mediaType = "application/json", schema = @Schema(implementation = ReadUserToDeleteDto.class))
+        }
+      )
+    }
+  )
+  @PreAuthorize("hasAuthority('USER')")
+  @PutMapping("elimination")
+  @Operation(summary = "Set my own user to be eliminated")
+  ResponseEntity<ReadUserToDeleteDto> deleteMyUser() throws ApiException {
+    var userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    var email = userDetails.getEmail();
+    return ResponseEntity.ok(this.userService.setEliminationDate(email));
   }
 }
 

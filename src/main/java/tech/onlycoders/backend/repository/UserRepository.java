@@ -1,5 +1,6 @@
 package tech.onlycoders.backend.repository;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -84,4 +85,7 @@ public interface UserRepository extends Neo4jRepository<User, String> {
 
   @Query("MATCH (u:User{id: $id}) SET u.blocked = $blocked")
   void setBlockedStatus(String id, Boolean blocked);
+
+  @Query("MATCH (u:User{email: $email}) SET u.eliminationDate = $eliminationDate")
+  void setEliminationDate(String email, Date eliminationDate);
 }

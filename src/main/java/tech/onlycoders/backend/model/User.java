@@ -1,9 +1,6 @@
 package tech.onlycoders.backend.model;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -19,6 +16,8 @@ public class User extends Person {
   private Boolean defaultPrivacyIsPublic = false;
 
   private Boolean blocked = false;
+
+  private Date eliminationDate = null;
 
   @Relationship(type = "WORKS", direction = Relationship.Direction.OUTGOING)
   private List<WorkPosition> workingPlaces = new ArrayList<>();
