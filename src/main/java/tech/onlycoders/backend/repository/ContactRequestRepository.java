@@ -8,7 +8,7 @@ import tech.onlycoders.backend.model.ContactRequest;
 
 @Repository
 public interface ContactRequestRepository extends Neo4jRepository<ContactRequest, String> {
-  @Query("MATCH (:User{id: $sourceId})-[]->(cr:ContactRequest)-[]->(target:User{id: $targetId}) detach delete cr")
+  @Query("MATCH (:User{id: $sourceId})-[]-(cr:ContactRequest)-[]-(target:User{id: $targetId}) detach delete cr")
   void deleteRequest(String sourceId, String targetId);
 
   @Query("MATCH (u:User)-[]->(cr:ContactRequest)-[]->(:User{email: $email}) RETURN count(cr)")
