@@ -433,15 +433,77 @@ public class UserServiceTest {
   @Test
   public void ShouldGetContactsOfUser() {
     var canonicalName = ezRandom.nextObject(String.class);
-    var usersList = new ArrayList<User>();
-    usersList.add(new User());
+    var usersList = ezRandom.objects(User.class, 10).collect(Collectors.toList());
     var size = 20;
     var page = 0;
 
-    Mockito.when(this.userRepository.getContacts(canonicalName)).thenReturn(usersList);
+    Mockito.when(this.userRepository.getMyContacts(canonicalName, page * size, size)).thenReturn(usersList);
     Mockito.when(this.userRepository.countContacts(canonicalName)).thenReturn(1);
+    Mockito
+      .when(this.workPositionRepository.getUserCurrentPosition(anyString()))
+      .thenReturn(Optional.of(ezRandom.nextObject(WorkPosition.class)));
 
-    var result = this.service.getMyContacts(canonicalName, page, size);
+    var result = this.service.getMyContacts(canonicalName, page, size, "", "");
+    assertNotNull(result);
+  }
+
+  @Test
+  @MockitoSettings(strictness = Strictness.LENIENT)
+  public void ShouldGetContactsOfUserFilterByName() {
+    var canonicalName = ezRandom.nextObject(String.class);
+    var usersList = ezRandom.objects(User.class, 10).collect(Collectors.toList());
+    var size = 20;
+    var page = 0;
+
+    Mockito
+      .when(this.userRepository.filterContactsByName(canonicalName, "partial", page * size, size))
+      .thenReturn(usersList);
+    Mockito.when(this.userRepository.countContacts(canonicalName)).thenReturn(1);
+    Mockito
+      .when(this.workPositionRepository.getUserCurrentPosition(anyString()))
+      .thenReturn(Optional.of(ezRandom.nextObject(WorkPosition.class)));
+
+    var result = this.service.getMyContacts(canonicalName, page, size, "partial", "");
+    assertNotNull(result);
+  }
+
+  @Test
+  @MockitoSettings(strictness = Strictness.LENIENT)
+  public void ShouldGetContactsOfUserFilterByCountry() {
+    var canonicalName = ezRandom.nextObject(String.class);
+    var usersList = ezRandom.objects(User.class, 10).collect(Collectors.toList());
+    var size = 20;
+    var page = 0;
+
+    Mockito
+      .when(this.userRepository.filterContactsByCountry(canonicalName, "country", page * size, size))
+      .thenReturn(usersList);
+    Mockito.when(this.userRepository.countContacts(canonicalName)).thenReturn(1);
+    Mockito
+      .when(this.workPositionRepository.getUserCurrentPosition(anyString()))
+      .thenReturn(Optional.of(ezRandom.nextObject(WorkPosition.class)));
+
+    var result = this.service.getMyContacts(canonicalName, page, size, "", "country");
+    assertNotNull(result);
+  }
+
+  @Test
+  @MockitoSettings(strictness = Strictness.LENIENT)
+  public void ShouldGetContactsOfUserFilterByNameAndCountry() {
+    var canonicalName = ezRandom.nextObject(String.class);
+    var usersList = ezRandom.objects(User.class, 10).collect(Collectors.toList());
+    var size = 20;
+    var page = 0;
+
+    Mockito
+      .when(this.userRepository.filterContactsByCountryAndName(canonicalName, "partial", "country", page * size, size))
+      .thenReturn(usersList);
+    Mockito.when(this.userRepository.countContacts(canonicalName)).thenReturn(1);
+    Mockito
+      .when(this.workPositionRepository.getUserCurrentPosition(anyString()))
+      .thenReturn(Optional.of(ezRandom.nextObject(WorkPosition.class)));
+
+    var result = this.service.getMyContacts(canonicalName, page, size, "partial", "country");
     assertNotNull(result);
   }
 

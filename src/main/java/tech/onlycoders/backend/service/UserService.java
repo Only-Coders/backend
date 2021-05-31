@@ -284,11 +284,44 @@ public class UserService {
     return paginated;
   }
 
-  public PaginateDto<ReadUserLiteDto> getMyContacts(String canonicalName, Integer page, Integer size) {
-    var users = this.userRepository.getContacts(canonicalName);
+  public PaginateDto<ReadUserLiteDto> getMyContacts(
+    String canonicalName,
+    Integer page,
+    Integer size,
+    String partialName,
+    String countryName
+  ) {
+    var userRegex = "(?i)" + partialName + ".*";
+    var countryRegex = "(?i)" + countryName + ".*";
+    List<User> users;
+    if (partialName.isEmpty() && countryName.isEmpty()) {
+      users = this.userRepository.getMyContacts(canonicalName, page * size, size);
+    } else if (partialName.isEmpty()) {
+      users = this.userRepository.filterContactsByCountry(canonicalName, countryRegex, page * size, size);
+    } else if (countryName.isEmpty()) {
+      users = this.userRepository.filterContactsByName(canonicalName, userRegex, page * size, size);
+    } else {
+      users =
+        this.userRepository.filterContactsByCountryAndName(canonicalName, userRegex, countryRegex, page * size, size);
+    }
 
     var totalQuantity = this.userRepository.countContacts(canonicalName);
-    return getReadUserLiteDtoPaginateDto(page, size, users, totalQuantity);
+    var dtos = getReadUserLiteDtoPaginateDto(page, size, users, totalQuantity);
+    dtos
+      .getContent()
+      .stream()
+      .parallel()
+      .forEach(
+        user -> {
+          var currentPosition = this.workPositionRepository.getUserCurrentPosition(user.getCanonicalName());
+          var medals = this.userRepository.countUserMedals(user.getCanonicalName());
+          user.setAmountOfMedals(medals);
+          currentPosition.ifPresent(
+            workPosition -> user.setCurrentPosition(workPositionMapper.workPositionToReadWorkPositionDto(workPosition))
+          );
+        }
+      );
+    return dtos;
   }
 
   public PaginateDto<ReadUserLiteDto> findByPartialName(String partialName, Integer page, Integer size) {

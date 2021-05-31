@@ -14,8 +14,6 @@ import tech.onlycoders.backend.model.Tag;
 public interface TagRepository extends Neo4jRepository<Tag, String> {
   Optional<Tag> findByCanonicalName(String canonicalName);
 
-  Page<Tag> findByCanonicalNameContainingIgnoreCase(String tagName, PageRequest pageRequest);
-
   @Query("MATCH (t:Tag{canonicalName:$canonicalName})<-[:IS_INTERESTED]-(p:Person) RETURN count(p)")
   Long getFollowerQuantity(String canonicalName);
 

@@ -331,12 +331,14 @@ public class UserController {
   @GetMapping("/contacts")
   @Operation(summary = "Get my contacts.")
   ResponseEntity<PaginateDto<ReadUserLiteDto>> getContacts(
+    @RequestParam(defaultValue = "") String partialName,
+    @RequestParam(defaultValue = "") String countryName,
     @RequestParam(defaultValue = "0") @Min(0) Integer page,
     @RequestParam(defaultValue = "20") @Min(1) Integer size
   ) {
     var userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     var canonicalName = userDetails.getCanonicalName();
-    var contacts = this.userService.getMyContacts(canonicalName, page, size);
+    var contacts = this.userService.getMyContacts(canonicalName, page, size, partialName, countryName);
     return ResponseEntity.ok(contacts);
   }
 
