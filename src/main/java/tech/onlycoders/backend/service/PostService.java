@@ -1,7 +1,6 @@
 package tech.onlycoders.backend.service;
 
 import java.util.*;
-import java.util.stream.Collectors;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -180,7 +179,7 @@ public class PostService {
     Integer page,
     Integer size
   ) {
-    if (userRepository.userIsContact(requesterCanonicalName, targetCanonicalName)) {
+    if (userRepository.areUsersConnected(requesterCanonicalName, targetCanonicalName)) {
       return this.getPostsOfUser(targetCanonicalName, page, size);
     } else {
       var skip = page * size;
@@ -372,7 +371,7 @@ public class PostService {
     var publisherCanonicalName = postRepository.getPostPublisherCanonicalName(postId);
     if (
       !publisherCanonicalName.equals(requesterCanonicalName) &&
-      !userRepository.userIsContact(requesterCanonicalName, requesterCanonicalName) &&
+      !userRepository.areUsersConnected(requesterCanonicalName, requesterCanonicalName) &&
       !postRepository.postIsPublic(postId)
     ) throw new ApiException(HttpStatus.FORBIDDEN, "error.not-authorized");
   }

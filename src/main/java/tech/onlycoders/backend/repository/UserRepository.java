@@ -29,9 +29,19 @@ public interface UserRepository extends Neo4jRepository<User, String> {
   Set<User> findSuggestedUsers(String email, Integer size);
 
   @Query(
-    "MATCH (u:User{canonicalName:$requesterCanonicalName})-[IS_CONNECTED]-(u2:User{canonicalName:$targetCanonicalName}) RETURN count(u2)>0"
+    "MATCH (u:User{canonicalName:$requesterCanonicalName})-[:IS_CONNECTED]-(u2:User{canonicalName:$targetCanonicalName}) RETURN count(u2)>0"
   )
-  Boolean userIsContact(String requesterCanonicalName, String targetCanonicalName);
+  Boolean areUsersConnected(String requesterCanonicalName, String targetCanonicalName);
+
+  @Query(
+    "MATCH (u:User{canonicalName:$sourceCanonicalName})-[:FOLLOWS]->(u2:User{canonicalName:$targetCanonicalName}) RETURN count(u2)>0"
+  )
+  Boolean isFollowingAnotherUser(String sourceCanonicalName, String targetCanonicalName);
+
+  @Query(
+    "MATCH (u:User{canonicalName:$sourceCanonicalName})-[:SENDS]->(fr:FriendRequest)-[:TO]->(u2:User{canonicalName:$targetCanonicalName}) RETURN count(fr)>0"
+  )
+  Boolean havePendingRequest(String sourceCanonicalName, String targetCanonicalName);
 
   @Query("MATCH (a:User{id: $userId}) WITH a MATCH (b:Skill{canonicalName: $canonicalName}) MERGE (a)-[:POSSESS]->(b)")
   void addSkill(String userId, String canonicalName);

@@ -29,6 +29,7 @@ import tech.onlycoders.backend.model.ContactRequest;
 import tech.onlycoders.backend.model.GitProfile;
 import tech.onlycoders.backend.model.User;
 import tech.onlycoders.backend.repository.*;
+import tech.onlycoders.backend.repository.projections.PartialUser;
 import tech.onlycoders.backend.utils.CanonicalFactory;
 import tech.onlycoders.backend.utils.GlobalVariables;
 import tech.onlycoders.backend.utils.PaginationUtils;
@@ -88,29 +89,39 @@ public class UserService {
     this.contactRequestMapper = contactRequestMapper;
   }
 
-  public ReadUserDto getProfile(String canonicalName) throws ApiException {
-    var user =
-      this.userRepository.findByCanonicalName(canonicalName)
+  public ReadUserDto getProfile(String sourceCanonicalName, String targetCanonicalName) throws ApiException {
+    var partialUser =
+      this.userRepository.findByCanonicalName(targetCanonicalName)
         .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "error.profile-not-found"));
-    var medals = this.userRepository.countUserMedals(canonicalName);
-    var followers = this.userRepository.countUserFollowers(canonicalName);
-    var contacts = this.userRepository.countContacts(canonicalName);
-    var posts = this.postRepository.countUserPosts(canonicalName);
-    var currentPosition = this.workPositionRepository.getUserCurrentPositions(canonicalName);
-    var dto = userMapper.userToReadPersonDto(user);
+    var medals = this.userRepository.countUserMedals(targetCanonicalName);
+    var followers = this.userRepository.countUserFollowers(targetCanonicalName);
+    var contacts = this.userRepository.countContacts(targetCanonicalName);
+    var posts = this.postRepository.countUserPosts(targetCanonicalName);
+    var currentPosition = this.workPositionRepository.getUserCurrentPositions(targetCanonicalName);
+    var dto = userMapper.userToReadPersonDto(partialUser);
     dto.setMedalQty(medals);
     dto.setFollowerQty(followers);
     dto.setContactQty(contacts);
     dto.setPostQty(posts);
-    if (user.getGitProfile() != null) {
+    if (partialUser.getGitProfile() != null) {
       dto.setGitProfile(
         GitProfileDto
           .builder()
-          .userName(user.getGitProfile().getUsername())
-          .platform(GitPlatform.valueOf(user.getGitProfile().getPlatform().getId()))
+          .userName(partialUser.getGitProfile().getUsername())
+          .platform(GitPlatform.valueOf(partialUser.getGitProfile().getPlatform().getId()))
           .build()
       );
     }
+
+    if (!sourceCanonicalName.equalsIgnoreCase(targetCanonicalName)) {
+      Boolean isFollowing = this.userRepository.isFollowingAnotherUser(sourceCanonicalName, targetCanonicalName);
+      Boolean isConnected = this.userRepository.areUsersConnected(sourceCanonicalName, targetCanonicalName);
+      Boolean pendingRequest = this.userRepository.havePendingRequest(sourceCanonicalName, targetCanonicalName);
+      dto.setFollowing(isFollowing);
+      dto.setConnected(isConnected);
+      dto.setPendingRequest(pendingRequest);
+    }
+
     if (!currentPosition.isEmpty()) {
       var workPositionDto = this.workPositionMapper.workPositionToReadWorkPositionDto(currentPosition.get(0));
       dto.setCurrentPosition(workPositionDto);

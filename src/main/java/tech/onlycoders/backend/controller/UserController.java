@@ -71,7 +71,9 @@ public class UserController {
   @GetMapping("/{canonicalName}")
   @Operation(summary = "Gets user profile")
   ResponseEntity<ReadUserDto> getProfile(@PathVariable String canonicalName) throws ApiException {
-    var persistedPerson = this.userService.getProfile(canonicalName);
+    var userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    var sourceCanonicalName = userDetails.getCanonicalName();
+    var persistedPerson = this.userService.getProfile(sourceCanonicalName, canonicalName);
     return ResponseEntity.ok(persistedPerson);
   }
 

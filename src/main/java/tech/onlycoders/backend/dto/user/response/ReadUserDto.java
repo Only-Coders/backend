@@ -25,4 +25,7 @@ public class ReadUserDto {
   private Integer contactQty;
   private Integer postQty;
   private ReadWorkPositionDto currentPosition;
+  private boolean isConnected;
+  private boolean isFollowing;
+  private boolean pendingRequest;
 }
