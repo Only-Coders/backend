@@ -39,7 +39,7 @@ public interface UserRepository extends Neo4jRepository<User, String> {
   Boolean isFollowingAnotherUser(String sourceCanonicalName, String targetCanonicalName);
 
   @Query(
-    "MATCH (u:User{canonicalName:$sourceCanonicalName})-[:SENDS]->(fr:FriendRequest)-[:TO]->(u2:User{canonicalName:$targetCanonicalName}) RETURN count(fr)>0"
+    "MATCH (u:User{canonicalName:$sourceCanonicalName})-[:SENDS]->(fr:ContactRequest)-[:TO]->(u2:User{canonicalName:$targetCanonicalName}) RETURN count(fr)>0"
   )
   Boolean havePendingRequest(String sourceCanonicalName, String targetCanonicalName);
 
