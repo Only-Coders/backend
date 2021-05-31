@@ -57,12 +57,18 @@ public class PostServiceTest {
   private ReportRepository reportRepository;
 
   @Mock
+  private WorkPositionRepository workPositionRepository;
+
+  @Mock
   private ReportTypeRepository reportTypeRepository;
 
   private final EasyRandom ezRandom = new EasyRandom();
 
   @Spy
   private final PostMapper postMapper = new PostMapperImpl(new TagMapperImpl());
+
+  @Spy
+  private WorkPositionMapper workPositionMapper = new WorkPositionMapperImpl(new WorkplaceMapperImpl());
 
   @Spy
   private final CommentMapper commentMapper = new CommentMapperImpl();

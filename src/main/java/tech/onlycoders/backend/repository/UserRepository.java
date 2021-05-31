@@ -62,10 +62,21 @@ public interface UserRepository extends Neo4jRepository<User, String> {
 
   @Query(
     "CALL { " +
-    "  MATCH (User{canonicalName:$canonicalName})-[r:IS_CONNECTED]-(u:User) RETURN u" +
+    "  MATCH (User{canonicalName:$canonicalName})-[r:IS_CONNECTED]-(u:User) RETURN u " +
+    "UNION " +
+    "  MATCH (User{canonicalName:$canonicalName})-[:FOLLOWS]->(u:User) RETURN u " +
     "} RETURN u ORDER BY u.name DESC SKIP $skip LIMIT $size "
   )
   List<User> getMyContacts(String canonicalName, int skip, Integer size);
+
+  @Query(
+    "CALL { " +
+    "  MATCH (User{canonicalName:$canonicalName})-[r:IS_CONNECTED]-(u:User) RETURN u " +
+    "UNION " +
+    "  MATCH (User{canonicalName:$canonicalName})-[:FOLLOWS]->(u:User) RETURN u " +
+    "} RETURN count(u)"
+  )
+  Integer countContacts(String canonicalName);
 
   @Query(
     "CALL { " +
@@ -93,9 +104,6 @@ public interface UserRepository extends Neo4jRepository<User, String> {
     int skip,
     Integer size
   );
-
-  @Query("MATCH (u:User{canonicalName:$canonicalName})-[r:IS_CONNECTED]-(u2:User) RETURN count(u2)")
-  Integer countContacts(String canonicalName);
 
   @Query(
     "MATCH (u1:User{email: $email}) WITH u1 MATCH (u2:User{canonicalName: $requesterCanonicalName}) CREATE (u1)-[:IS_CONNECTED]->(u2)"

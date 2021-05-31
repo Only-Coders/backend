@@ -445,7 +445,7 @@ public class UserServiceTest {
       .when(this.workPositionRepository.getUserCurrentPosition(anyString()))
       .thenReturn(Optional.of(ezRandom.nextObject(WorkPosition.class)));
 
-    var result = this.service.getMyContacts(canonicalName, page, size, "", "");
+    var result = this.service.getMyContacts(canonicalName, page, size);
     assertNotNull(result);
   }
 
@@ -465,7 +465,7 @@ public class UserServiceTest {
       .when(this.workPositionRepository.getUserCurrentPosition(anyString()))
       .thenReturn(Optional.of(ezRandom.nextObject(WorkPosition.class)));
 
-    var result = this.service.getMyContacts(canonicalName, page, size, "partial", "");
+    var result = this.service.getMyContacts(canonicalName, page, size);
     assertNotNull(result);
   }
 
@@ -485,7 +485,7 @@ public class UserServiceTest {
       .when(this.workPositionRepository.getUserCurrentPosition(anyString()))
       .thenReturn(Optional.of(ezRandom.nextObject(WorkPosition.class)));
 
-    var result = this.service.getMyContacts(canonicalName, page, size, "", "country");
+    var result = this.service.getMyContacts(canonicalName, page, size);
     assertNotNull(result);
   }
 
@@ -505,7 +505,7 @@ public class UserServiceTest {
       .when(this.workPositionRepository.getUserCurrentPosition(anyString()))
       .thenReturn(Optional.of(ezRandom.nextObject(WorkPosition.class)));
 
-    var result = this.service.getMyContacts(canonicalName, page, size, "partial", "country");
+    var result = this.service.getMyContacts(canonicalName, page, size);
     assertNotNull(result);
   }
 
