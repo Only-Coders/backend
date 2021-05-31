@@ -22,6 +22,6 @@ public interface CommentRepository extends Neo4jRepository<Comment, String> {
   )
   List<Comment> getPostComments(String postId, int skip, Integer size);
 
-  @Query("MATCH (c:Comment{id: $commentId}) WITH c MATCH (u:User({id: $userId}) MERGE (u)-[:WRITES]->(c);")
+  @Query("MATCH (c:Comment{id: $commentId}) WITH c MATCH (u:User{id: $userId}) MERGE (u)-[:WRITES]->(c);")
   void linkWithCommenter(String commentId, String userId);
 }

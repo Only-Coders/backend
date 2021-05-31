@@ -26,6 +26,6 @@ public interface ContactRequestRepository extends Neo4jRepository<ContactRequest
   @Query("MATCH (:User{id: $sourceId})-[]->(a:ContactRequest)-[]->(:User{id: $targetId}) RETURN count(a)>0")
   boolean hasPendingRequest(String sourceId, String targetId);
 
-  @Query("MATCH (r:ContactRequest{id: $contactRequestId}) WITH r MATCH (u:User({id: $userId}) MERGE (u)-[:SENDS]->(r);")
+  @Query("MATCH (r:ContactRequest{id: $contactRequestId}) WITH r MATCH (u:User{id: $userId}) MERGE (u)-[:SENDS]->(r);")
   void setTarget(String contactRequestId, String userId);
 }
