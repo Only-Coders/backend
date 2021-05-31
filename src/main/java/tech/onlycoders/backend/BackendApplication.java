@@ -4,6 +4,7 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
+import tech.onlycoders.backend.service.UserService;
 
 @SpringBootApplication
 public class BackendApplication {
@@ -13,7 +14,9 @@ public class BackendApplication {
   }
 
   @Bean
-  CommandLineRunner runner() {
-    return args -> {};
+  CommandLineRunner runner(UserService us) {
+    return args -> {
+      us.getProfile("marianozunino-gqrwq");
+    };
   }
 }

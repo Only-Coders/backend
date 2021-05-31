@@ -1,6 +1,7 @@
 package tech.onlycoders.backend.service;
 
 import java.util.*;
+import java.util.stream.Collectors;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,6 +18,7 @@ import tech.onlycoders.backend.mapper.CommentMapper;
 import tech.onlycoders.backend.mapper.PostMapper;
 import tech.onlycoders.backend.model.*;
 import tech.onlycoders.backend.repository.*;
+import tech.onlycoders.backend.repository.projections.PartialUser;
 import tech.onlycoders.backend.utils.CanonicalFactory;
 import tech.onlycoders.backend.utils.PaginationUtils;
 import tech.onlycoders.notificator.dto.EventType;
@@ -84,15 +86,15 @@ public class PostService {
     );
 
     var tags = getOrSaveTagList(createPostDto.getTagNames());
-
     var post = postMapper.createPostDtoToPost(createPostDto);
-    post.setPublisher(publisher);
-    post.setMentions(mentions);
     post.setTags(tags);
-    post = postRepository.save(post);
 
-    publisher.setDefaultPrivacyIsPublic(post.getIsPublic());
-    userRepository.save(publisher);
+    final var postId = postRepository.save(post).getId();
+
+    mentions.forEach(partialUser -> postRepository.mentionUser(postId, partialUser.getId()));
+    postRepository.linkWithPublisher(post.getId(), publisher.getId());
+    userRepository.updateDefaultPrivacy(publisher.getId(), post.getIsPublic());
+
     return postMapper.postToReadPersonDto(post);
   }
 
@@ -116,8 +118,8 @@ public class PostService {
     return tagList;
   }
 
-  private Set<User> getPersonList(List<String> canonicalNames) throws ApiException {
-    var list = new HashSet<User>();
+  private HashSet<PartialUser> getPersonList(List<String> canonicalNames) throws ApiException {
+    var list = new HashSet<PartialUser>();
     if (canonicalNames != null) {
       for (String cName : canonicalNames) {
         var person = userRepository
@@ -155,7 +157,7 @@ public class PostService {
   private PaginateDto<ReadPostDto> getReadPostDtoPaginateDto(
     Integer page,
     Integer size,
-    List<Post> posts,
+    Set<Post> posts,
     Integer totalQuantity
   ) {
     var totalPages = PaginationUtils.getPagesQuantity(totalQuantity, size);
@@ -163,7 +165,7 @@ public class PostService {
     paginated.setCurrentPage(page);
     paginated.setTotalElements(totalQuantity);
     paginated.setTotalPages(totalPages);
-    paginated.setContent(postMapper.listPostToListPostDto(posts));
+    paginated.setContent(postMapper.listPostToListPostDto(new ArrayList<>(posts)));
 
     return paginated;
   }
@@ -183,6 +185,8 @@ public class PostService {
     } else {
       var skip = page * size;
       var posts = postRepository.getUserPublicPosts(targetCanonicalName, skip, size);
+
+      var readPostDtoList = postMapper.setPostToListPostDto(posts);
 
       var totalQuantity = postRepository.countUserPublicPosts(targetCanonicalName);
       var paginatedDto = getReadPostDtoPaginateDto(page, size, posts, totalQuantity);
@@ -264,13 +268,14 @@ public class PostService {
       .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "error.user-not-found"));
 
     var post = postRepository
-      .findById(id)
+      .getById(id)
       .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "error.post-not-found"));
 
-    var comment = Comment.builder().publisher(commenter).message(createCommentDto.getMessage()).build();
+    var comment = Comment.builder().message(createCommentDto.getMessage()).build();
     commentRepository.save(comment);
 
     postRepository.addComment(post.getId(), comment.getId());
+    commentRepository.linkWithCommenter(comment.getId(), commenter.getId());
 
     var commentDto = commentMapper.commentToReadCommentDto(comment);
     commentDto.setReactions(getCommentReactionQuantity(comment.getId()));
@@ -375,7 +380,7 @@ public class PostService {
   public void reactToPost(String canonicalName, String postId, CreateReactionDto createReactionDto)
     throws ApiException {
     var post =
-      this.postRepository.findById(postId)
+      this.postRepository.getById(postId)
         .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "error.post-not-found"));
     var user =
       this.userRepository.findByCanonicalName(canonicalName)
@@ -386,9 +391,10 @@ public class PostService {
           this.reactionRepository.updateReaction(reaction.getId(), createReactionDto.getReactionType());
         },
         () -> {
-          var reaction = Reaction.builder().person(user).type(createReactionDto.getReactionType()).build();
+          var reaction = Reaction.builder().type(createReactionDto.getReactionType()).build();
           this.reactionRepository.save(reaction);
           this.reactionRepository.linkWithPost(reaction.getId(), post.getId());
+          this.reactionRepository.linkWithUser(reaction.getId(), user.getId());
         }
       );
   }
@@ -414,6 +420,18 @@ public class PostService {
       publisher.getLastName()
     );
 
+    var tags = getOrSaveTagList(createPostDto.getTagNames());
+
+    originalPost.setTags(tags);
+    originalPost.setMessage(createPostDto.getMessage());
+    originalPost.setIsPublic(createPostDto.getIsPublic());
+    originalPost.setUrl(createPostDto.getUrl());
+    originalPost.setType(createPostDto.getType());
+    originalPost = postRepository.save(originalPost);
+
+    mentions.forEach(partialUser -> postRepository.mentionUser(postId, partialUser.getId()));
+    postRepository.linkWithPublisher(originalPost.getId(), publisher.getId());
+
     mentions.forEach(
       person ->
         this.notificatorService.send(
@@ -421,26 +439,13 @@ public class PostService {
           )
     );
 
-    var tags = getOrSaveTagList(createPostDto.getTagNames());
-
-    originalPost.setPublisher(publisher);
-    originalPost.setMentions(mentions);
-    originalPost.setTags(tags);
-    originalPost.setMessage(createPostDto.getMessage());
-    originalPost.setIsPublic(createPostDto.getIsPublic());
-    originalPost.setReactions(originalPost.getReactions());
-    originalPost.setComments(originalPost.getComments());
-    originalPost.setUrl(createPostDto.getUrl());
-    originalPost.setType(createPostDto.getType());
-    originalPost = postRepository.save(originalPost);
-
     return postMapper.postToReadPersonDto(originalPost);
   }
 
   public void reportPost(String canonicalName, String postId, CreatePostReportDto createPostReportDto)
     throws ApiException {
     var post =
-      this.postRepository.findById(postId)
+      this.postRepository.getById(postId)
         .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "error.post-not-found"));
     var user =
       this.userRepository.findByCanonicalName(canonicalName)

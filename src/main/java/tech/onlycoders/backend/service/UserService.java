@@ -13,6 +13,8 @@ import tech.onlycoders.backend.dto.contactrequest.request.CreateContactRequestDt
 import tech.onlycoders.backend.dto.contactrequest.request.ResponseContactRequestDto;
 import tech.onlycoders.backend.dto.contactrequest.response.ReadContactRequestDto;
 import tech.onlycoders.backend.dto.post.response.ReadPostDto;
+import tech.onlycoders.backend.dto.user.GitPlatform;
+import tech.onlycoders.backend.dto.user.GitProfileDto;
 import tech.onlycoders.backend.dto.user.request.CreateUserDto;
 import tech.onlycoders.backend.dto.user.request.UpdateUserBlockedStatusDto;
 import tech.onlycoders.backend.dto.user.response.ReadUserDto;
@@ -100,6 +102,15 @@ public class UserService {
     dto.setFollowerQty(followers);
     dto.setContactQty(contacts);
     dto.setPostQty(posts);
+    if (user.getGitProfile() != null) {
+      dto.setGitProfile(
+        GitProfileDto
+          .builder()
+          .userName(user.getGitProfile().getUsername())
+          .platform(GitPlatform.valueOf(user.getGitProfile().getPlatform().getId()))
+          .build()
+      );
+    }
     if (!currentPosition.isEmpty()) {
       var workPositionDto = this.workPositionMapper.workPositionToReadWorkPositionDto(currentPosition.get(0));
       dto.setCurrentPosition(workPositionDto);
@@ -168,9 +179,10 @@ public class UserService {
       throw new ApiException(HttpStatus.CONFLICT, "error.pending-request");
     }
 
-    var contactRequest = ContactRequest.builder().message(contactRequestDto.getMessage()).target(contact).build();
+    var contactRequest = ContactRequest.builder().message(contactRequestDto.getMessage()).build();
 
     contactRequestRepository.save(contactRequest);
+    contactRequestRepository.setTarget(contactRequest.getId(), contact.getId());
     contactRequestRepository.createSendContactRequest(contactRequest.getId(), user.getId());
 
     var message = String.format(
@@ -198,7 +210,7 @@ public class UserService {
       this.userRepository.findByEmail(email)
         .orElseThrow(() -> new ApiException(HttpStatus.INTERNAL_SERVER_ERROR, "error.500"));
     var post =
-      this.postRepository.findById(postId)
+      this.postRepository.getById(postId)
         .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "error.post-not-found"));
     this.userRepository.addFavoritePost(user.getId(), post.getId());
   }
@@ -312,10 +324,9 @@ public class UserService {
       this.userRepository.findByCanonicalName(response.getRequesterCanonicalName())
         .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "error.user-not-found"));
 
-    if (!contactRequestRepository.hasPendingRequest(requester.getId(), user.getId())) throw new ApiException(
-      HttpStatus.NOT_FOUND,
-      "error.request-not-found"
-    );
+    if (!contactRequestRepository.hasPendingRequest(requester.getId(), user.getId())) {
+      throw new ApiException(HttpStatus.NOT_FOUND, "error.request-not-found");
+    }
 
     if (response.getAcceptContact()) userRepository.addContact(email, response.getRequesterCanonicalName());
     contactRequestRepository.deleteRequest(requester.getId(), user.getId());
@@ -339,7 +350,7 @@ public class UserService {
     calendar.setTime(new Date());
     calendar.add(Calendar.DAY_OF_YEAR, GlobalVariables.DAYS_TO_DELETE_USERS);
     var eliminationDate = calendar.getTime();
-    this.userRepository.setEliminationDate(email, eliminationDate);
+    this.userRepository.setEliminationDate(email, eliminationDate.getTime());
     return ReadUserToDeleteDto.builder().eliminationDate(eliminationDate).build();
   }
 }

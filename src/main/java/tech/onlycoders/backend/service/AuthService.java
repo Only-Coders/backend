@@ -7,12 +7,12 @@ import tech.onlycoders.backend.bean.FirebaseService;
 import tech.onlycoders.backend.dto.auth.request.AuthRequestDto;
 import tech.onlycoders.backend.dto.auth.response.AuthResponseDto;
 import tech.onlycoders.backend.exception.ApiException;
-import tech.onlycoders.backend.model.Person;
 import tech.onlycoders.backend.model.User;
 import tech.onlycoders.backend.repository.AdminRepository;
 import tech.onlycoders.backend.repository.PersonRepository;
 import tech.onlycoders.backend.repository.UserRepository;
 import tech.onlycoders.backend.repository.WorkPositionRepository;
+import tech.onlycoders.backend.repository.projections.PartialUser;
 
 @Service
 @Transactional
@@ -73,12 +73,12 @@ public class AuthService {
             claims.put("currentPosition", workPosition.getPosition() + " - " + workPosition.getWorkplace().getName()),
           () -> claims.put("currentPosition", "")
         );
-      claims.put("defaultPrivacy", user.getDefaultPrivacyIsPublic());
+      claims.put("defaultPrivacy", user.getDefaultPrivacyIsPublic().orElse(false));
     }
     return claims;
   }
 
-  private void extendClaims(Person person, HashMap<String, Object> claims) {
+  private void extendClaims(PartialUser person, HashMap<String, Object> claims) {
     claims.put("id", person.getId());
     claims.put("roles", person.getRole().getName());
     claims.put("canonicalName", person.getCanonicalName());

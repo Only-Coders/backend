@@ -31,7 +31,7 @@ public class CommentService {
   public void reactToComment(String canonicalName, String commentId, CreateReactionDto createReactionDto)
     throws ApiException {
     var comment =
-      this.commentRepository.findById(commentId)
+      this.commentRepository.getById(commentId)
         .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "error.comment-not-found"));
     var user =
       this.userRepository.findByCanonicalName(canonicalName)
@@ -42,9 +42,10 @@ public class CommentService {
           this.reactionRepository.updateReaction(reaction.getId(), createReactionDto.getReactionType());
         },
         () -> {
-          var reaction = Reaction.builder().person(user).type(createReactionDto.getReactionType()).build();
+          var reaction = Reaction.builder().type(createReactionDto.getReactionType()).build();
           this.reactionRepository.save(reaction);
           this.reactionRepository.linkWithComment(reaction.getId(), comment.getId());
+          this.reactionRepository.linkWithUser(reaction.getId(), user.getId());
         }
       );
   }

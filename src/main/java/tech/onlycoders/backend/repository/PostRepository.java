@@ -1,14 +1,18 @@
 package tech.onlycoders.backend.repository;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import org.springframework.data.neo4j.repository.Neo4jRepository;
 import org.springframework.data.neo4j.repository.query.Query;
 import org.springframework.stereotype.Repository;
 import tech.onlycoders.backend.model.Post;
+import tech.onlycoders.backend.repository.projections.PartialPost;
 
 @Repository
 public interface PostRepository extends Neo4jRepository<Post, String> {
+  Optional<PartialPost> getById(String postId);
+
   @Query("MATCH (u:User{email:$email})-[:IS_FAVORITE]->(p:Post) RETURN count(p)")
   int getUserFavoritePostTotalQuantity(String email);
 
@@ -16,17 +20,25 @@ public interface PostRepository extends Neo4jRepository<Post, String> {
   List<Post> getUserFavoritePosts(String email, Integer skip, Integer size);
 
   @Query(
-    "MATCH (u:User{canonicalName:$canonicalName})-[r:PUBLISH]->(p:Post) RETURN p, collect(r), collect(u) ORDER BY p.createdAt DESC SKIP $skip LIMIT $size"
+    "MATCH (u:User{canonicalName:$canonicalName})-[r:PUBLISH]->(p:Post) " +
+    " OPTIONAL MATCH (p)-[rt:HAS]->(t:Tag) " +
+    " OPTIONAL MATCH (p)-[rm:MENTIONS]->(m:User) " +
+    " RETURN p, collect(r), collect(u), collect(rm), collect(m), collect(rt), collect(t) " +
+    "ORDER BY p.createdAt DESC SKIP $skip LIMIT $size"
   )
-  List<Post> getPosts(String canonicalName, Integer skip, Integer size);
+  Set<Post> getPosts(String canonicalName, Integer skip, Integer size);
 
   @Query("MATCH (u:User{canonicalName:$canonicalName})-[:PUBLISH]->(p:Post) RETURN count(p)")
   Integer countUserPosts(String canonicalName);
 
   @Query(
-    "MATCH (u:User{canonicalName:$canonicalName})-[r:PUBLISH]->(p:Post{isPublic:true}) RETURN p, collect(r), collect(u)  ORDER BY p.createdAt DESC SKIP $skip LIMIT $size"
+    "MATCH (u:User{canonicalName:$canonicalName})-[r:PUBLISH]->(p:Post{isPublic:true}) " +
+    " OPTIONAL MATCH (p)-[rt:HAS]->(t:Tag) " +
+    " OPTIONAL MATCH (p)-[rm:MENTIONS]->(m:User) " +
+    " RETURN p, collect(r), collect(u), collect(rm), collect(m), collect(rt), collect(t) " +
+    "ORDER BY p.createdAt DESC SKIP $skip LIMIT $size"
   )
-  List<Post> getUserPublicPosts(String canonicalName, Integer skip, Integer size);
+  Set<Post> getUserPublicPosts(String canonicalName, Integer skip, Integer size);
 
   @Query("MATCH (u:User{canonicalName:$canonicalName})-[:PUBLISH]->(p:Post{isPublic:true}) RETURN count(p)")
   Integer countUserPublicPosts(String canonicalName);
@@ -97,4 +109,10 @@ public interface PostRepository extends Neo4jRepository<Post, String> {
     "} DETACH DELETE c RETURN COUNT(c)>=1;"
   )
   Boolean removeComment(String canonicalName, String commentId);
+
+  @Query("MATCH (p:Post{id: $postId}) WITH p MATCH (u:User{id: $userId}) MERGE (u)-[:PUBLISH]->(p);")
+  void linkWithPublisher(String postId, String userId);
+
+  @Query("MATCH (p:Post{id: $postId}) WITH p MATCH (u:User{id: $userId}) MERGE (p)-[:MENTIONS]->(u);")
+  void mentionUser(String postId, String userId);
 }

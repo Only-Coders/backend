@@ -19,6 +19,8 @@ import tech.onlycoders.backend.model.User;
 import tech.onlycoders.backend.repository.CommentRepository;
 import tech.onlycoders.backend.repository.ReactionRepository;
 import tech.onlycoders.backend.repository.UserRepository;
+import tech.onlycoders.backend.utils.PartialCommentImpl;
+import tech.onlycoders.backend.utils.PartialUserImpl;
 
 @ExtendWith(MockitoExtension.class)
 public class CommentServiceTest {
@@ -39,11 +41,11 @@ public class CommentServiceTest {
 
   @Test
   public void ShouldReactToPost() throws ApiException {
-    var comment = ezRandom.nextObject(Comment.class);
-    var user = ezRandom.nextObject(User.class);
+    var comment = ezRandom.nextObject(PartialCommentImpl.class);
+    var user = ezRandom.nextObject(PartialUserImpl.class);
     var createReactionDto = ezRandom.nextObject(CreateReactionDto.class);
 
-    Mockito.when(commentRepository.findById(comment.getId())).thenReturn(Optional.of(comment));
+    Mockito.when(commentRepository.getById(comment.getId())).thenReturn(Optional.of(comment));
     Mockito.when(userRepository.findByCanonicalName(user.getCanonicalName())).thenReturn(Optional.of(user));
 
     Mockito
@@ -56,11 +58,11 @@ public class CommentServiceTest {
   @Test
   public void ShouldUpdatePostReaction() throws ApiException {
     var reaction = ezRandom.nextObject(Reaction.class);
-    var comment = ezRandom.nextObject(Comment.class);
-    var user = ezRandom.nextObject(User.class);
+    var comment = ezRandom.nextObject(PartialCommentImpl.class);
+    var user = ezRandom.nextObject(PartialUserImpl.class);
     var createReactionDto = ezRandom.nextObject(CreateReactionDto.class);
 
-    Mockito.when(commentRepository.findById(comment.getId())).thenReturn(Optional.of(comment));
+    Mockito.when(commentRepository.getById(comment.getId())).thenReturn(Optional.of(comment));
     Mockito.when(userRepository.findByCanonicalName(user.getCanonicalName())).thenReturn(Optional.of(user));
 
     Mockito
@@ -72,11 +74,11 @@ public class CommentServiceTest {
 
   @Test
   public void ShouldFailToReactToPostPostNotFound() {
-    var comment = ezRandom.nextObject(Comment.class);
+    var comment = ezRandom.nextObject(PartialCommentImpl.class);
     var user = ezRandom.nextObject(User.class);
     var createReactionDto = ezRandom.nextObject(CreateReactionDto.class);
 
-    Mockito.when(commentRepository.findById(comment.getId())).thenReturn(Optional.empty());
+    Mockito.when(commentRepository.getById(comment.getId())).thenReturn(Optional.empty());
 
     assertThrows(
       Exception.class,
@@ -86,11 +88,11 @@ public class CommentServiceTest {
 
   @Test
   public void ShouldFailToReactToPostUserNotFound() {
-    var comment = ezRandom.nextObject(Comment.class);
+    var comment = ezRandom.nextObject(PartialCommentImpl.class);
     var user = ezRandom.nextObject(User.class);
     var createReactionDto = ezRandom.nextObject(CreateReactionDto.class);
 
-    Mockito.when(commentRepository.findById(comment.getId())).thenReturn(Optional.of(comment));
+    Mockito.when(commentRepository.getById(comment.getId())).thenReturn(Optional.of(comment));
     Mockito.when(userRepository.findByCanonicalName(user.getCanonicalName())).thenReturn(Optional.empty());
 
     assertThrows(

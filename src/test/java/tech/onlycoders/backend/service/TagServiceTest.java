@@ -4,9 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.*;
 
-import java.util.ArrayList;
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
 import org.jeasy.random.EasyRandom;
 import org.junit.jupiter.api.Test;
@@ -17,17 +15,14 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
-import tech.onlycoders.backend.dto.PaginateDto;
 import tech.onlycoders.backend.dto.tag.request.CreateTagDto;
-import tech.onlycoders.backend.dto.tag.response.ReadTagDto;
 import tech.onlycoders.backend.exception.ApiException;
 import tech.onlycoders.backend.mapper.TagMapper;
-import tech.onlycoders.backend.model.Post;
 import tech.onlycoders.backend.model.Tag;
-import tech.onlycoders.backend.model.User;
 import tech.onlycoders.backend.repository.TagRepository;
 import tech.onlycoders.backend.repository.UserRepository;
 import tech.onlycoders.backend.utils.CanonicalFactory;
+import tech.onlycoders.backend.utils.PartialUserImpl;
 
 @ExtendWith(MockitoExtension.class)
 public class TagServiceTest {
@@ -80,7 +75,7 @@ public class TagServiceTest {
 
   @Test
   public void ShouldAddTag() throws ApiException {
-    var user = ezRandom.nextObject(User.class);
+    var user = ezRandom.nextObject(PartialUserImpl.class);
     var tag = ezRandom.nextObject(Tag.class);
     var email = ezRandom.nextObject(String.class);
 
@@ -108,7 +103,7 @@ public class TagServiceTest {
 
   @Test
   public void ShouldRemoveTag() throws ApiException {
-    var user = ezRandom.nextObject(User.class);
+    var user = ezRandom.nextObject(PartialUserImpl.class);
     var tag = ezRandom.nextObject(Tag.class);
     var email = ezRandom.nextObject(String.class);
 

@@ -41,4 +41,7 @@ public interface ReactionRepository extends Neo4jRepository<Reaction, String> {
 
   @Query("MATCH (r:Reaction{id: $reactionId}) SET r += { type: $reactionType, updatedAt: timestamp() } ")
   void updateReaction(String reactionId, ReactionType reactionType);
+
+  @Query("MATCH (r:Reaction{id: $reactionId}) WITH c MATCH (u:User({id: $userId}) MERGE (u)-[:MAKES]->(r);")
+  void linkWithUser(String reactionId, String userId);
 }

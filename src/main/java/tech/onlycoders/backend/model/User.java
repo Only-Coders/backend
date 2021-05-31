@@ -6,6 +6,7 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import org.springframework.data.neo4j.core.schema.Node;
 import org.springframework.data.neo4j.core.schema.Relationship;
+import org.springframework.data.neo4j.core.support.DateLong;
 
 @EqualsAndHashCode(callSuper = true)
 @Node({ "User", "Person" })
@@ -17,6 +18,7 @@ public class User extends Person {
 
   private Boolean blocked = false;
 
+  @DateLong
   private Date eliminationDate = null;
 
   @Relationship(type = "WORKS", direction = Relationship.Direction.OUTGOING)

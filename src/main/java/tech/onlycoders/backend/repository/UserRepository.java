@@ -1,6 +1,5 @@
 package tech.onlycoders.backend.repository;
 
-import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -8,14 +7,13 @@ import org.springframework.data.neo4j.repository.Neo4jRepository;
 import org.springframework.data.neo4j.repository.query.Query;
 import org.springframework.stereotype.Repository;
 import tech.onlycoders.backend.model.User;
+import tech.onlycoders.backend.repository.projections.PartialUser;
 
 @Repository
 public interface UserRepository extends Neo4jRepository<User, String> {
-  @Query("MATCH (u:User)-[r]-(p) where toLower(u.email) = toLower($email) return u, collect(r), collect(p)")
-  Optional<User> findByEmail(String email);
+  Optional<PartialUser> findByEmail(String email);
 
-  @Query("MATCH (u:User{canonicalName:$canonicalName})-[r]-(p) return u, collect(r), collect(p)")
-  Optional<User> findByCanonicalName(String canonicalName);
+  Optional<PartialUser> findByCanonicalName(String canonicalName);
 
   @Query(
     "CALL { " +
@@ -83,9 +81,12 @@ public interface UserRepository extends Neo4jRepository<User, String> {
   @Query("MATCH (:User{id: $userId})-[r:IS_INTERESTED]->(:Tag{canonicalName: $canonicalName}) DELETE r")
   void unFollowTag(String userId, String canonicalName);
 
-  @Query("MATCH (u:User{id: $id}) SET u.blocked = $blocked")
+  @Query("MATCH (u:User{id: $id}) SET u += {blocked: $blocked}")
   void setBlockedStatus(String id, Boolean blocked);
 
-  @Query("MATCH (u:User{email: $email}) SET u.eliminationDate = $eliminationDate")
-  void setEliminationDate(String email, Date eliminationDate);
+  @Query("MATCH (u:User{email: $email}) SET u += {eliminationDate: $eliminationDate}")
+  void setEliminationDate(String email, long eliminationDate);
+
+  @Query("MATCH (u:User{id: $userId}) SET u += {defaultPrivacyIsPublic: $isPublic}")
+  void updateDefaultPrivacy(String userId, Boolean isPublic);
 }

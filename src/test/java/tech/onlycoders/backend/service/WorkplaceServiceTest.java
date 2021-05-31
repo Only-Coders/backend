@@ -24,11 +24,11 @@ import tech.onlycoders.backend.mapper.WorkPositionMapper;
 import tech.onlycoders.backend.mapper.WorkPositionMapperImpl;
 import tech.onlycoders.backend.mapper.WorkplaceMapper;
 import tech.onlycoders.backend.mapper.WorkplaceMapperImpl;
-import tech.onlycoders.backend.model.User;
 import tech.onlycoders.backend.model.Workplace;
 import tech.onlycoders.backend.repository.UserRepository;
 import tech.onlycoders.backend.repository.WorkPositionRepository;
 import tech.onlycoders.backend.repository.WorkplaceRepository;
+import tech.onlycoders.backend.utils.PartialUserImpl;
 
 @ExtendWith(MockitoExtension.class)
 public class WorkplaceServiceTest {
@@ -75,7 +75,7 @@ public class WorkplaceServiceTest {
 
   @Test
   public void ShouldAddWorkingExperience() throws ApiException {
-    var user = ezRandom.nextObject(User.class);
+    var user = ezRandom.nextObject(PartialUserImpl.class);
     var organization = ezRandom.nextObject(Workplace.class);
     var workExperienceDto = ezRandom.nextObject(WorkExperienceDto.class);
     var email = ezRandom.nextObject(String.class);

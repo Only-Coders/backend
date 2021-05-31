@@ -19,6 +19,9 @@ public interface TagMapper {
 
   @Named("tag-to-string")
   default String tagToString(Tag tag) {
+    if (tag == null) {
+      return null;
+    }
     return tag.getCanonicalName();
   }
 

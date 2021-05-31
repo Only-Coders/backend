@@ -21,10 +21,10 @@ import tech.onlycoders.backend.dto.skill.request.CreateSkillDto;
 import tech.onlycoders.backend.exception.ApiException;
 import tech.onlycoders.backend.mapper.SkillMapper;
 import tech.onlycoders.backend.model.Skill;
-import tech.onlycoders.backend.model.User;
 import tech.onlycoders.backend.repository.SkillRepository;
 import tech.onlycoders.backend.repository.UserRepository;
 import tech.onlycoders.backend.utils.CanonicalFactory;
+import tech.onlycoders.backend.utils.PartialUserImpl;
 
 @ExtendWith(MockitoExtension.class)
 public class SkillServiceTest {
@@ -71,7 +71,7 @@ public class SkillServiceTest {
 
   @Test
   public void ShouldAddSkill() throws ApiException {
-    var user = ezRandom.nextObject(User.class);
+    var user = ezRandom.nextObject(PartialUserImpl.class);
     var skill = ezRandom.nextObject(Skill.class);
     var email = ezRandom.nextObject(String.class);
 

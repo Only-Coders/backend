@@ -1,6 +1,7 @@
 package tech.onlycoders.backend.mapper;
 
 import java.util.List;
+import java.util.Optional;
 import org.mapstruct.InjectionStrategy;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -8,13 +9,18 @@ import tech.onlycoders.backend.dto.user.request.CreateUserDto;
 import tech.onlycoders.backend.dto.user.response.ReadUserDto;
 import tech.onlycoders.backend.dto.user.response.ReadUserLiteDto;
 import tech.onlycoders.backend.model.User;
+import tech.onlycoders.backend.repository.projections.PartialUser;
 
 @Mapper(componentModel = "spring", injectionStrategy = InjectionStrategy.CONSTRUCTOR)
 public interface UserMapper {
   ReadUserLiteDto userToReadPersonLiteDto(User person);
 
   @Mapping(target = "gitProfile", ignore = true)
-  ReadUserDto userToReadPersonDto(User person);
+  ReadUserDto userToReadPersonDto(PartialUser person);
+
+  default Boolean map(Optional<Boolean> value) {
+    return value.orElse(false);
+  }
 
   @Mapping(target = "workingPlaces", ignore = true)
   @Mapping(target = "updatedAt", ignore = true)

@@ -17,14 +17,13 @@ import org.springframework.test.util.ReflectionTestUtils;
 import tech.onlycoders.backend.bean.FirebaseService;
 import tech.onlycoders.backend.dto.auth.request.AuthRequestDto;
 import tech.onlycoders.backend.exception.ApiException;
-import tech.onlycoders.backend.model.Admin;
-import tech.onlycoders.backend.model.Role;
 import tech.onlycoders.backend.model.User;
 import tech.onlycoders.backend.model.WorkPosition;
 import tech.onlycoders.backend.repository.AdminRepository;
-import tech.onlycoders.backend.repository.PersonRepository;
 import tech.onlycoders.backend.repository.UserRepository;
 import tech.onlycoders.backend.repository.WorkPositionRepository;
+import tech.onlycoders.backend.utils.PartialRoleImpl;
+import tech.onlycoders.backend.utils.PartialUserImpl;
 
 @ExtendWith(MockitoExtension.class)
 public class AuthServiceTest {
@@ -66,8 +65,8 @@ public class AuthServiceTest {
 
   @Test
   public void ShouldReturnAnAccessTokenWhenEmailIsVerified() throws ApiException {
-    var person = ezRandom.nextObject(User.class);
-    person.setRole(Role.builder().name("USER").build());
+    var person = ezRandom.nextObject(PartialUserImpl.class);
+    person.setRole(new PartialRoleImpl("USER"));
     var authRequest = ezRandom.nextObject(AuthRequestDto.class);
     Mockito.when(this.userRepository.findByEmail(person.getEmail())).thenReturn(Optional.of(person));
     Mockito.when(this.firebaseService.verifyFirebaseToken(anyString())).thenReturn(person.getEmail());
@@ -103,9 +102,9 @@ public class AuthServiceTest {
   @Test
   public void ShouldRefreshTokenWhenUserHasBeenRegistered() throws ApiException {
     var authRequest = ezRandom.nextObject(AuthRequestDto.class);
-    var person = ezRandom.nextObject(User.class);
+    var person = ezRandom.nextObject(PartialUserImpl.class);
     var workPosition = ezRandom.nextObject(WorkPosition.class);
-    person.setRole(Role.builder().name("USER").build());
+    person.setRole(new PartialRoleImpl("USER"));
     person.setSecurityUpdate(null);
     Mockito.when(this.userRepository.findByEmail(person.getEmail())).thenReturn(Optional.of(person));
     Mockito.when(this.workPositionRepository.getUserCurrentPosition(anyString())).thenReturn(Optional.of(workPosition));
@@ -117,9 +116,9 @@ public class AuthServiceTest {
   @Test
   public void ShouldRefreshTokenWhenAdminHasBeenRegistered() throws ApiException {
     var authRequest = ezRandom.nextObject(AuthRequestDto.class);
-    var person = ezRandom.nextObject(Admin.class);
+    var person = ezRandom.nextObject(PartialUserImpl.class);
     person.setEmail("admin@onlycoders.tech");
-    person.setRole(Role.builder().name("ADMIN").build());
+    person.setRole(new PartialRoleImpl("ADMIN"));
     person.setSecurityUpdate(null);
     Mockito.when(this.adminRepository.findByEmail(person.getEmail())).thenReturn(Optional.of(person));
     Mockito.when(this.firebaseService.verifyFirebaseToken(anyString())).thenReturn(person.getEmail());

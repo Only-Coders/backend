@@ -22,10 +22,10 @@ import tech.onlycoders.backend.dto.user.request.EducationExperienceDto;
 import tech.onlycoders.backend.exception.ApiException;
 import tech.onlycoders.backend.mapper.InstituteMapper;
 import tech.onlycoders.backend.model.Institute;
-import tech.onlycoders.backend.model.User;
 import tech.onlycoders.backend.repository.DegreeRepository;
 import tech.onlycoders.backend.repository.InstituteRepository;
 import tech.onlycoders.backend.repository.UserRepository;
+import tech.onlycoders.backend.utils.PartialUserImpl;
 
 @ExtendWith(MockitoExtension.class)
 public class InstituteServiceTest {
@@ -69,7 +69,7 @@ public class InstituteServiceTest {
 
   @Test
   public void ShouldAddSchool() throws ApiException {
-    var user = ezRandom.nextObject(User.class);
+    var user = ezRandom.nextObject(PartialUserImpl.class);
     var organization = ezRandom.nextObject(Institute.class);
     var educationExperienceDto = ezRandom.nextObject(EducationExperienceDto.class);
     var email = ezRandom.nextObject(String.class);

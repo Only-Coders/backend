@@ -27,6 +27,8 @@ import tech.onlycoders.backend.exception.ApiException;
 import tech.onlycoders.backend.mapper.*;
 import tech.onlycoders.backend.model.*;
 import tech.onlycoders.backend.repository.*;
+import tech.onlycoders.backend.utils.PartialPostImpl;
+import tech.onlycoders.backend.utils.PartialUserImpl;
 
 @ExtendWith(MockitoExtension.class)
 public class UserServiceTest {
@@ -105,18 +107,16 @@ public class UserServiceTest {
 
   @Test
   public void ShouldReturnUserProfile() throws ApiException {
-    var canonicalName = ezRandom.nextObject(String.class);
+    var user = ezRandom.nextObject(PartialUserImpl.class);
+    Mockito.when(this.userRepository.findByCanonicalName(anyString())).thenReturn(Optional.of(user));
+    Mockito.when(this.userRepository.countContacts(user.getCanonicalName())).thenReturn(ezRandom.nextInt());
+    Mockito.when(this.userRepository.countUserFollowers(user.getCanonicalName())).thenReturn(ezRandom.nextInt());
+    Mockito.when(this.userRepository.countUserMedals(user.getCanonicalName())).thenReturn(ezRandom.nextInt());
+    Mockito.when(this.postRepository.countUserPosts(user.getCanonicalName())).thenReturn(ezRandom.nextInt());
     Mockito
-      .when(this.userRepository.findByCanonicalName(anyString()))
-      .thenReturn(Optional.of(ezRandom.nextObject(User.class)));
-    Mockito.when(this.userRepository.countContacts(anyString())).thenReturn(ezRandom.nextInt());
-    Mockito.when(this.userRepository.countUserFollowers(anyString())).thenReturn(ezRandom.nextInt());
-    Mockito.when(this.userRepository.countUserMedals(anyString())).thenReturn(ezRandom.nextInt());
-    Mockito.when(this.postRepository.countUserPosts(anyString())).thenReturn(ezRandom.nextInt());
-    Mockito
-      .when(this.workPositionRepository.getUserCurrentPositions(anyString()))
+      .when(this.workPositionRepository.getUserCurrentPositions(user.getCanonicalName()))
       .thenReturn(ezRandom.objects(WorkPosition.class, 10).collect(Collectors.toList()));
-    var profile = this.service.getProfile(canonicalName);
+    var profile = this.service.getProfile(user.getCanonicalName());
     assertNotNull(profile);
   }
 
@@ -161,8 +161,8 @@ public class UserServiceTest {
 
   @Test
   public void ShouldFollowUser() throws ApiException {
-    var user1 = ezRandom.nextObject(User.class);
-    var user2 = ezRandom.nextObject(User.class);
+    var user1 = ezRandom.nextObject(PartialUserImpl.class);
+    var user2 = ezRandom.nextObject(PartialUserImpl.class);
     var email = ezRandom.nextObject(String.class);
     var cName = ezRandom.nextObject(String.class);
 
@@ -184,7 +184,7 @@ public class UserServiceTest {
 
   @Test
   public void ShouldFailFollowUserWhenWrongCanonicalName() {
-    var user1 = ezRandom.nextObject(User.class);
+    var user1 = ezRandom.nextObject(PartialUserImpl.class);
     var email = ezRandom.nextObject(String.class);
     var cName = ezRandom.nextObject(String.class);
 
@@ -211,8 +211,8 @@ public class UserServiceTest {
 
   @Test
   public void ShouldSendRequest() throws ApiException {
-    var user1 = ezRandom.nextObject(User.class);
-    var user2 = ezRandom.nextObject(User.class);
+    var user1 = ezRandom.nextObject(PartialUserImpl.class);
+    var user2 = ezRandom.nextObject(PartialUserImpl.class);
     var email = ezRandom.nextObject(String.class);
     var reqDto = ezRandom.nextObject(CreateContactRequestDto.class);
 
@@ -224,8 +224,8 @@ public class UserServiceTest {
 
   @Test
   public void ShouldFailWithConflictWhenSendContactRequest() {
-    var user1 = ezRandom.nextObject(User.class);
-    var user2 = ezRandom.nextObject(User.class);
+    var user1 = ezRandom.nextObject(PartialUserImpl.class);
+    var user2 = ezRandom.nextObject(PartialUserImpl.class);
     var reqDto = ezRandom.nextObject(CreateContactRequestDto.class);
 
     Mockito.when(this.userRepository.findByEmail(user1.getEmail())).thenReturn(Optional.of(user1));
@@ -247,7 +247,7 @@ public class UserServiceTest {
 
   @Test
   public void ShouldFailSendRequestUserWhenCanonicalName() {
-    var user1 = ezRandom.nextObject(User.class);
+    var user1 = ezRandom.nextObject(PartialUserImpl.class);
     var email = ezRandom.nextObject(String.class);
     var reqDto = ezRandom.nextObject(CreateContactRequestDto.class);
 
@@ -259,13 +259,13 @@ public class UserServiceTest {
 
   @Test
   public void ShouldAddFavoritePost() throws ApiException {
-    var user1 = ezRandom.nextObject(User.class);
-    var post = new Post();
+    var user1 = ezRandom.nextObject(PartialUserImpl.class);
+    var post = new PartialPostImpl();
     var email = ezRandom.nextObject(String.class);
     var postId = ezRandom.nextObject(String.class);
 
     Mockito.when(this.userRepository.findByEmail(email)).thenReturn(Optional.of(user1));
-    Mockito.when(this.postRepository.findById(postId)).thenReturn(Optional.of(post));
+    Mockito.when(this.postRepository.getById(postId)).thenReturn(Optional.of(post));
 
     this.service.addFavoritePost(email, postId);
   }
@@ -282,12 +282,12 @@ public class UserServiceTest {
 
   @Test
   public void ShouldFailAddFavoritePostWhenWrongPostId() {
-    var user1 = ezRandom.nextObject(User.class);
+    var user1 = ezRandom.nextObject(PartialUserImpl.class);
     var email = ezRandom.nextObject(String.class);
     var postId = ezRandom.nextObject(String.class);
 
     Mockito.when(this.userRepository.findByEmail(email)).thenReturn(Optional.of(user1));
-    Mockito.when(this.postRepository.findById(postId)).thenReturn(Optional.empty());
+    Mockito.when(this.postRepository.getById(postId)).thenReturn(Optional.empty());
 
     assertThrows(ApiException.class, () -> this.service.addFavoritePost(email, postId));
   }
@@ -309,7 +309,7 @@ public class UserServiceTest {
 
   @Test
   public void ShouldFailReturnFavoritePostsWhenUserNotFound() throws ApiException {
-    var user1 = ezRandom.nextObject(User.class);
+    var user1 = ezRandom.nextObject(PartialUserImpl.class);
     var email = ezRandom.nextObject(String.class);
     var size = 20;
     var page = 0;
@@ -323,8 +323,8 @@ public class UserServiceTest {
 
   @Test
   public void ShouldUnfollowUser() throws ApiException {
-    var user1 = ezRandom.nextObject(User.class);
-    var user2 = ezRandom.nextObject(User.class);
+    var user1 = ezRandom.nextObject(PartialUserImpl.class);
+    var user2 = ezRandom.nextObject(PartialUserImpl.class);
     var email = ezRandom.nextObject(String.class);
     var cName = ezRandom.nextObject(String.class);
 
@@ -346,7 +346,7 @@ public class UserServiceTest {
 
   @Test
   public void ShouldFailUnfollowUserWhenWrongCanonicalName() {
-    var user1 = ezRandom.nextObject(User.class);
+    var user1 = ezRandom.nextObject(PartialUserImpl.class);
     var email = ezRandom.nextObject(String.class);
     var cName = ezRandom.nextObject(String.class);
 
@@ -358,8 +358,8 @@ public class UserServiceTest {
 
   @Test
   public void ShouldUnSendRequest() throws ApiException {
-    var user1 = ezRandom.nextObject(User.class);
-    var user2 = ezRandom.nextObject(User.class);
+    var user1 = ezRandom.nextObject(PartialUserImpl.class);
+    var user2 = ezRandom.nextObject(PartialUserImpl.class);
 
     Mockito.when(this.userRepository.findByEmail(user1.getEmail())).thenReturn(Optional.of(user1));
     Mockito.when(this.userRepository.findByCanonicalName(user2.getCanonicalName())).thenReturn(Optional.of(user2));
@@ -381,8 +381,8 @@ public class UserServiceTest {
 
   @Test
   public void ShouldFailUnSendRequestUserWhenCanonicalName() {
-    var user1 = ezRandom.nextObject(User.class);
-    var user2 = ezRandom.nextObject(User.class);
+    var user1 = ezRandom.nextObject(PartialUserImpl.class);
+    var user2 = ezRandom.nextObject(PartialUserImpl.class);
 
     Mockito.when(this.userRepository.findByEmail(user1.getEmail())).thenReturn(Optional.of(user1));
     Mockito.when(this.userRepository.findByCanonicalName(user2.getCanonicalName())).thenReturn(Optional.empty());
@@ -446,33 +446,35 @@ public class UserServiceTest {
   }
 
   @Test
+  @MockitoSettings(strictness = Strictness.LENIENT)
   public void ShouldAcceptContactRequest() throws ApiException {
     var response = new ResponseContactRequestDto();
     response.setRequesterCanonicalName("ds");
     response.setAcceptContact(true);
+    var user1 = ezRandom.nextObject(PartialUserImpl.class);
+    var user2 = ezRandom.nextObject(PartialUserImpl.class);
 
-    Mockito.when(this.userRepository.findByEmail(anyString())).thenReturn(Optional.of(ezRandom.nextObject(User.class)));
-    Mockito
-      .when(this.userRepository.findByCanonicalName(anyString()))
-      .thenReturn(Optional.of(ezRandom.nextObject(User.class)));
-    Mockito.when(this.contactRequestRepository.hasPendingRequest(anyString(), anyString())).thenReturn(true);
+    Mockito.when(this.userRepository.findByEmail(anyString())).thenReturn(Optional.of(user1));
+    Mockito.when(this.userRepository.findByCanonicalName(anyString())).thenReturn(Optional.of(user2));
+    Mockito.when(this.contactRequestRepository.hasPendingRequest(user2.getId(), user1.getId())).thenReturn(true);
 
     this.service.responseContactRequest("email", response);
   }
 
   @Test
+  @MockitoSettings(strictness = Strictness.LENIENT)
   public void ShouldRejectContactRequest() throws ApiException {
+    var user = ezRandom.nextObject(PartialUserImpl.class);
+    var user2 = ezRandom.nextObject(PartialUserImpl.class);
     var response = new ResponseContactRequestDto();
-    response.setRequesterCanonicalName("ds");
+    response.setRequesterCanonicalName(user.getCanonicalName());
     response.setAcceptContact(false);
 
-    Mockito.when(this.userRepository.findByEmail(anyString())).thenReturn(Optional.of(ezRandom.nextObject(User.class)));
-    Mockito
-      .when(this.userRepository.findByCanonicalName(anyString()))
-      .thenReturn(Optional.of(ezRandom.nextObject(User.class)));
-    Mockito.when(this.contactRequestRepository.hasPendingRequest(anyString(), anyString())).thenReturn(true);
+    Mockito.when(this.userRepository.findByCanonicalName(user.getCanonicalName())).thenReturn(Optional.of(user));
+    Mockito.when(this.userRepository.findByEmail(user2.getEmail())).thenReturn(Optional.of(user2));
+    Mockito.when(this.contactRequestRepository.hasPendingRequest(user.getId(), user2.getId())).thenReturn(true);
 
-    this.service.responseContactRequest("email", response);
+    this.service.responseContactRequest(user2.getEmail(), response);
   }
 
   @Test
@@ -481,10 +483,12 @@ public class UserServiceTest {
     response.setRequesterCanonicalName("ds");
     response.setAcceptContact(false);
 
-    Mockito.when(this.userRepository.findByEmail(anyString())).thenReturn(Optional.of(ezRandom.nextObject(User.class)));
+    Mockito
+      .when(this.userRepository.findByEmail(anyString()))
+      .thenReturn(Optional.of(ezRandom.nextObject(PartialUserImpl.class)));
     Mockito
       .when(this.userRepository.findByCanonicalName(anyString()))
-      .thenReturn(Optional.of(ezRandom.nextObject(User.class)));
+      .thenReturn(Optional.of(ezRandom.nextObject(PartialUserImpl.class)));
     Mockito.when(this.contactRequestRepository.hasPendingRequest(anyString(), anyString())).thenReturn(false);
 
     assertThrows(Exception.class, () -> this.service.responseContactRequest("email", response));
@@ -518,7 +522,7 @@ public class UserServiceTest {
 
     Mockito
       .when(this.userRepository.findByCanonicalName(anyString()))
-      .thenReturn(Optional.of(ezRandom.nextObject(User.class)));
+      .thenReturn(Optional.of(ezRandom.nextObject(PartialUserImpl.class)));
 
     this.service.setUserBlockedStatus("cname", blocked);
   }
