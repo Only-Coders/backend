@@ -114,6 +114,15 @@ public class PostService {
       var readWorkPositionDto = this.workPositionMapper.workPositionToReadWorkPositionDto(currentPosition.get());
       dto.getPublisher().setCurrentPosition(readWorkPositionDto);
     }
+
+    this.notificatorService.send(
+        MessageDTO
+          .builder()
+          .message(publisher.getFullName() + " ha publicado un nuevo post!")
+          .to(publisher.getEmail())
+          .eventType(EventType.NEW_POST)
+          .build()
+      );
     return dto;
   }
 
@@ -305,6 +314,16 @@ public class PostService {
     var commentDto = commentMapper.commentToReadCommentDto(comment);
     commentDto.setReactions(getCommentReactionQuantity(comment.getId()));
     commentDto.setMyReaction(getCommentUserReaction(canonicalName, comment.getId()));
+
+    //TODO: get post original publisher
+    //    this.notificatorService.send(
+    //            MessageDTO
+    //                    .builder()
+    //                    .message(commenter.getFullName() + " ha publicado un comentario en tu post!")
+    //                    .to(post.get.getEmail())
+    //                    .eventType(EventType.NEW_POST)
+    //                    .build()
+    //    );
 
     return commentDto;
   }

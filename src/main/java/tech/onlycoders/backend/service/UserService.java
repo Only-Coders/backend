@@ -217,6 +217,14 @@ public class UserService {
       this.userRepository.findByCanonicalName(canonicalName)
         .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "error.user-not-found"));
     this.userRepository.followUser(user.getId(), followed.getId());
+    this.notificatorService.send(
+        MessageDTO
+          .builder()
+          .message(user.getFullName() + " ha comenzado a seguirte!")
+          .to(followed.getEmail())
+          .eventType(EventType.NEW_FOLLOWER)
+          .build()
+      );
   }
 
   public void addFavoritePost(String email, String postId) throws ApiException {
@@ -368,6 +376,14 @@ public class UserService {
     contactRequestRepository.deleteRequest(requester.getId(), user.getId());
     userRepository.unfollowUser(requester.getId(), user.getId());
     userRepository.unfollowUser(user.getId(), requester.getId());
+    this.notificatorService.send(
+        MessageDTO
+          .builder()
+          .message(user.getFullName() + " ha aceptado tu peticion de contacto!")
+          .to(requester.getEmail())
+          .eventType(EventType.CONTACT_ACCEPTED)
+          .build()
+      );
   }
 
   public void removeFavoritePost(String email, String postId) {
