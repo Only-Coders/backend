@@ -1,7 +1,6 @@
 package tech.onlycoders.backend.service;
 
 import java.util.*;
-import java.util.stream.Collectors;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,6 +15,7 @@ import tech.onlycoders.backend.dto.report.request.CreatePostReportDto;
 import tech.onlycoders.backend.exception.ApiException;
 import tech.onlycoders.backend.mapper.CommentMapper;
 import tech.onlycoders.backend.mapper.PostMapper;
+import tech.onlycoders.backend.mapper.WorkPositionMapper;
 import tech.onlycoders.backend.model.*;
 import tech.onlycoders.backend.repository.*;
 import tech.onlycoders.backend.repository.projections.PartialUser;
@@ -35,6 +35,8 @@ public class PostService {
   private final CommentRepository commentRepository;
   private final ReportRepository reportRepository;
   private final ReportTypeRepository reportTypeRepository;
+  private final WorkPositionRepository workPositionRepository;
+  private final WorkPositionMapper workPositionMapper;
 
   private final PostMapper postMapper;
   private final CommentMapper commentMapper;
@@ -48,6 +50,8 @@ public class PostService {
     CommentRepository commentRepository,
     ReportRepository reportRepository,
     ReportTypeRepository reportTypeRepository,
+    WorkPositionRepository workPositionRepository,
+    WorkPositionMapper workPositionMapper,
     PostMapper postMapper,
     CommentMapper commentMapper,
     NotificatorService notificatorService
@@ -59,6 +63,8 @@ public class PostService {
     this.commentRepository = commentRepository;
     this.reportRepository = reportRepository;
     this.reportTypeRepository = reportTypeRepository;
+    this.workPositionRepository = workPositionRepository;
+    this.workPositionMapper = workPositionMapper;
 
     this.postMapper = postMapper;
     this.commentMapper = commentMapper;
@@ -95,7 +101,14 @@ public class PostService {
     postRepository.linkWithPublisher(post.getId(), publisher.getId());
     userRepository.updateDefaultPrivacy(publisher.getId(), post.getIsPublic());
 
-    return postMapper.postToReadPersonDto(post);
+    var dto = postMapper.postToReadPersonDto(post);
+
+    var currentPosition = this.workPositionRepository.getUserCurrentPosition(publisher.getCanonicalName());
+    if (currentPosition.isPresent()) {
+      var readWorkPositionDto = this.workPositionMapper.workPositionToReadWorkPositionDto(currentPosition.get());
+      dto.getPublisher().setCurrentPosition(readWorkPositionDto);
+    }
+    return dto;
   }
 
   private Set<DisplayedTag> getOrSaveTagList(List<String> displayTagNames) {
@@ -180,7 +193,7 @@ public class PostService {
     Integer page,
     Integer size
   ) {
-    if (userRepository.userIsContact(requesterCanonicalName, targetCanonicalName)) {
+    if (userRepository.areUsersConnected(requesterCanonicalName, targetCanonicalName)) {
       return this.getPostsOfUser(targetCanonicalName, page, size);
     } else {
       var skip = page * size;
@@ -195,6 +208,8 @@ public class PostService {
         .parallelStream()
         .forEach(
           post -> {
+            var publisher = post.getPublisher().getCanonicalName();
+
             post.setMyReaction(getPostUserReaction(requesterCanonicalName, post.getId()));
             post.setReactions(getPostReactionQuantity(post.getId()));
             post.setCommentQuantity(postRepository.getPostCommentsQuantity(post.getId()));
@@ -216,6 +231,12 @@ public class PostService {
       .parallelStream()
       .forEach(
         post -> {
+          var publisher = post.getPublisher().getCanonicalName();
+          var currentPosition = this.workPositionRepository.getUserCurrentPosition(publisher);
+          if (currentPosition.isPresent()) {
+            var readWorkPositionDto = this.workPositionMapper.workPositionToReadWorkPositionDto(currentPosition.get());
+            post.getPublisher().setCurrentPosition(readWorkPositionDto);
+          }
           post.setReactions(getPostReactionQuantity(post.getId()));
           post.setCommentQuantity(postRepository.getPostCommentsQuantity(post.getId()));
           post.setMyReaction(getPostUserReaction(canonicalName, post.getId()));
@@ -372,7 +393,7 @@ public class PostService {
     var publisherCanonicalName = postRepository.getPostPublisherCanonicalName(postId);
     if (
       !publisherCanonicalName.equals(requesterCanonicalName) &&
-      !userRepository.userIsContact(requesterCanonicalName, requesterCanonicalName) &&
+      !userRepository.areUsersConnected(requesterCanonicalName, requesterCanonicalName) &&
       !postRepository.postIsPublic(postId)
     ) throw new ApiException(HttpStatus.FORBIDDEN, "error.not-authorized");
   }

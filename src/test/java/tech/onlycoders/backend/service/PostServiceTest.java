@@ -57,12 +57,18 @@ public class PostServiceTest {
   private ReportRepository reportRepository;
 
   @Mock
+  private WorkPositionRepository workPositionRepository;
+
+  @Mock
   private ReportTypeRepository reportTypeRepository;
 
   private final EasyRandom ezRandom = new EasyRandom();
 
   @Spy
   private final PostMapper postMapper = new PostMapperImpl(new TagMapperImpl());
+
+  @Spy
+  private WorkPositionMapper workPositionMapper = new WorkPositionMapperImpl(new WorkplaceMapperImpl());
 
   @Spy
   private final CommentMapper commentMapper = new CommentMapperImpl();
@@ -147,7 +153,7 @@ public class PostServiceTest {
     var targetCanonicalName = ezRandom.nextObject(String.class);
     var size = 20;
     var page = 0;
-    Mockito.when(this.userRepository.userIsContact(requesterCanonicalName, targetCanonicalName)).thenReturn(true);
+    Mockito.when(this.userRepository.areUsersConnected(requesterCanonicalName, targetCanonicalName)).thenReturn(true);
     Mockito
       .when(this.postRepository.getPosts(requesterCanonicalName, page, size))
       .thenReturn(ezRandom.objects(Post.class, 10).collect(Collectors.toSet()));
@@ -164,7 +170,7 @@ public class PostServiceTest {
     var targetCanonicalName = ezRandom.nextObject(String.class);
     var size = 20;
     var page = 0;
-    Mockito.when(this.userRepository.userIsContact(requesterCanonicalName, targetCanonicalName)).thenReturn(false);
+    Mockito.when(this.userRepository.areUsersConnected(requesterCanonicalName, targetCanonicalName)).thenReturn(false);
     Mockito
       .when(this.postRepository.getUserPublicPosts(requesterCanonicalName, page, size))
       .thenReturn(ezRandom.objects(Post.class, 10).collect(Collectors.toSet()));
@@ -218,7 +224,7 @@ public class PostServiceTest {
 
     Mockito.when(postRepository.getPostPublisherCanonicalName(anyString())).thenReturn("cname");
     Mockito.when(postRepository.postIsPublic(anyString())).thenReturn(true);
-    Mockito.when(userRepository.userIsContact(anyString(), anyString())).thenReturn(true);
+    Mockito.when(userRepository.areUsersConnected(anyString(), anyString())).thenReturn(true);
     Mockito.when(this.userRepository.findByCanonicalName(anyString())).thenReturn(Optional.of(user));
     Mockito.when(this.postRepository.getById(anyString())).thenReturn(Optional.of(post));
     Mockito.when(this.reactionRepository.getCommentUserReaction(anyString(), anyString())).thenReturn(null);
@@ -257,7 +263,7 @@ public class PostServiceTest {
       .thenReturn(0L);
     Mockito.when(postRepository.getPostPublisherCanonicalName(anyString())).thenReturn("cname");
     Mockito.when(postRepository.postIsPublic(anyString())).thenReturn(true);
-    Mockito.when(userRepository.userIsContact(anyString(), anyString())).thenReturn(true);
+    Mockito.when(userRepository.areUsersConnected(anyString(), anyString())).thenReturn(true);
 
     var result = service.getPostComments("asd", "postid", 0, 10);
 
@@ -269,7 +275,7 @@ public class PostServiceTest {
   public void ShouldFailReturnPostCommentsWhenUserIsNotAllowed() {
     Mockito.when(postRepository.getPostPublisherCanonicalName(anyString())).thenReturn("cname");
     Mockito.when(postRepository.postIsPublic(anyString())).thenReturn(false);
-    Mockito.when(userRepository.userIsContact(anyString(), anyString())).thenReturn(false);
+    Mockito.when(userRepository.areUsersConnected(anyString(), anyString())).thenReturn(false);
 
     assertThrows(Exception.class, () -> service.getPostComments("asd", "postid", 0, 10));
   }

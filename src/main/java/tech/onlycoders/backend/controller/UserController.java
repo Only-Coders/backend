@@ -71,7 +71,9 @@ public class UserController {
   @GetMapping("/{canonicalName}")
   @Operation(summary = "Gets user profile")
   ResponseEntity<ReadUserDto> getProfile(@PathVariable String canonicalName) throws ApiException {
-    var persistedPerson = this.userService.getProfile(canonicalName);
+    var userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    var sourceCanonicalName = userDetails.getCanonicalName();
+    var persistedPerson = this.userService.getProfile(sourceCanonicalName, canonicalName);
     return ResponseEntity.ok(persistedPerson);
   }
 
@@ -331,14 +333,12 @@ public class UserController {
   @GetMapping("/contacts")
   @Operation(summary = "Get my contacts.")
   ResponseEntity<PaginateDto<ReadUserLiteDto>> getContacts(
-    @RequestParam(defaultValue = "") String partialName,
-    @RequestParam(defaultValue = "") String countryName,
     @RequestParam(defaultValue = "0") @Min(0) Integer page,
     @RequestParam(defaultValue = "20") @Min(1) Integer size
   ) {
     var userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     var canonicalName = userDetails.getCanonicalName();
-    var contacts = this.userService.getMyContacts(canonicalName, page, size, partialName, countryName);
+    var contacts = this.userService.getMyContacts(canonicalName, page, size);
     return ResponseEntity.ok(contacts);
   }
 

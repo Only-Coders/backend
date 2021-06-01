@@ -101,13 +101,15 @@ public class UserServiceTest {
   @Test
   public void ShouldFailWhenFirebaseReturnsException() {
     var canonicalName = ezRandom.nextObject(String.class);
+    var sourceCanonicalName = ezRandom.nextObject(String.class);
     Mockito.when(this.userRepository.findByCanonicalName(anyString())).thenReturn(Optional.empty());
-    assertThrows(ApiException.class, () -> this.service.getProfile(canonicalName));
+    assertThrows(ApiException.class, () -> this.service.getProfile(sourceCanonicalName, canonicalName));
   }
 
   @Test
   public void ShouldReturnUserProfile() throws ApiException {
     var user = ezRandom.nextObject(PartialUserImpl.class);
+    var sourceCanonicalName = ezRandom.nextObject(String.class);
     Mockito.when(this.userRepository.findByCanonicalName(anyString())).thenReturn(Optional.of(user));
     Mockito.when(this.userRepository.countContacts(user.getCanonicalName())).thenReturn(ezRandom.nextInt());
     Mockito.when(this.userRepository.countUserFollowers(user.getCanonicalName())).thenReturn(ezRandom.nextInt());
@@ -116,7 +118,7 @@ public class UserServiceTest {
     Mockito
       .when(this.workPositionRepository.getUserCurrentPositions(user.getCanonicalName()))
       .thenReturn(ezRandom.objects(WorkPosition.class, 10).collect(Collectors.toList()));
-    var profile = this.service.getProfile(user.getCanonicalName());
+    var profile = this.service.getProfile(sourceCanonicalName, user.getCanonicalName());
     assertNotNull(profile);
   }
 
@@ -443,7 +445,7 @@ public class UserServiceTest {
       .when(this.workPositionRepository.getUserCurrentPosition(anyString()))
       .thenReturn(Optional.of(ezRandom.nextObject(WorkPosition.class)));
 
-    var result = this.service.getMyContacts(canonicalName, page, size, "", "");
+    var result = this.service.getMyContacts(canonicalName, page, size);
     assertNotNull(result);
   }
 
@@ -463,7 +465,7 @@ public class UserServiceTest {
       .when(this.workPositionRepository.getUserCurrentPosition(anyString()))
       .thenReturn(Optional.of(ezRandom.nextObject(WorkPosition.class)));
 
-    var result = this.service.getMyContacts(canonicalName, page, size, "partial", "");
+    var result = this.service.getMyContacts(canonicalName, page, size);
     assertNotNull(result);
   }
 
@@ -483,7 +485,7 @@ public class UserServiceTest {
       .when(this.workPositionRepository.getUserCurrentPosition(anyString()))
       .thenReturn(Optional.of(ezRandom.nextObject(WorkPosition.class)));
 
-    var result = this.service.getMyContacts(canonicalName, page, size, "", "country");
+    var result = this.service.getMyContacts(canonicalName, page, size);
     assertNotNull(result);
   }
 
@@ -503,7 +505,7 @@ public class UserServiceTest {
       .when(this.workPositionRepository.getUserCurrentPosition(anyString()))
       .thenReturn(Optional.of(ezRandom.nextObject(WorkPosition.class)));
 
-    var result = this.service.getMyContacts(canonicalName, page, size, "partial", "country");
+    var result = this.service.getMyContacts(canonicalName, page, size);
     assertNotNull(result);
   }
 

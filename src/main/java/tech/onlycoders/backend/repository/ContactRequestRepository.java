@@ -8,10 +8,7 @@ import tech.onlycoders.backend.model.ContactRequest;
 
 @Repository
 public interface ContactRequestRepository extends Neo4jRepository<ContactRequest, String> {
-  @Query("MATCH (a:User{id: $userId}) WITH a MATCH (b:ContactRequest{id: $contactRequestId}) MERGE (a)-[:SENDS]->(b)")
-  void createSendContactRequest(String contactRequestId, String userId);
-
-  @Query("MATCH (:User{id: $sourceId})-[]->(cr:ContactRequest)-[]->(target:User{id: $targetId}) detach delete cr")
+  @Query("MATCH (:User{id: $sourceId})-[]-(cr:ContactRequest)-[]-(target:User{id: $targetId}) detach delete cr")
   void deleteRequest(String sourceId, String targetId);
 
   @Query("MATCH (u:User)-[]->(cr:ContactRequest)-[]->(:User{email: $email}) RETURN count(cr)")
@@ -26,6 +23,9 @@ public interface ContactRequestRepository extends Neo4jRepository<ContactRequest
   @Query("MATCH (:User{id: $sourceId})-[]->(a:ContactRequest)-[]->(:User{id: $targetId}) RETURN count(a)>0")
   boolean hasPendingRequest(String sourceId, String targetId);
 
-  @Query("MATCH (r:ContactRequest{id: $contactRequestId}) WITH r MATCH (u:User{id: $userId}) MERGE (u)-[:SENDS]->(r);")
+  @Query("MATCH (r:ContactRequest{id: $contactRequestId}) WITH r MATCH (u:User{id: $userId}) MERGE (u)<-[:TO]-(r);")
   void setTarget(String contactRequestId, String userId);
+
+  @Query("MATCH (a:User{id: $userId}) WITH a MATCH (b:ContactRequest{id: $contactRequestId}) MERGE (a)-[:SENDS]->(b)")
+  void createSendContactRequest(String contactRequestId, String userId);
 }
