@@ -19,6 +19,7 @@ public class PartialUserImpl implements PartialUser {
   private String canonicalName;
   private Date securityUpdate;
   private PartialRoleImpl partialRoleImpl;
+  private PartialGitProfileImpl gitProfile;
 
   public PartialUserImpl() {}
 
@@ -30,7 +31,8 @@ public class PartialUserImpl implements PartialUser {
     String imageURI,
     String canonicalName,
     Date securityUpdate,
-    PartialRoleImpl partialRoleImpl
+    PartialRoleImpl partialRoleImpl,
+    PartialGitProfileImpl gitProfile
   ) {
     this.firstName = firstName;
     this.lastName = lastName;
@@ -40,6 +42,7 @@ public class PartialUserImpl implements PartialUser {
     this.canonicalName = canonicalName;
     this.securityUpdate = securityUpdate;
     this.partialRoleImpl = partialRoleImpl;
+    this.gitProfile = gitProfile;
   }
 
   public void setFirstName(String firstName) {
@@ -70,8 +73,10 @@ public class PartialUserImpl implements PartialUser {
     this.securityUpdate = securityUpdate;
   }
 
-  public void setRole(PartialRoleImpl partialRoleImpl) {
-    this.partialRoleImpl = partialRoleImpl;
+  public void setRole(PartialRoleImpl partialRoleImpl) {}
+
+  public void setGitProfile(PartialGitProfileImpl gitProfile) {
+    this.gitProfile = gitProfile;
   }
 
   @Override
@@ -146,6 +151,6 @@ public class PartialUserImpl implements PartialUser {
 
   @Override
   public PartialGitProfile getGitProfile() {
-    return null;
+    return gitProfile;
   }
 }

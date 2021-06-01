@@ -71,6 +71,9 @@ public class PostServiceTest {
   private WorkPositionMapper workPositionMapper = new WorkPositionMapperImpl(new WorkplaceMapperImpl());
 
   @Spy
+  private UserMapper userMapper = new UserMapperImpl();
+
+  @Spy
   private final CommentMapper commentMapper = new CommentMapperImpl();
 
   @Test
