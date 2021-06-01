@@ -15,6 +15,7 @@ import tech.onlycoders.backend.dto.report.request.CreatePostReportDto;
 import tech.onlycoders.backend.exception.ApiException;
 import tech.onlycoders.backend.mapper.CommentMapper;
 import tech.onlycoders.backend.mapper.PostMapper;
+import tech.onlycoders.backend.mapper.UserMapper;
 import tech.onlycoders.backend.mapper.WorkPositionMapper;
 import tech.onlycoders.backend.model.*;
 import tech.onlycoders.backend.repository.*;
@@ -39,6 +40,7 @@ public class PostService {
   private final WorkPositionMapper workPositionMapper;
 
   private final PostMapper postMapper;
+  private final UserMapper userMapper;
   private final CommentMapper commentMapper;
   private final NotificatorService notificatorService;
 
@@ -53,6 +55,7 @@ public class PostService {
     WorkPositionRepository workPositionRepository,
     WorkPositionMapper workPositionMapper,
     PostMapper postMapper,
+    UserMapper userMapper,
     CommentMapper commentMapper,
     NotificatorService notificatorService
   ) {
@@ -67,6 +70,7 @@ public class PostService {
     this.workPositionMapper = workPositionMapper;
 
     this.postMapper = postMapper;
+    this.userMapper = userMapper;
     this.commentMapper = commentMapper;
     this.notificatorService = notificatorService;
   }
@@ -102,6 +106,8 @@ public class PostService {
     userRepository.updateDefaultPrivacy(publisher.getId(), post.getIsPublic());
 
     var dto = postMapper.postToReadPersonDto(post);
+    var publisherDto = this.userMapper.userToReadPersonLiteDto(publisher);
+    dto.setPublisher(publisherDto);
 
     var currentPosition = this.workPositionRepository.getUserCurrentPosition(publisher.getCanonicalName());
     if (currentPosition.isPresent()) {
@@ -199,8 +205,6 @@ public class PostService {
       var skip = page * size;
       var posts = postRepository.getUserPublicPosts(targetCanonicalName, skip, size);
 
-      var readPostDtoList = postMapper.setPostToListPostDto(posts);
-
       var totalQuantity = postRepository.countUserPublicPosts(targetCanonicalName);
       var paginatedDto = getReadPostDtoPaginateDto(page, size, posts, totalQuantity);
       paginatedDto
@@ -208,8 +212,6 @@ public class PostService {
         .parallelStream()
         .forEach(
           post -> {
-            var publisher = post.getPublisher().getCanonicalName();
-
             post.setMyReaction(getPostUserReaction(requesterCanonicalName, post.getId()));
             post.setReactions(getPostReactionQuantity(post.getId()));
             post.setCommentQuantity(postRepository.getPostCommentsQuantity(post.getId()));

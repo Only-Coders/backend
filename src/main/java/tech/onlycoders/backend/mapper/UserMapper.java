@@ -14,6 +14,7 @@ import tech.onlycoders.backend.repository.projections.PartialUser;
 @Mapper(componentModel = "spring", injectionStrategy = InjectionStrategy.CONSTRUCTOR)
 public interface UserMapper {
   ReadUserLiteDto userToReadPersonLiteDto(User person);
+  ReadUserLiteDto userToReadPersonLiteDto(PartialUser partialUser);
 
   @Mapping(target = "gitProfile", ignore = true)
   ReadUserDto userToReadPersonDto(PartialUser person);
