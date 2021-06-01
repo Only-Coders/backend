@@ -29,7 +29,6 @@ import tech.onlycoders.backend.model.ContactRequest;
 import tech.onlycoders.backend.model.GitProfile;
 import tech.onlycoders.backend.model.User;
 import tech.onlycoders.backend.repository.*;
-import tech.onlycoders.backend.repository.projections.PartialUser;
 import tech.onlycoders.backend.utils.CanonicalFactory;
 import tech.onlycoders.backend.utils.GlobalVariables;
 import tech.onlycoders.backend.utils.PaginationUtils;
@@ -116,10 +115,12 @@ public class UserService {
     if (!sourceCanonicalName.equalsIgnoreCase(targetCanonicalName)) {
       Boolean isFollowing = this.userRepository.isFollowingAnotherUser(sourceCanonicalName, targetCanonicalName);
       Boolean isConnected = this.userRepository.areUsersConnected(sourceCanonicalName, targetCanonicalName);
-      Boolean pendingRequest = this.userRepository.havePendingRequest(sourceCanonicalName, targetCanonicalName);
+      Boolean pendingRequest = this.userRepository.hasPendingRequest(sourceCanonicalName, targetCanonicalName);
+      Boolean requestHasBeenSent = this.userRepository.requestHasBeenSent(sourceCanonicalName, targetCanonicalName);
       dto.setFollowing(isFollowing);
       dto.setConnected(isConnected);
       dto.setPendingRequest(pendingRequest);
+      dto.setRequestHasBeenSent(requestHasBeenSent);
     }
 
     if (!currentPosition.isEmpty()) {

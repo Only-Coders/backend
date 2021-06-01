@@ -28,4 +28,5 @@ public class ReadUserDto {
   private boolean isConnected;
   private boolean isFollowing;
   private boolean pendingRequest;
+  private boolean requestHasBeenSent;
 }
