@@ -141,4 +141,7 @@ public interface UserRepository extends Neo4jRepository<User, String> {
 
   @Query("MATCH (:User{id:$user1Id})-[c:IS_CONNECTED]-(:User{id:$user2Id}) DELETE c")
   void removeContact(String user1Id, String user2Id);
+
+  @Query("MATCH (u:User{email: $email}) set u += {eliminationDate: null}")
+  void removeUserEliminationDate(String email);
 }

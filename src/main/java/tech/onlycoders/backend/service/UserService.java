@@ -390,4 +390,8 @@ public class UserService {
         .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "error.user-not-found"));
     userRepository.removeContact(requesterUser.getId(), targetUser.getId());
   }
+
+  public void cancelEliminationDate(String email) {
+    this.userRepository.removeUserEliminationDate(email);
+  }
 }
