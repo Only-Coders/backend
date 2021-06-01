@@ -61,22 +61,22 @@ public interface UserRepository extends Neo4jRepository<User, String> {
   void unfollowUser(String followerId, String followedId);
 
   @Query(
-    "CALL { " +
-    "  MATCH (User{canonicalName:$canonicalName})-[r:IS_CONNECTED]-(u:User) RETURN u " +
-    "UNION " +
-    "  MATCH (User{canonicalName:$canonicalName})-[:FOLLOWS]->(u:User) RETURN u " +
-    "} RETURN u ORDER BY u.name DESC SKIP $skip LIMIT $size "
+    " MATCH (:User{canonicalName:$canonicalName})-[r:FOLLOWS]->(u:User) " +
+    " RETURN u ORDER BY u.name DESC SKIP $skip LIMIT $size "
+  )
+  List<User> getMyFollows(String canonicalName, int skip, Integer size);
+
+  @Query(
+    "  MATCH (u2:User{canonicalName:$canonicalName})-[r:IS_CONNECTED]-(u:User) " +
+    " RETURN u ORDER BY u.name DESC SKIP $skip LIMIT $size "
   )
   List<User> getMyContacts(String canonicalName, int skip, Integer size);
 
-  @Query(
-    "CALL { " +
-    "  MATCH (User{canonicalName:$canonicalName})-[r:IS_CONNECTED]-(u:User) RETURN u " +
-    "UNION " +
-    "  MATCH (User{canonicalName:$canonicalName})-[:FOLLOWS]->(u:User) RETURN u " +
-    "} RETURN count(u)"
-  )
+  @Query("MATCH (User{canonicalName:$canonicalName})-[r:IS_CONNECTED]-(u:User) RETURN count(u)")
   Integer countContacts(String canonicalName);
+
+  @Query("MATCH (User{canonicalName:$canonicalName})-[:FOLLOWS]->(u:User) RETURN count(u) ")
+  Integer countFollows(String canonicalName);
 
   @Query(
     "CALL { " +

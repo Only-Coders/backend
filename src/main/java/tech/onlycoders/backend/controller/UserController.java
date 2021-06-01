@@ -342,6 +342,27 @@ public class UserController {
     return ResponseEntity.ok(contacts);
   }
 
+  @ApiResponses(
+    value = {
+      @ApiResponse(
+        responseCode = "200",
+        content = { @Content(mediaType = "application/json", schema = @Schema(implementation = PaginatedUsers.class)) }
+      )
+    }
+  )
+  @PreAuthorize("hasAuthority('USER')")
+  @GetMapping("/follows")
+  @Operation(summary = "Get my follows.")
+  ResponseEntity<PaginateDto<ReadUserLiteDto>> getMyFollows(
+    @RequestParam(defaultValue = "0") @Min(0) Integer page,
+    @RequestParam(defaultValue = "20") @Min(1) Integer size
+  ) {
+    var userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    var canonicalName = userDetails.getCanonicalName();
+    var contacts = this.userService.getMyFollows(canonicalName, page, size);
+    return ResponseEntity.ok(contacts);
+  }
+
   @ApiResponses(value = { @ApiResponse(responseCode = "200", content = { @Content(mediaType = "application/json") }) })
   @PreAuthorize("hasAuthority('ADMIN')")
   @PatchMapping("/{canonicalName}/blocked")

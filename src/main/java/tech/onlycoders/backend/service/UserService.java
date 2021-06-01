@@ -295,27 +295,18 @@ public class UserService {
     return paginated;
   }
 
+  public PaginateDto<ReadUserLiteDto> getMyFollows(String canonicalName, Integer page, Integer size) {
+    var users = this.userRepository.getMyFollows(canonicalName, page * size, size);
+    var totalQuantity = this.userRepository.countFollows(canonicalName);
+
+    return getReadUserLiteDtoPaginateDto(page, size, users, totalQuantity);
+  }
+
   public PaginateDto<ReadUserLiteDto> getMyContacts(String canonicalName, Integer page, Integer size) {
     var users = this.userRepository.getMyContacts(canonicalName, page * size, size);
     var totalQuantity = this.userRepository.countContacts(canonicalName);
 
-    var dtos = getReadUserLiteDtoPaginateDto(page, size, users, totalQuantity);
-    dtos
-      .getContent()
-      .stream()
-      .parallel()
-      .forEach(
-        user -> {
-          var currentPosition = this.workPositionRepository.getUserCurrentPosition(user.getCanonicalName());
-          var medals = this.userRepository.countUserMedals(user.getCanonicalName());
-          user.setAmountOfMedals(medals);
-          currentPosition.ifPresent(
-            workPosition -> user.setCurrentPosition(workPositionMapper.workPositionToReadWorkPositionDto(workPosition))
-          );
-        }
-      );
-
-    return dtos;
+    return getReadUserLiteDtoPaginateDto(page, size, users, totalQuantity);
   }
 
   public PaginateDto<ReadUserLiteDto> findByPartialName(String partialName, Integer page, Integer size) {
@@ -338,6 +329,21 @@ public class UserService {
     paginated.setTotalElements(totalQuantity);
     paginated.setTotalPages(pagesQuantity);
     paginated.setContent(userMapper.listUserToListReadUserLiteDto(users));
+
+    paginated
+      .getContent()
+      .stream()
+      .parallel()
+      .forEach(
+        user -> {
+          var currentPosition = this.workPositionRepository.getUserCurrentPosition(user.getCanonicalName());
+          var medals = this.userRepository.countUserMedals(user.getCanonicalName());
+          user.setAmountOfMedals(medals);
+          currentPosition.ifPresent(
+            workPosition -> user.setCurrentPosition(workPositionMapper.workPositionToReadWorkPositionDto(workPosition))
+          );
+        }
+      );
 
     return paginated;
   }
