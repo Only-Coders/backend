@@ -160,6 +160,7 @@ public class PostService {
           post.setMyReaction(getPostUserReaction(canonicalName, post.getId()));
           post.setReactions(getPostReactionQuantity(post.getId()));
           post.setCommentQuantity(postRepository.getPostCommentsQuantity(post.getId()));
+          post.setIsFavorite(postRepository.isFavorite(post.getId(), canonicalName));
         }
       );
     return paginatedDto;
@@ -242,6 +243,7 @@ public class PostService {
           post.setReactions(getPostReactionQuantity(post.getId()));
           post.setCommentQuantity(postRepository.getPostCommentsQuantity(post.getId()));
           post.setMyReaction(getPostUserReaction(canonicalName, post.getId()));
+          post.setIsFavorite(postRepository.isFavorite(post.getId(), canonicalName));
           var medals = getAmountOfMedals(medalsCache, post.getPublisher().getCanonicalName());
           post.getPublisher().setAmountOfMedals(medals);
         }

@@ -174,9 +174,16 @@ public class PostController {
     var userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     postService.reportPost(userDetails.getCanonicalName(), id, createPostReportDto);
     return ResponseEntity.ok().build();
-}
-  
-  @ApiResponses(value = { @ApiResponse(responseCode = "200", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ReadPostDto.class) ) }) })
+  }
+
+  @ApiResponses(
+    value = {
+      @ApiResponse(
+        responseCode = "200",
+        content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ReadPostDto.class)) }
+      )
+    }
+  )
   @PreAuthorize("hasAuthority('USER')")
   @PutMapping("/{postId}")
   @Operation(summary = "Response received update post")

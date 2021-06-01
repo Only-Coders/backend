@@ -93,8 +93,10 @@ public class UserService {
       this.userRepository.findByCanonicalName(targetCanonicalName)
         .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "error.profile-not-found"));
     var medals = this.userRepository.countUserMedals(targetCanonicalName);
+
     var followers = this.userRepository.countUserFollowers(targetCanonicalName);
     var contacts = this.userRepository.countContacts(targetCanonicalName);
+
     var posts = this.postRepository.countUserPosts(targetCanonicalName);
     var currentPosition = this.workPositionRepository.getUserCurrentPositions(targetCanonicalName);
     var dto = userMapper.userToReadPersonDto(partialUser);

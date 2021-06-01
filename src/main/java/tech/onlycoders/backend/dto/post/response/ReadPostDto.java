@@ -30,4 +30,5 @@ public class ReadPostDto {
   private Long commentQuantity;
   private ReactionType myReaction;
   private Date createdAt;
+  private Boolean isFavorite;
 }

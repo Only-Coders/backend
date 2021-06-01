@@ -115,4 +115,7 @@ public interface PostRepository extends Neo4jRepository<Post, String> {
 
   @Query("MATCH (p:Post{id: $postId}) WITH p MATCH (u:User{id: $userId}) MERGE (p)-[:MENTIONS]->(u);")
   void mentionUser(String postId, String userId);
+
+  @Query("MATCH (p:Post{id: $postId})-[r:IS_FAVORITE]-(u:User{canonicalName: $canonicalName}) return count(r)>0;")
+  Boolean isFavorite(String postId, String canonicalName);
 }
