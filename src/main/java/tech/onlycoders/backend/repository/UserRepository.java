@@ -120,4 +120,7 @@ public interface UserRepository extends Neo4jRepository<User, String> {
 
   @Query("MATCH (u:User{id: $userId}) SET u += {defaultPrivacyIsPublic: $isPublic}")
   void updateDefaultPrivacy(String userId, Boolean isPublic);
+
+  @Query("MATCH (:User{id:$user1Id})-[c:IS_CONNECTED]-(:User{id:$user2Id}) DELETE c")
+  void removeContact(String user1Id, String user2Id);
 }

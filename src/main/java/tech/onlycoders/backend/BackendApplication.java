@@ -16,7 +16,7 @@ public class BackendApplication {
   @Bean
   CommandLineRunner runner(UserService us) {
     return args -> {
-      us.getProfile("marianozunino-gqrwq");
+      //us.getProfile("marianozunino-gqrwq");
     };
   }
 }

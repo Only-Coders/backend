@@ -372,6 +372,17 @@ public class UserController {
     var email = userDetails.getEmail();
     return ResponseEntity.ok(this.userService.setEliminationDate(email));
   }
+
+  @ApiResponses(value = { @ApiResponse(responseCode = "200", content = { @Content(mediaType = "application/json") }) })
+  @PreAuthorize("hasAuthority('USER')")
+  @DeleteMapping("/contacts/{canonicalName}")
+  @Operation(summary = "Get my contacts.")
+  ResponseEntity<?> getContacts(@PathVariable String canonicalName) throws ApiException {
+    var userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    var requesterCanonicalName = userDetails.getCanonicalName();
+    this.userService.removeContact(requesterCanonicalName, canonicalName);
+    return ResponseEntity.ok().build();
+  }
 }
 
 class PaginatedUsers extends PaginateDto<ReadUserLiteDto> {}

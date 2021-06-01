@@ -594,4 +594,18 @@ public class UserServiceTest {
     var res = this.service.setEliminationDate("email");
     assertNotNull(res);
   }
+
+  @Test
+  public void ShouldDeleteContact() throws ApiException {
+    var user = ezRandom.nextObject(PartialUserImpl.class);
+    var user2 = ezRandom.nextObject(PartialUserImpl.class);
+    var response = new ResponseContactRequestDto();
+    response.setRequesterCanonicalName(user.getCanonicalName());
+    response.setAcceptContact(false);
+
+    Mockito.when(this.userRepository.findByCanonicalName(user.getCanonicalName())).thenReturn(Optional.of(user));
+    Mockito.when(this.userRepository.findByCanonicalName(user2.getCanonicalName())).thenReturn(Optional.of(user2));
+
+    this.service.removeContact(user.getCanonicalName(), user2.getCanonicalName());
+  }
 }
