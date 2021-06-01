@@ -18,6 +18,8 @@ public class User extends Person {
 
   private Boolean blocked = false;
 
+  private String description;
+
   @DateLong
   private Date eliminationDate = null;
 

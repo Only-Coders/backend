@@ -39,6 +39,7 @@ public interface UserMapper {
   @Mapping(target = "configs", ignore = true)
   @Mapping(target = "canonicalName", ignore = true)
   @Mapping(target = "blocked", ignore = true)
+  @Mapping(target = "description", ignore = true)
   User createUserDtoToUser(CreateUserDto createUser);
 
   List<ReadUserLiteDto> listUserToListReadUserLiteDto(List<User> users);
