@@ -380,4 +380,14 @@ public class UserService {
     this.userRepository.setEliminationDate(email, eliminationDate.getTime());
     return ReadUserToDeleteDto.builder().eliminationDate(eliminationDate).build();
   }
+
+  public void removeContact(String requesterCanonicalName, String canonicalName) throws ApiException {
+    var requesterUser =
+      this.userRepository.findByCanonicalName(requesterCanonicalName)
+        .orElseThrow(() -> new ApiException(HttpStatus.INTERNAL_SERVER_ERROR, "error.user-not-found"));
+    var targetUser =
+      this.userRepository.findByCanonicalName(canonicalName)
+        .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "error.user-not-found"));
+    userRepository.removeContact(requesterUser.getId(), targetUser.getId());
+  }
 }
