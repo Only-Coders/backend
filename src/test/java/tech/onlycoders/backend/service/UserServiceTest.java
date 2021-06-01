@@ -522,7 +522,7 @@ public class UserServiceTest {
     Mockito.when(this.userRepository.findByCanonicalName(anyString())).thenReturn(Optional.of(user2));
     Mockito.when(this.contactRequestRepository.hasPendingRequest(user2.getId(), user1.getId())).thenReturn(true);
 
-    this.service.responseContactRequest("email", response);
+    this.service.acceptContactRequest("email", response);
   }
 
   @Test
@@ -538,7 +538,7 @@ public class UserServiceTest {
     Mockito.when(this.userRepository.findByEmail(user2.getEmail())).thenReturn(Optional.of(user2));
     Mockito.when(this.contactRequestRepository.hasPendingRequest(user.getId(), user2.getId())).thenReturn(true);
 
-    this.service.responseContactRequest(user2.getEmail(), response);
+    this.service.acceptContactRequest(user2.getEmail(), response);
   }
 
   @Test
@@ -555,7 +555,7 @@ public class UserServiceTest {
       .thenReturn(Optional.of(ezRandom.nextObject(PartialUserImpl.class)));
     Mockito.when(this.contactRequestRepository.hasPendingRequest(anyString(), anyString())).thenReturn(false);
 
-    assertThrows(Exception.class, () -> this.service.responseContactRequest("email", response));
+    assertThrows(Exception.class, () -> this.service.acceptContactRequest("email", response));
   }
 
   @Test

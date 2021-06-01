@@ -349,7 +349,7 @@ public class UserService {
     return paginated;
   }
 
-  public void responseContactRequest(String email, ResponseContactRequestDto response) throws ApiException {
+  public void acceptContactRequest(String email, ResponseContactRequestDto response) throws ApiException {
     var user =
       this.userRepository.findByEmail(email)
         .orElseThrow(() -> new ApiException(HttpStatus.INTERNAL_SERVER_ERROR, "error.user-not-found"));
@@ -364,6 +364,8 @@ public class UserService {
 
     if (response.getAcceptContact()) userRepository.addContact(email, response.getRequesterCanonicalName());
     contactRequestRepository.deleteRequest(requester.getId(), user.getId());
+    userRepository.unfollowUser(requester.getId(), user.getId());
+    userRepository.unfollowUser(user.getId(), requester.getId());
   }
 
   public void removeFavoritePost(String email, String postId) {

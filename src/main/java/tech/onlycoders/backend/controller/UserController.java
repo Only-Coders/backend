@@ -312,12 +312,12 @@ public class UserController {
   @PreAuthorize("hasAuthority('USER')")
   @PutMapping("/received-contact-requests")
   @Operation(summary = "Response received contact requests")
-  ResponseEntity<PaginateDto<ReadContactRequestDto>> ResponseContactRequest(
+  ResponseEntity<PaginateDto<ReadContactRequestDto>> acceptContactRequest(
     @RequestBody ResponseContactRequestDto response
   ) throws ApiException {
     var userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     var email = userDetails.getEmail();
-    this.userService.responseContactRequest(email, response);
+    this.userService.acceptContactRequest(email, response);
     return ResponseEntity.ok().build();
   }
 
