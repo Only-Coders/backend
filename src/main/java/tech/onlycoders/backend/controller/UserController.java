@@ -376,11 +376,22 @@ public class UserController {
   @ApiResponses(value = { @ApiResponse(responseCode = "200", content = { @Content(mediaType = "application/json") }) })
   @PreAuthorize("hasAuthority('USER')")
   @DeleteMapping("/contacts/{canonicalName}")
-  @Operation(summary = "Get my contacts.")
+  @Operation(summary = "Remove a contact.")
   ResponseEntity<?> getContacts(@PathVariable String canonicalName) throws ApiException {
     var userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     var requesterCanonicalName = userDetails.getCanonicalName();
     this.userService.removeContact(requesterCanonicalName, canonicalName);
+    return ResponseEntity.ok().build();
+  }
+
+  @ApiResponses(value = { @ApiResponse(responseCode = "200", content = { @Content(mediaType = "application/json") }) })
+  @PreAuthorize("hasAuthority('USER')")
+  @DeleteMapping("elimination")
+  @Operation(summary = "Cancel my own user elimination")
+  ResponseEntity<?> cancelMyUserElimination() throws ApiException {
+    var userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    var email = userDetails.getEmail();
+    this.userService.cancelEliminationDate(email);
     return ResponseEntity.ok().build();
   }
 }

@@ -610,4 +610,9 @@ public class UserServiceTest {
 
     this.service.removeContact(user.getCanonicalName(), user2.getCanonicalName());
   }
+
+  @Test
+  public void ShouldCancelUserToDelete() throws ApiException {
+    this.service.cancelEliminationDate("email");
+  }
 }
