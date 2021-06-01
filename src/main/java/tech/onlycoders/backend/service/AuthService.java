@@ -85,6 +85,7 @@ public class AuthService {
     claims.put("complete", true);
     claims.put("imageURI", person.getImageURI());
     claims.put("fullName", person.getFirstName() + " " + person.getLastName());
+    claims.put("eliminationDate", person.getEliminationDate().orElse(null));
   }
 
   public AuthResponseDto refreshToken(String token) throws ApiException {
