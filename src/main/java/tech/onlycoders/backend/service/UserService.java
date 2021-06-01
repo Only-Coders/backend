@@ -306,15 +306,51 @@ public class UserService {
     return paginated;
   }
 
-  public PaginateDto<ReadUserLiteDto> getMyFollows(String canonicalName, Integer page, Integer size) {
-    var users = this.userRepository.getMyFollows(canonicalName, page * size, size);
+  public PaginateDto<ReadUserLiteDto> getMyFollows(
+    String canonicalName,
+    Integer page,
+    Integer size,
+    String partialName,
+    String countryName
+  ) {
+    var userRegex = "(?i)" + partialName + ".*";
+    var countryRegex = "(?i)" + countryName + ".*";
+    List<User> users;
+    if (partialName.isEmpty() && countryName.isEmpty()) {
+      users = this.userRepository.getMyFollows(canonicalName, page * size, size);
+    } else if (partialName.isEmpty()) {
+      users = this.userRepository.filterFollowsByCountry(canonicalName, countryRegex, page * size, size);
+    } else if (countryName.isEmpty()) {
+      users = this.userRepository.filterFollowsByName(canonicalName, userRegex, page * size, size);
+    } else {
+      users =
+        this.userRepository.filterFollowsByCountryAndName(canonicalName, userRegex, countryRegex, page * size, size);
+    }
     var totalQuantity = this.userRepository.countFollows(canonicalName);
 
     return getReadUserLiteDtoPaginateDto(page, size, users, totalQuantity);
   }
 
-  public PaginateDto<ReadUserLiteDto> getMyContacts(String canonicalName, Integer page, Integer size) {
-    var users = this.userRepository.getMyContacts(canonicalName, page * size, size);
+  public PaginateDto<ReadUserLiteDto> getMyContacts(
+    String canonicalName,
+    Integer page,
+    Integer size,
+    String partialName,
+    String countryName
+  ) {
+    var userRegex = "(?i)" + partialName + ".*";
+    var countryRegex = "(?i)" + countryName + ".*";
+    List<User> users;
+    if (partialName.isEmpty() && countryName.isEmpty()) {
+      users = this.userRepository.getMyContacts(canonicalName, page * size, size);
+    } else if (partialName.isEmpty()) {
+      users = this.userRepository.filterContactsByCountry(canonicalName, countryRegex, page * size, size);
+    } else if (countryName.isEmpty()) {
+      users = this.userRepository.filterContactsByName(canonicalName, userRegex, page * size, size);
+    } else {
+      users =
+        this.userRepository.filterContactsByCountryAndName(canonicalName, userRegex, countryRegex, page * size, size);
+    }
     var totalQuantity = this.userRepository.countContacts(canonicalName);
 
     return getReadUserLiteDtoPaginateDto(page, size, users, totalQuantity);

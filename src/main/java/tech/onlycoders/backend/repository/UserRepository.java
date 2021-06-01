@@ -149,4 +149,31 @@ public interface UserRepository extends Neo4jRepository<User, String> {
 
   @Query("MATCH (u:User{email: $email}) set u += {eliminationDate: null}")
   void removeUserEliminationDate(String email);
+
+  @Query(
+    "CALL { " +
+    "  MATCH (User{canonicalName:$canonicalName})-[r:FOLLOWS]->(u:User)-[:LIVES]->(c:Country) WHERE c.name =~ $countryName RETURN u" +
+    "} RETURN u ORDER BY u.fullName DESC SKIP $skip LIMIT $size "
+  )
+  List<User> filterFollowsByCountry(String canonicalName, String countryName, int skip, Integer size);
+
+  @Query(
+    "CALL { " +
+    "  MATCH (User{canonicalName:$canonicalName})-[r:FOLLOWS]-(u:User) WHERE u.fullName =~ $userName RETURN u" +
+    "} RETURN u ORDER BY u.fullName DESC SKIP $skip LIMIT $size "
+  )
+  List<User> filterFollowsByName(String canonicalName, String userName, int skip, Integer size);
+
+  @Query(
+    "CALL { " +
+    "  MATCH (User{canonicalName:$canonicalName})-[r:FOLLOWS]->(u:User)-[:LIVES]->(c:Country) WHERE u.fullName =~ $userName AND  c.name =~ $countryName RETURN u" +
+    "} RETURN u ORDER BY u.fullName DESC SKIP $skip LIMIT $size "
+  )
+  List<User> filterFollowsByCountryAndName(
+    String canonicalName,
+    String userName,
+    String countryName,
+    int skip,
+    Integer size
+  );
 }
