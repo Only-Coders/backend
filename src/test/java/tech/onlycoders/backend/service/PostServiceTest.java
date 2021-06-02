@@ -68,10 +68,10 @@ public class PostServiceTest {
   private final PostMapper postMapper = new PostMapperImpl(new TagMapperImpl());
 
   @Spy
-  private WorkPositionMapper workPositionMapper = new WorkPositionMapperImpl(new WorkplaceMapperImpl());
+  private final WorkPositionMapper workPositionMapper = new WorkPositionMapperImpl(new WorkplaceMapperImpl());
 
   @Spy
-  private UserMapper userMapper = new UserMapperImpl();
+  private final UserMapper userMapper = new UserMapperImpl();
 
   @Spy
   private final CommentMapper commentMapper = new CommentMapperImpl();

@@ -15,6 +15,7 @@ public class ReadUserDto {
 
   private String firstName;
   private String lastName;
+  private String description;
   private String email;
   private String imageURI;
   private String canonicalName;

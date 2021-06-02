@@ -46,10 +46,10 @@ public class WorkplaceServiceTest {
   private WorkPositionRepository workPositionRepository;
 
   @Spy
-  private WorkPositionMapper workPositionMapper = new WorkPositionMapperImpl(new WorkplaceMapperImpl());
+  private final WorkPositionMapper workPositionMapper = new WorkPositionMapperImpl(new WorkplaceMapperImpl());
 
   @Spy
-  private WorkplaceMapper workplaceMapper = Mappers.getMapper(WorkplaceMapper.class);
+  private final WorkplaceMapper workplaceMapper = Mappers.getMapper(WorkplaceMapper.class);
 
   private final EasyRandom ezRandom = new EasyRandom();
 

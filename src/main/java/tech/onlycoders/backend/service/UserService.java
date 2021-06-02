@@ -4,10 +4,12 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import org.springframework.data.neo4j.core.Neo4jTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tech.onlycoders.backend.dto.PaginateDto;
+import tech.onlycoders.backend.dto.SortContactsBy;
 import tech.onlycoders.backend.dto.auth.response.AuthResponseDto;
 import tech.onlycoders.backend.dto.contactrequest.request.CreateContactRequestDto;
 import tech.onlycoders.backend.dto.contactrequest.request.ResponseContactRequestDto;
@@ -70,7 +72,8 @@ public class UserService {
     ContactRequestRepository contactRequestRepository,
     NotificatorService notificatorService,
     PostMapper postMapper,
-    ContactRequestMapper contactRequestMapper
+    ContactRequestMapper contactRequestMapper,
+    Neo4jTemplate template
   ) {
     this.workPositionRepository = workPositionRepository;
     this.workPositionMapper = workPositionMapper;
@@ -311,21 +314,23 @@ public class UserService {
     Integer page,
     Integer size,
     String partialName,
-    String countryName
+    String countryName,
+    String skillName,
+    SortContactsBy orderBy
   ) {
     var userRegex = "(?i)" + partialName + ".*";
     var countryRegex = "(?i)" + countryName + ".*";
-    List<User> users;
-    if (partialName.isEmpty() && countryName.isEmpty()) {
-      users = this.userRepository.getMyFollows(canonicalName, page * size, size);
-    } else if (partialName.isEmpty()) {
-      users = this.userRepository.filterFollowsByCountry(canonicalName, countryRegex, page * size, size);
-    } else if (countryName.isEmpty()) {
-      users = this.userRepository.filterFollowsByName(canonicalName, userRegex, page * size, size);
-    } else {
-      users =
-        this.userRepository.filterFollowsByCountryAndName(canonicalName, userRegex, countryRegex, page * size, size);
-    }
+    var skillNameRegex = "(?i)" + skillName + ".*";
+    var users =
+      this.userRepository.getMyFollows(
+          canonicalName,
+          page * size,
+          size,
+          userRegex,
+          countryRegex,
+          skillNameRegex,
+          orderBy.label
+        );
     var totalQuantity = this.userRepository.countFollows(canonicalName);
 
     return getReadUserLiteDtoPaginateDto(page, size, users, totalQuantity);
@@ -336,21 +341,23 @@ public class UserService {
     Integer page,
     Integer size,
     String partialName,
-    String countryName
+    String countryName,
+    String skillName,
+    SortContactsBy orderBy
   ) {
     var userRegex = "(?i)" + partialName + ".*";
     var countryRegex = "(?i)" + countryName + ".*";
-    List<User> users;
-    if (partialName.isEmpty() && countryName.isEmpty()) {
-      users = this.userRepository.getMyContacts(canonicalName, page * size, size);
-    } else if (partialName.isEmpty()) {
-      users = this.userRepository.filterContactsByCountry(canonicalName, countryRegex, page * size, size);
-    } else if (countryName.isEmpty()) {
-      users = this.userRepository.filterContactsByName(canonicalName, userRegex, page * size, size);
-    } else {
-      users =
-        this.userRepository.filterContactsByCountryAndName(canonicalName, userRegex, countryRegex, page * size, size);
-    }
+    var skillNameRegex = "(?i)" + skillName + ".*";
+    var users =
+      this.userRepository.getMyContacts(
+          canonicalName,
+          page * size,
+          size,
+          userRegex,
+          countryRegex,
+          skillNameRegex,
+          orderBy.label
+        );
     var totalQuantity = this.userRepository.countContacts(canonicalName);
 
     return getReadUserLiteDtoPaginateDto(page, size, users, totalQuantity);

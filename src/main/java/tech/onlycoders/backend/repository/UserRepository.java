@@ -66,49 +66,50 @@ public interface UserRepository extends Neo4jRepository<User, String> {
   void unfollowUser(String followerId, String followedId);
 
   @Query(
-    " MATCH (:User{canonicalName:$canonicalName})-[r:FOLLOWS]->(u:User) " +
-    " RETURN u ORDER BY u.fullName DESC SKIP $skip LIMIT $size "
+    " MATCH (User{canonicalName:$canonicalName})-[r:FOLLOWS]->(u:User)-[:LIVES]->(c:Country) " +
+    "     WHERE u.fullName =~ $userName AND  c.name =~ $countryName " +
+    " WITH u" +
+    "     OPTIONAL MATCH (u)-[:PUBLISH]->(:Post)<-[:TO]-(r:Reaction{type:'APPROVE'}) " +
+    " WITH u" +
+    " OPTIONAL MATCH (u)-[:POSSES]->(s:Skill) WHERE s.canonicalName =~ $skillName " +
+    "     WITH u, count(r) as medals " +
+    " RETURN u{.*, medals:medals} ORDER BY u[$sortField] [$sortMode] SKIP $skip LIMIT $size "
   )
-  List<User> getMyFollows(String canonicalName, int skip, Integer size);
+  List<User> getMyFollows(
+    String canonicalName,
+    int skip,
+    Integer size,
+    String userName,
+    String countryName,
+    String skillName,
+    String sortField
+  );
 
   @Query(
-    "  MATCH (u2:User{canonicalName:$canonicalName})-[r:IS_CONNECTED]-(u:User) " +
-    " RETURN u ORDER BY u.fullName DESC SKIP $skip LIMIT $size "
+    " MATCH (User{canonicalName:$canonicalName})-[r:IS_CONNECTED]-(u:User)-[:LIVES]->(c:Country) " +
+    "     WHERE u.fullName =~ $userName AND  c.name =~ $countryName " +
+    " WITH u" +
+    "     OPTIONAL MATCH (u)-[:PUBLISH]->(:Post)<-[:TO]-(r:Reaction{type:'APPROVE'}) " +
+    " WITH u" +
+    "     OPTIONAL MATCH (u)-[:POSSES]->(s:Skill) WHERE s.canonicalName =~ $skillName " +
+    " WITH u, count(r) as medals " +
+    " RETURN u{.*, medals:medals} ORDER BY u[$sortField] DESC SKIP $skip LIMIT $size "
   )
-  List<User> getMyContacts(String canonicalName, int skip, Integer size);
+  List<User> getMyContacts(
+    String canonicalName,
+    int skip,
+    Integer size,
+    String userName,
+    String countryName,
+    String skillName,
+    String sortField
+  );
 
   @Query("MATCH (User{canonicalName:$canonicalName})-[r:IS_CONNECTED]-(u:User) RETURN count(u)")
   Integer countContacts(String canonicalName);
 
   @Query("MATCH (User{canonicalName:$canonicalName})-[:FOLLOWS]->(u:User) RETURN count(u) ")
   Integer countFollows(String canonicalName);
-
-  @Query(
-    "CALL { " +
-    "  MATCH (User{canonicalName:$canonicalName})-[r:IS_CONNECTED]-(u:User) WHERE u.fullName =~ $userName RETURN u" +
-    "} RETURN u ORDER BY u.fullName DESC SKIP $skip LIMIT $size "
-  )
-  List<User> filterContactsByName(String canonicalName, String userName, int skip, Integer size);
-
-  @Query(
-    "CALL { " +
-    "  MATCH (User{canonicalName:$canonicalName})-[r:IS_CONNECTED]-(u:User)-[:LIVES]->(c:Country) WHERE c.name =~ $countryName RETURN u" +
-    "} RETURN u ORDER BY u.fullName DESC SKIP $skip LIMIT $size "
-  )
-  List<User> filterContactsByCountry(String canonicalName, String countryName, int skip, Integer size);
-
-  @Query(
-    "CALL { " +
-    "  MATCH (User{canonicalName:$canonicalName})-[r:IS_CONNECTED]-(u:User)-[:LIVES]->(c:Country) WHERE u.fullName =~ $userName AND  c.name =~ $countryName RETURN u" +
-    "} RETURN u ORDER BY u.fullName DESC SKIP $skip LIMIT $size "
-  )
-  List<User> filterContactsByCountryAndName(
-    String canonicalName,
-    String userName,
-    String countryName,
-    int skip,
-    Integer size
-  );
 
   @Query(
     "MATCH (u1:User{email: $email}) WITH u1 MATCH (u2:User{canonicalName: $requesterCanonicalName}) CREATE (u1)-[:IS_CONNECTED]->(u2)"
@@ -149,31 +150,4 @@ public interface UserRepository extends Neo4jRepository<User, String> {
 
   @Query("MATCH (u:User{email: $email}) set u += {eliminationDate: null}")
   void removeUserEliminationDate(String email);
-
-  @Query(
-    "CALL { " +
-    "  MATCH (User{canonicalName:$canonicalName})-[r:FOLLOWS]->(u:User)-[:LIVES]->(c:Country) WHERE c.name =~ $countryName RETURN u" +
-    "} RETURN u ORDER BY u.fullName DESC SKIP $skip LIMIT $size "
-  )
-  List<User> filterFollowsByCountry(String canonicalName, String countryName, int skip, Integer size);
-
-  @Query(
-    "CALL { " +
-    "  MATCH (User{canonicalName:$canonicalName})-[r:FOLLOWS]-(u:User) WHERE u.fullName =~ $userName RETURN u" +
-    "} RETURN u ORDER BY u.fullName DESC SKIP $skip LIMIT $size "
-  )
-  List<User> filterFollowsByName(String canonicalName, String userName, int skip, Integer size);
-
-  @Query(
-    "CALL { " +
-    "  MATCH (User{canonicalName:$canonicalName})-[r:FOLLOWS]->(u:User)-[:LIVES]->(c:Country) WHERE u.fullName =~ $userName AND  c.name =~ $countryName RETURN u" +
-    "} RETURN u ORDER BY u.fullName DESC SKIP $skip LIMIT $size "
-  )
-  List<User> filterFollowsByCountryAndName(
-    String canonicalName,
-    String userName,
-    String countryName,
-    int skip,
-    Integer size
-  );
 }

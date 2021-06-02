@@ -5,9 +5,7 @@ import org.mapstruct.InjectionStrategy;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import tech.onlycoders.backend.dto.comment.response.ReadCommentDto;
-import tech.onlycoders.backend.dto.contactrequest.response.ReadContactRequestDto;
 import tech.onlycoders.backend.model.Comment;
-import tech.onlycoders.backend.model.ContactRequest;
 
 @Mapper(componentModel = "spring", injectionStrategy = InjectionStrategy.CONSTRUCTOR, uses = { UserMapper.class })
 public interface CommentMapper {

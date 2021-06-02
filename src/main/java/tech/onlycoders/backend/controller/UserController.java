@@ -15,6 +15,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import tech.onlycoders.backend.bean.auth.UserDetails;
 import tech.onlycoders.backend.dto.PaginateDto;
+import tech.onlycoders.backend.dto.SortContactsBy;
 import tech.onlycoders.backend.dto.contactrequest.request.CreateContactRequestDto;
 import tech.onlycoders.backend.dto.contactrequest.request.ResponseContactRequestDto;
 import tech.onlycoders.backend.dto.contactrequest.response.ReadContactRequestDto;
@@ -335,12 +336,15 @@ public class UserController {
   ResponseEntity<PaginateDto<ReadUserLiteDto>> getContacts(
     @RequestParam(defaultValue = "") String partialName,
     @RequestParam(defaultValue = "") String countryName,
+    @RequestParam(defaultValue = "") String skillName,
+    @RequestParam(defaultValue = "FULLNAME") SortContactsBy orderBy,
     @RequestParam(defaultValue = "0") @Min(0) Integer page,
     @RequestParam(defaultValue = "20") @Min(1) Integer size
   ) {
     var userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     var canonicalName = userDetails.getCanonicalName();
-    var contacts = this.userService.getMyContacts(canonicalName, page, size, partialName, countryName);
+    var contacts =
+      this.userService.getMyContacts(canonicalName, page, size, partialName, countryName, skillName, orderBy);
     return ResponseEntity.ok(contacts);
   }
 
@@ -358,12 +362,15 @@ public class UserController {
   ResponseEntity<PaginateDto<ReadUserLiteDto>> getMyFollows(
     @RequestParam(defaultValue = "") String partialName,
     @RequestParam(defaultValue = "") String countryName,
+    @RequestParam(defaultValue = "FULLNAME") SortContactsBy orderBy,
+    @RequestParam(defaultValue = "") String skillName,
     @RequestParam(defaultValue = "0") @Min(0) Integer page,
     @RequestParam(defaultValue = "20") @Min(1) Integer size
   ) {
     var userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     var canonicalName = userDetails.getCanonicalName();
-    var contacts = this.userService.getMyFollows(canonicalName, page, size, partialName, countryName);
+    var contacts =
+      this.userService.getMyFollows(canonicalName, page, size, partialName, countryName, skillName, orderBy);
     return ResponseEntity.ok(contacts);
   }
 

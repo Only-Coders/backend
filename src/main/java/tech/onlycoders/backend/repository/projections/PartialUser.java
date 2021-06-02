@@ -12,6 +12,8 @@ public interface PartialUser {
 
   String getFirstName();
 
+  String getDescription();
+
   String getLastName();
 
   String getFullName();

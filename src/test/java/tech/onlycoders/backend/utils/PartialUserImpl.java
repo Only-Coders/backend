@@ -105,6 +105,11 @@ public class PartialUserImpl implements PartialUser {
   }
 
   @Override
+  public String getDescription() {
+    return "";
+  }
+
+  @Override
   public String getLastName() {
     return lastName;
   }
