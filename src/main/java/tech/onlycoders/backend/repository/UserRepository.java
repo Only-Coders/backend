@@ -66,14 +66,44 @@ public interface UserRepository extends Neo4jRepository<User, String> {
   void unfollowUser(String followerId, String followedId);
 
   @Query(
-    " MATCH (User{canonicalName:$canonicalName})-[r:FOLLOWS]->(u:User)-[:LIVES]->(c:Country) " +
-    "     WHERE u.fullName =~ $userName AND c.name =~ $countryName " +
-    " WITH u" +
-    "     OPTIONAL MATCH (u)-[:POSSESS]->(s:Skill) WHERE s.canonicalName =~ $skillName " +
-    " WITH u" +
-    "     OPTIONAL MATCH (u)-[]->()<-[:TO]-(r:Reaction{type:'APPROVE'}) " +
-    " WITH u, count(r) as medals " +
-    " RETURN u{.*, medals:medals} ORDER BY u[$sortField] DESC SKIP $skip LIMIT $size "
+    " MATCH (User{canonicalName: $canonicalName})-[:IS_CONNECTED]-(u:User) " +
+    "   OPTIONAL MATCH (u)-[:POSSESS]->(s:Skill) " +
+    "   OPTIONAL MATCH (u)-[:LIVES]->(c:Country) " +
+    "   OPTIONAL MATCH (u)-[]->()<-[:TO]-(r:Reaction{type:'APPROVE'}) " +
+    "   WITH u, s, c, r " +
+    " WHERE u.fullName =~ $userName AND c.name =~ $countryName AND COALESCE(s.name, '') =~ $skillName " +
+    " WITH u, COUNT(r) as medals " +
+    " RETURN u{.*, medals: medals} ORDER BY u[$sortField] DESC SKIP $skip LIMIT $size "
+  )
+  List<User> getMyContacts(
+    String canonicalName,
+    int skip,
+    Integer size,
+    String userName,
+    String countryName,
+    String skillName,
+    String sortField
+  );
+
+  @Query(
+    " MATCH (User{canonicalName: $canonicalName})-[:IS_CONNECTED]-(u:User) " +
+    " OPTIONAL MATCH (u)-[:POSSESS]->(s:Skill) " +
+    " OPTIONAL MATCH (u)-[:LIVES]->(c:Country) " +
+    "   WITH u, s, c " +
+    " WHERE u.fullName =~ $userName AND c.name =~ $countryName AND COALESCE(s.name, '') =~ $skillName  " +
+    " RETURN COUNT(DISTINCT(u)) "
+  )
+  Integer countContacts(String canonicalName, String userName, String countryName, String skillName);
+
+  @Query(
+    " MATCH (User{canonicalName: $canonicalName})-[:FOLLOWS]->(u:User) " +
+    "   OPTIONAL MATCH (u)-[:POSSESS]->(s:Skill) " +
+    "   OPTIONAL MATCH (u)-[:LIVES]->(c:Country) " +
+    "   OPTIONAL MATCH (u)-[]->()<-[:TO]-(r:Reaction{type:'APPROVE'}) " +
+    "   WITH u, s, c, r " +
+    " WHERE u.fullName =~ $userName AND c.name =~ $countryName AND COALESCE(s.name, '') =~ $skillName " +
+    " WITH u, COUNT(r) as medals " +
+    " RETURN u{.*, medals: medals} ORDER BY u[$sortField] DESC SKIP $skip LIMIT $size "
   )
   List<User> getMyFollows(
     String canonicalName,
@@ -86,30 +116,17 @@ public interface UserRepository extends Neo4jRepository<User, String> {
   );
 
   @Query(
-    " MATCH (User{canonicalName:$canonicalName})-[:IS_CONNECTED]-(u:User)-[:LIVES]->(c:Country) " +
-    "     WHERE u.fullName =~ $userName AND c.name =~ $countryName " +
-    " WITH u" +
-    "     OPTIONAL MATCH (u)-[:POSSESS]->(s:Skill) WHERE s.canonicalName =~ $skillName " +
-    " WITH u" +
-    "     OPTIONAL MATCH (u)-[]->()<-[:TO]-(r:Reaction{type:'APPROVE'}) " +
-    " WITH u, count(r) as medals " +
-    " RETURN u{.*, medals:medals} ORDER BY u[$sortField] DESC SKIP $skip LIMIT $size "
+    " MATCH (User{canonicalName: $canonicalName})-[:FOLLOWS]->(u:User) " +
+    "   OPTIONAL MATCH (u)-[:POSSESS]->(s:Skill) " +
+    "   OPTIONAL MATCH (u)-[:LIVES]->(c:Country) " +
+    "   WITH u, s, c " +
+    " WHERE u.fullName =~ $userName AND c.name =~ $countryName AND COALESCE(s.name, '') =~ $skillName " +
+    " RETURN COUNT(DISTINCT(u)) "
   )
-  List<User> getMyContacts(
-    String canonicalName,
-    int skip,
-    Integer size,
-    String userName,
-    String countryName,
-    String skillName,
-    String sortField
-  );
+  Integer countFollows(String canonicalName, String userName, String countryName, String skillName);
 
-  @Query("MATCH (User{canonicalName:$canonicalName})-[r:IS_CONNECTED]-(u:User) RETURN count(u)")
-  Integer countContacts(String canonicalName);
-
-  @Query("MATCH (User{canonicalName:$canonicalName})-[:FOLLOWS]->(u:User) RETURN count(u) ")
-  Integer countFollows(String canonicalName);
+  @Query(" MATCH (User{canonicalName:$canonicalName})-[:IS_CONNECTED]-(u:User) RETURN COUNT(DISTINCT(u))")
+  Integer countContactsWithOutFilters(String canonicalName);
 
   @Query(
     "MATCH (u1:User{email: $email}) WITH u1 MATCH (u2:User{canonicalName: $requesterCanonicalName}) CREATE (u1)-[:IS_CONNECTED]->(u2)"

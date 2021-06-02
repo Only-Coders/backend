@@ -112,7 +112,9 @@ public class UserServiceTest {
     var user = ezRandom.nextObject(PartialUserImpl.class);
     var sourceCanonicalName = ezRandom.nextObject(String.class);
     Mockito.when(this.userRepository.findByCanonicalName(anyString())).thenReturn(Optional.of(user));
-    Mockito.when(this.userRepository.countContacts(user.getCanonicalName())).thenReturn(ezRandom.nextInt());
+    Mockito
+      .when(this.userRepository.countContactsWithOutFilters(user.getCanonicalName()))
+      .thenReturn(ezRandom.nextInt());
     Mockito.when(this.userRepository.countUserFollowers(user.getCanonicalName())).thenReturn(ezRandom.nextInt());
     Mockito.when(this.userRepository.countUserMedals(user.getCanonicalName())).thenReturn(ezRandom.nextInt());
     Mockito.when(this.postRepository.countUserPosts(user.getCanonicalName())).thenReturn(ezRandom.nextInt());
@@ -453,7 +455,7 @@ public class UserServiceTest {
           )
       )
       .thenReturn(usersList);
-    Mockito.when(this.userRepository.countContacts(canonicalName)).thenReturn(1);
+    Mockito.when(this.userRepository.countContacts(canonicalName, "(?i).*", "(?i).*", "(?i).*")).thenReturn(1);
     Mockito
       .when(this.workPositionRepository.getUserCurrentPosition(anyString()))
       .thenReturn(Optional.of(ezRandom.nextObject(WorkPosition.class)));

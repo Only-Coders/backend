@@ -98,7 +98,7 @@ public class UserService {
     var medals = this.userRepository.countUserMedals(targetCanonicalName);
 
     var followers = this.userRepository.countUserFollowers(targetCanonicalName);
-    var contacts = this.userRepository.countContacts(targetCanonicalName);
+    var contacts = this.userRepository.countContactsWithOutFilters(targetCanonicalName);
 
     var posts = this.postRepository.countUserPosts(targetCanonicalName);
     var currentPosition = this.workPositionRepository.getUserCurrentPositions(targetCanonicalName);
@@ -331,7 +331,7 @@ public class UserService {
           skillNameRegex,
           orderBy.label
         );
-    var totalQuantity = this.userRepository.countFollows(canonicalName);
+    var totalQuantity = this.userRepository.countFollows(canonicalName, userRegex, countryRegex, skillNameRegex);
 
     return getReadUserLiteDtoPaginateDto(page, size, users, totalQuantity);
   }
@@ -358,7 +358,7 @@ public class UserService {
           skillNameRegex,
           orderBy.label
         );
-    var totalQuantity = this.userRepository.countContacts(canonicalName);
+    var totalQuantity = this.userRepository.countContacts(canonicalName, userRegex, countryRegex, skillNameRegex);
 
     return getReadUserLiteDtoPaginateDto(page, size, users, totalQuantity);
   }
