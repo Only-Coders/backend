@@ -67,13 +67,13 @@ public interface UserRepository extends Neo4jRepository<User, String> {
 
   @Query(
     " MATCH (User{canonicalName:$canonicalName})-[r:FOLLOWS]->(u:User)-[:LIVES]->(c:Country) " +
-    "     WHERE u.fullName =~ $userName AND  c.name =~ $countryName " +
+    "     WHERE u.fullName =~ $userName AND c.name =~ $countryName " +
     " WITH u" +
-    "     OPTIONAL MATCH (u)-[:PUBLISH]->(:Post)<-[:TO]-(r:Reaction{type:'APPROVE'}) " +
+    "     OPTIONAL MATCH (u)-[:POSSESS]->(s:Skill) WHERE s.canonicalName =~ $skillName " +
     " WITH u" +
-    " OPTIONAL MATCH (u)-[:POSSES]->(s:Skill) WHERE s.canonicalName =~ $skillName " +
-    "     WITH u, count(r) as medals " +
-    " RETURN u{.*, medals:medals} ORDER BY u[$sortField] [$sortMode] SKIP $skip LIMIT $size "
+    "     OPTIONAL MATCH (u)-[r:PUBLISH]->(:Post)<-[:TO]-(r:Reaction{type:'APPROVE'}) " +
+    " WITH u, count(r) as medals " +
+    " RETURN u{.*, medals:medals} ORDER BY u[$sortField] DESC SKIP $skip LIMIT $size "
   )
   List<User> getMyFollows(
     String canonicalName,
@@ -86,12 +86,12 @@ public interface UserRepository extends Neo4jRepository<User, String> {
   );
 
   @Query(
-    " MATCH (User{canonicalName:$canonicalName})-[r:IS_CONNECTED]-(u:User)-[:LIVES]->(c:Country) " +
-    "     WHERE u.fullName =~ $userName AND  c.name =~ $countryName " +
+    " MATCH (User{canonicalName:$canonicalName})-[:IS_CONNECTED]-(u:User)-[:LIVES]->(c:Country) " +
+    "     WHERE u.fullName =~ $userName AND c.name =~ $countryName " +
     " WITH u" +
-    "     OPTIONAL MATCH (u)-[:PUBLISH]->(:Post)<-[:TO]-(r:Reaction{type:'APPROVE'}) " +
+    "     OPTIONAL MATCH (u)-[:POSSESS]->(s:Skill) WHERE s.canonicalName =~ $skillName " +
     " WITH u" +
-    "     OPTIONAL MATCH (u)-[:POSSES]->(s:Skill) WHERE s.canonicalName =~ $skillName " +
+    "     OPTIONAL MATCH (u)-[r:PUBLISH]->(:Post)<-[:TO]-(r:Reaction{type:'APPROVE'}) " +
     " WITH u, count(r) as medals " +
     " RETURN u{.*, medals:medals} ORDER BY u[$sortField] DESC SKIP $skip LIMIT $size "
   )
