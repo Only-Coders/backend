@@ -44,7 +44,7 @@ public interface UserRepository extends Neo4jRepository<User, String> {
   Boolean requestHasBeenSent(String sourceCanonicalName, String targetCanonicalName);
 
   @Query(
-    "MATCH (u:User{canonicalName:$sourceCanonicalName})<-[:SENDS]-(fr:ContactRequest)<-[:TO]-(u2:User{canonicalName:$targetCanonicalName}) RETURN count(fr)>0"
+    "MATCH (u:User{canonicalName:$sourceCanonicalName})<-[:TO]-(fr:ContactRequest)<-[:SENDS]-(u2:User{canonicalName:$targetCanonicalName}) RETURN count(fr)>0"
   )
   Boolean hasPendingRequest(String sourceCanonicalName, String targetCanonicalName);
 
@@ -71,7 +71,7 @@ public interface UserRepository extends Neo4jRepository<User, String> {
     " WITH u" +
     "     OPTIONAL MATCH (u)-[:POSSESS]->(s:Skill) WHERE s.canonicalName =~ $skillName " +
     " WITH u" +
-    "     OPTIONAL MATCH (u)-[r:PUBLISH]->(:Post)<-[:TO]-(r:Reaction{type:'APPROVE'}) " +
+    "     OPTIONAL MATCH (u)-[]->()<-[:TO]-(r:Reaction{type:'APPROVE'}) " +
     " WITH u, count(r) as medals " +
     " RETURN u{.*, medals:medals} ORDER BY u[$sortField] DESC SKIP $skip LIMIT $size "
   )
@@ -91,7 +91,7 @@ public interface UserRepository extends Neo4jRepository<User, String> {
     " WITH u" +
     "     OPTIONAL MATCH (u)-[:POSSESS]->(s:Skill) WHERE s.canonicalName =~ $skillName " +
     " WITH u" +
-    "     OPTIONAL MATCH (u)-[r:PUBLISH]->(:Post)<-[:TO]-(r:Reaction{type:'APPROVE'}) " +
+    "     OPTIONAL MATCH (u)-[]->()<-[:TO]-(r:Reaction{type:'APPROVE'}) " +
     " WITH u, count(r) as medals " +
     " RETURN u{.*, medals:medals} ORDER BY u[$sortField] DESC SKIP $skip LIMIT $size "
   )
@@ -122,9 +122,7 @@ public interface UserRepository extends Neo4jRepository<User, String> {
   @Query("MATCH (u:User) WHERE u.fullName =~ $likeName RETURN count(u)")
   Integer countByPartialName(String likeName);
 
-  @Query(
-    "MATCH (:User{canonicalName:$canonicalName})-[:PUBLISH]->(:Post)<-[:TO]-(r:Reaction{type:'APPROVE'}) return count(r)"
-  )
+  @Query("MATCH (:User{email: $canonicalName })-[]->()<-[:TO]-(r:Reaction{type:'APPROVE'}) return count(r)")
   Integer countUserMedals(String canonicalName);
 
   @Query("MATCH (:User{canonicalName:$canonicalName})<-[:FOLLOWS]-(u:User) return count(u)")
