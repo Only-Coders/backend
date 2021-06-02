@@ -118,4 +118,33 @@ public interface PostRepository extends Neo4jRepository<Post, String> {
 
   @Query("MATCH (p:Post{id: $postId})-[r:IS_FAVORITE]-(u:User{canonicalName: $canonicalName}) return count(r)>0;")
   Boolean isFavorite(String postId, String canonicalName);
+
+  @Query(
+    "CALL{ \n" +
+    "        MATCH (:User{canonicalName: $requesterCanonicalName})-[:IS_CONNECTED]-(u:User)" +
+    "-[r:PUBLISH]->(p:Post{isPublic:false})-[rt:HAS]->(t:Tag{canonicalName:$tagCanonicalName})\n" +
+    "        RETURN p\n" +
+    "    UNION\n" +
+    "        MATCH (t:Tag{canonicalName:$tagCanonicalName})<-[rt:HAS]-(p:Post{isPublic:true})<-[r:PUBLISH]-(u:User)\n" +
+    "        RETURN p\n" +
+    "} \n" +
+    "RETURN count(p)\n"
+  )
+  int getPostsByTagQuantity(String requesterCanonicalName, String tagCanonicalName);
+
+  @Query(
+    "CALL{ \n" +
+    "        MATCH (:User{canonicalName: $requesterCanonicalName})-[:IS_CONNECTED]-(u:User)" +
+    "-[r:PUBLISH]->(p:Post{isPublic:false})-[rt:HAS]->(t:Tag{canonicalName:$tagCanonicalName})\n" +
+    "        RETURN p,r,u,rt,t\n" +
+    "    UNION\n" +
+    "        MATCH (t:Tag{canonicalName:$tagCanonicalName})<-[rt:HAS]-(p:Post{isPublic:true})<-[r:PUBLISH]-(u:User)\n" +
+    "        RETURN p,r,u,rt,t\n" +
+    "} \n" +
+    "OPTIONAL MATCH (p)-[rm:MENTIONS]->(m:User)\n" +
+    "RETURN p, collect(r), collect(u), collect(rm), collect(m), collect(rt), collect(t) \n" +
+    "ORDER BY p.createdAt DESC \n" +
+    "SKIP $skip LIMIT $size"
+  )
+  Set<Post> getPostsByTag(String requesterCanonicalName, String tagCanonicalName, int skip, int size);
 }

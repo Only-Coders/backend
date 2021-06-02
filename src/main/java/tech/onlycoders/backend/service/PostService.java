@@ -504,4 +504,45 @@ public class PostService {
     reportRepository.linkReportToPost(postId, report.getId());
     reportRepository.linkReportToUser(canonicalName, report.getId());
   }
+
+  public PaginateDto<ReadPostDto> getPostsbyTag(
+    String requesterCanonicalName,
+    String tagCanonicalName,
+    Integer page,
+    Integer size
+  ) {
+    var totalQuantity = postRepository.getPostsByTagQuantity(requesterCanonicalName, tagCanonicalName);
+    var posts = postRepository.getPostsByTag(requesterCanonicalName, tagCanonicalName, page * size, size);
+
+    var pageQuantity = PaginationUtils.getPagesQuantity(totalQuantity, size);
+    var readPostDtoList = postMapper.setPostToListPostDto(posts);
+
+    var medalsCache = new HashMap<String, Integer>();
+
+    readPostDtoList
+      .parallelStream()
+      .forEach(
+        post -> {
+          var publisher = post.getPublisher().getCanonicalName();
+          var currentPosition = this.workPositionRepository.getUserCurrentPosition(publisher);
+          if (currentPosition.isPresent()) {
+            var readWorkPositionDto = this.workPositionMapper.workPositionToReadWorkPositionDto(currentPosition.get());
+            post.getPublisher().setCurrentPosition(readWorkPositionDto);
+          }
+          post.setReactions(getPostReactionQuantity(post.getId()));
+          post.setCommentQuantity(postRepository.getPostCommentsQuantity(post.getId()));
+          post.setMyReaction(getPostUserReaction(requesterCanonicalName, post.getId()));
+          post.setIsFavorite(postRepository.isFavorite(post.getId(), requesterCanonicalName));
+          var medals = getAmountOfMedals(medalsCache, post.getPublisher().getCanonicalName());
+          post.getPublisher().setAmountOfMedals(medals);
+        }
+      );
+
+    var pagination = new PaginateDto<ReadPostDto>();
+    pagination.setContent(readPostDtoList);
+    pagination.setCurrentPage(page);
+    pagination.setTotalPages(pageQuantity);
+    pagination.setTotalElements(totalQuantity);
+    return pagination;
+  }
 }

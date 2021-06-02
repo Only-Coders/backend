@@ -9,11 +9,15 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import javax.validation.constraints.Min;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import tech.onlycoders.backend.bean.auth.UserDetails;
 import tech.onlycoders.backend.dto.PaginateDto;
+import tech.onlycoders.backend.dto.post.response.ReadPostDto;
 import tech.onlycoders.backend.dto.tag.request.CreateTagDto;
 import tech.onlycoders.backend.dto.tag.response.ReadTagDto;
+import tech.onlycoders.backend.service.PostService;
 import tech.onlycoders.backend.service.TagService;
 
 @RestController
@@ -23,9 +27,11 @@ import tech.onlycoders.backend.service.TagService;
 public class TagController {
 
   private final TagService tagService;
+  private final PostService postService;
 
-  public TagController(TagService tagService) {
+  public TagController(TagService tagService, PostService postService) {
     this.tagService = tagService;
+    this.postService = postService;
   }
 
   @PreAuthorize("hasAuthority('USER')")
@@ -62,6 +68,28 @@ public class TagController {
   ResponseEntity<ReadTagDto> createTag(@RequestBody CreateTagDto createTag) {
     var tag = this.tagService.createTag(createTag);
     return ResponseEntity.ok(tag);
+  }
+
+  @PreAuthorize("hasAuthority('USER')")
+  @ApiResponses(
+    value = {
+      @ApiResponse(
+        responseCode = "200",
+        content = { @Content(mediaType = "application/json", schema = @Schema(implementation = PaginatedPosts.class)) }
+      )
+    }
+  )
+  @GetMapping("{canonicalName}/posts")
+  @Operation(summary = "Get posts related with a tag")
+  ResponseEntity<PaginateDto<ReadPostDto>> getTagPosts(
+    @PathVariable String canonicalName,
+    @RequestParam(defaultValue = "0") @Min(0) Integer page,
+    @RequestParam(defaultValue = "20") @Min(1) Integer size
+  ) {
+    var userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    var requesterCanonicalName = userDetails.getCanonicalName();
+    var pagination = this.postService.getPostsbyTag(requesterCanonicalName, canonicalName, page, size);
+    return ResponseEntity.ok(pagination);
   }
 }
 
