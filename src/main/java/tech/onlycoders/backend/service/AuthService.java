@@ -68,6 +68,7 @@ public class AuthService {
     if (optionalUser.isPresent()) {
       var user = optionalUser.get();
       extendClaims(user, claims);
+      claims.put("eliminationDate", user.getEliminationDate().orElse(null));
       this.workPositionRepository.getUserCurrentPosition(user.getCanonicalName())
         .ifPresentOrElse(
           workPosition ->
@@ -86,7 +87,6 @@ public class AuthService {
     claims.put("complete", true);
     claims.put("imageURI", person.getImageURI());
     claims.put("fullName", person.getFirstName() + " " + person.getLastName());
-    if (person instanceof User) claims.put("eliminationDate", person.getEliminationDate().orElse(null));
   }
 
   public AuthResponseDto refreshToken(String token) throws ApiException {
