@@ -19,10 +19,13 @@ public interface TagRepository extends Neo4jRepository<Tag, String> {
   int getTagQuantityByName(String likeName);
 
   @Query(
-    "CALL {MATCH (t:Tag)<-[:IS_INTERESTED]-(p:Person) WHERE t.canonicalName =~ $likeName " +
-    "RETURN t, count(p) as quantity UNION " +
-    "MATCH (t:Tag) WHERE t.canonicalName =~ $likeName " +
-    "RETURN t, 0  as quantity} RETURN t ORDER BY quantity DESC SKIP $skip LIMIT $size "
+    "CALL { " +
+    "   MATCH (t:Tag)<-[:IS_INTERESTED]-(p:Person) WHERE t.name =~ $likeName " +
+    "   RETURN DISTINCT(t), count(p) as quantity " +
+    "UNION " +
+    "   MATCH (t:Tag) " +
+    "   RETURN DISTINCT(t), 0 as quantity " +
+    "} RETURN DISTINCT(t), quantity ORDER BY quantity DESC SKIP $skip LIMIT $size "
   )
   List<Tag> getTagsByNamePaginated(String likeName, Integer skip, Integer size);
 
@@ -31,10 +34,11 @@ public interface TagRepository extends Neo4jRepository<Tag, String> {
 
   @Query(
     "CALL { " +
-    "MATCH (t:Tag)<-[:IS_INTERESTED]-(p:Person) RETURN t, count(p) as quantity " +
+    "   MATCH (t:Tag)<-[:IS_INTERESTED]-(p:Person) " +
+    "   RETURN DISTINCT(t), count(p) as quantity " +
     "UNION " +
-    "MATCH (t:Tag) RETURN t, 0 as quantity} " +
-    "RETURN t ORDER BY quantity DESC SKIP $skip LIMIT $size"
+    "   MATCH (t:Tag) RETURN t, 0 as quantity" +
+    "} RETURN DISTINCT(t), quantity ORDER BY quantity DESC SKIP $skip LIMIT $size"
   )
   List<Tag> getTagsPaginated(Integer skip, Integer size);
 
