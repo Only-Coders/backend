@@ -58,9 +58,9 @@ jobs:
         with:
           switches: -avzr --delete
           path: app.jar
-          remote_path: /home/viruscontrol/onlycoders
+          remote_path: /home/mzunino/onlycoders
           remote_host: onlycoders.tech
-          remote_user: viruscontrol
+          remote_user: mzunino
           remote_key: ${{ secrets.DEPLOY_KEY }}
 
       - name: Slack Notification
