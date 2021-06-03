@@ -33,4 +33,8 @@ public class BlackListService {
     dto.setTotalElements(totalQuantity);
     return dto;
   }
+
+  public void removeUser(String email) {
+    blacklistRepository.removeByEmail(email);
+  }
 }

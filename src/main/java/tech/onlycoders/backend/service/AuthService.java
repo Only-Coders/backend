@@ -7,6 +7,7 @@ import tech.onlycoders.backend.bean.FirebaseService;
 import tech.onlycoders.backend.dto.auth.request.AuthRequestDto;
 import tech.onlycoders.backend.dto.auth.response.AuthResponseDto;
 import tech.onlycoders.backend.exception.ApiException;
+import tech.onlycoders.backend.model.Admin;
 import tech.onlycoders.backend.model.User;
 import tech.onlycoders.backend.repository.AdminRepository;
 import tech.onlycoders.backend.repository.PersonRepository;
@@ -67,6 +68,7 @@ public class AuthService {
     if (optionalUser.isPresent()) {
       var user = optionalUser.get();
       extendClaims(user, claims);
+      claims.put("eliminationDate", user.getEliminationDate().orElse(null));
       this.workPositionRepository.getUserCurrentPosition(user.getCanonicalName())
         .ifPresentOrElse(
           workPosition ->
@@ -85,7 +87,6 @@ public class AuthService {
     claims.put("complete", true);
     claims.put("imageURI", person.getImageURI());
     claims.put("fullName", person.getFirstName() + " " + person.getLastName());
-    claims.put("eliminationDate", person.getEliminationDate().orElse(null));
   }
 
   public AuthResponseDto refreshToken(String token) throws ApiException {

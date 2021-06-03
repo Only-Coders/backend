@@ -43,4 +43,9 @@ public class BlackListServiceTest {
     assertEquals(10, result.getTotalElements());
     assertEquals(10, result.getContent().size());
   }
+
+  @Test
+  public void ShouldDelete() {
+    this.service.removeUser("asd");
+  }
 }
