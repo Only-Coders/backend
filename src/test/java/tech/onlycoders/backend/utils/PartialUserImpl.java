@@ -95,6 +95,11 @@ public class PartialUserImpl implements PartialUser {
   }
 
   @Override
+  public Optional<Date> getBirthDate() {
+    return Optional.of(new Date());
+  }
+
+  @Override
   public Date getCreatedAt() {
     return null;
   }
@@ -150,7 +155,7 @@ public class PartialUserImpl implements PartialUser {
   }
 
   @Override
-  public PartialCountry getCode() {
+  public PartialCountry getCountry() {
     return null;
   }
 

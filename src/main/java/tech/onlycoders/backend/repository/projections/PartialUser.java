@@ -7,6 +7,7 @@ public interface PartialUser {
   Optional<Boolean> getDefaultPrivacyIsPublic();
   Optional<Boolean> getBlocked();
   Optional<Date> getEliminationDate();
+  Optional<Date> getBirthDate();
 
   Date getCreatedAt();
 
@@ -30,7 +31,7 @@ public interface PartialUser {
 
   PartialRole getRole();
 
-  PartialCountry getCode();
+  PartialCountry getCountry();
 
   PartialGitProfile getGitProfile();
 

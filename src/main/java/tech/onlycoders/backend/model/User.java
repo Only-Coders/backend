@@ -22,6 +22,9 @@ public class User extends Person {
   @DateLong
   private Date eliminationDate = null;
 
+  @DateLong
+  private Date birthDate;
+
   @Relationship(type = "WORKS", direction = Relationship.Direction.OUTGOING)
   private List<WorkPosition> workingPlaces = new ArrayList<>();
 

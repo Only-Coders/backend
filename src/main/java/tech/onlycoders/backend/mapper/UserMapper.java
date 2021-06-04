@@ -1,5 +1,6 @@
 package tech.onlycoders.backend.mapper;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import org.mapstruct.InjectionStrategy;
@@ -19,8 +20,12 @@ public interface UserMapper {
   @Mapping(target = "gitProfile", ignore = true)
   ReadUserDto userToReadPersonDto(PartialUser person);
 
-  default Boolean map(Optional<Boolean> value) {
+  default Boolean mapBoolean(Optional<Boolean> value) {
     return value.orElse(false);
+  }
+
+  default Date mapDate(Optional<Date> value) {
+    return value.orElse(null);
   }
 
   @Mapping(target = "workingPlaces", ignore = true)
