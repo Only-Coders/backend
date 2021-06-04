@@ -241,24 +241,6 @@ public class UserService {
     this.userRepository.addFavoritePost(user.getId(), post.getId());
   }
 
-  public PaginateDto<ReadPostDto> getFavoritePosts(String email, Integer page, Integer size) throws ApiException {
-    var totalQuantity = this.postRepository.getUserFavoritePostTotalQuantity(email);
-    if (totalQuantity == 0) {
-      this.userRepository.findByEmail(email)
-        .orElseThrow(() -> new ApiException(HttpStatus.INTERNAL_SERVER_ERROR, "error.500"));
-    }
-    var pagesQuantity = PaginationUtils.getPagesQuantity(totalQuantity, size);
-    var posts = this.postRepository.getUserFavoritePosts(email, page * size, size);
-
-    var paginated = new PaginateDto<ReadPostDto>();
-    paginated.setCurrentPage(page);
-    paginated.setTotalElements(totalQuantity);
-    paginated.setTotalPages(pagesQuantity);
-    paginated.setContent(postMapper.listPostToListPostDto(posts));
-
-    return paginated;
-  }
-
   public void unfollowUser(String email, String canonicalName) throws ApiException {
     var user =
       this.userRepository.findByEmail(email)

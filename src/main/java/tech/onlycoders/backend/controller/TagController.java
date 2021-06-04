@@ -88,7 +88,7 @@ public class TagController {
   ) {
     var userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     var requesterCanonicalName = userDetails.getCanonicalName();
-    var pagination = this.postService.getPostsbyTag(requesterCanonicalName, canonicalName, page, size);
+    var pagination = this.postService.getPostsByTag(requesterCanonicalName, canonicalName, page, size);
     return ResponseEntity.ok(pagination);
   }
 }

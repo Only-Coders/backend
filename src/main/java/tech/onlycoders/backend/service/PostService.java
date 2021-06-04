@@ -231,14 +231,29 @@ public class PostService {
     }
   }
 
-  public PaginateDto<ReadPostDto> getFeedPosts(String canonicalName, Integer page, Integer size) {
-    var totalQuantity = postRepository.getFeedPostsQuantity(canonicalName);
-    var skip = page * size;
-    var pageQuantity = PaginationUtils.getPagesQuantity(totalQuantity, size);
-    var readPostDtoList = postMapper.setPostToListPostDto(postRepository.getFeedPosts(canonicalName, skip, size));
+  public PaginateDto<ReadPostDto> getFavoritePosts(String canonicalName, Integer page, Integer size)
+    throws ApiException {
+    this.userRepository.findByCanonicalName(canonicalName)
+      .orElseThrow(() -> new ApiException(HttpStatus.INTERNAL_SERVER_ERROR, "error.500"));
+
+    var posts = this.postRepository.getUserFavoritePosts(canonicalName, page * size, size);
+    var totalQuantity = this.postRepository.getUserFavoritePostTotalQuantity(canonicalName);
+    var pagesQuantity = PaginationUtils.getPagesQuantity(totalQuantity, size);
 
     var medalsCache = new HashMap<String, Integer>();
+    var readPostDtoList = postMapper.listPostToListPostDto(posts);
+    var paginated = expandPostData(canonicalName, medalsCache, readPostDtoList);
+    paginated.setCurrentPage(page);
+    paginated.setTotalElements(totalQuantity);
+    paginated.setTotalPages(pagesQuantity);
+    return paginated;
+  }
 
+  private PaginateDto<ReadPostDto> expandPostData(
+    String canonicalName,
+    HashMap<String, Integer> medalsCache,
+    List<ReadPostDto> readPostDtoList
+  ) {
     readPostDtoList
       .parallelStream()
       .forEach(
@@ -258,12 +273,23 @@ public class PostService {
         }
       );
 
-    var pagination = new PaginateDto<ReadPostDto>();
-    pagination.setContent(readPostDtoList);
-    pagination.setCurrentPage(page);
-    pagination.setTotalPages(pageQuantity);
-    pagination.setTotalElements(totalQuantity);
-    return pagination;
+    var paginated = new PaginateDto<ReadPostDto>();
+    paginated.setContent(readPostDtoList);
+    return paginated;
+  }
+
+  public PaginateDto<ReadPostDto> getFeedPosts(String canonicalName, Integer page, Integer size) {
+    var totalQuantity = postRepository.getFeedPostsQuantity(canonicalName);
+    var skip = page * size;
+    var pageQuantity = PaginationUtils.getPagesQuantity(totalQuantity, size);
+    var readPostDtoList = postMapper.setPostToListPostDto(postRepository.getFeedPosts(canonicalName, skip, size));
+
+    var medalsCache = new HashMap<String, Integer>();
+    var paginated = expandPostData(canonicalName, medalsCache, readPostDtoList);
+    paginated.setCurrentPage(page);
+    paginated.setTotalElements(totalQuantity);
+    paginated.setTotalPages(pageQuantity);
+    return paginated;
   }
 
   private ReactionType getPostUserReaction(String canonicalName, String postId) {
@@ -505,7 +531,7 @@ public class PostService {
     reportRepository.linkReportToUser(canonicalName, report.getId());
   }
 
-  public PaginateDto<ReadPostDto> getPostsbyTag(
+  public PaginateDto<ReadPostDto> getPostsByTag(
     String requesterCanonicalName,
     String tagCanonicalName,
     Integer page,
@@ -519,27 +545,7 @@ public class PostService {
 
     var medalsCache = new HashMap<String, Integer>();
 
-    readPostDtoList
-      .parallelStream()
-      .forEach(
-        post -> {
-          var publisher = post.getPublisher().getCanonicalName();
-          var currentPosition = this.workPositionRepository.getUserCurrentPosition(publisher);
-          if (currentPosition.isPresent()) {
-            var readWorkPositionDto = this.workPositionMapper.workPositionToReadWorkPositionDto(currentPosition.get());
-            post.getPublisher().setCurrentPosition(readWorkPositionDto);
-          }
-          post.setReactions(getPostReactionQuantity(post.getId()));
-          post.setCommentQuantity(postRepository.getPostCommentsQuantity(post.getId()));
-          post.setMyReaction(getPostUserReaction(requesterCanonicalName, post.getId()));
-          post.setIsFavorite(postRepository.isFavorite(post.getId(), requesterCanonicalName));
-          var medals = getAmountOfMedals(medalsCache, post.getPublisher().getCanonicalName());
-          post.getPublisher().setAmountOfMedals(medals);
-        }
-      );
-
-    var pagination = new PaginateDto<ReadPostDto>();
-    pagination.setContent(readPostDtoList);
+    var pagination = expandPostData(requesterCanonicalName, medalsCache, readPostDtoList);
     pagination.setCurrentPage(page);
     pagination.setTotalPages(pageQuantity);
     pagination.setTotalElements(totalQuantity);

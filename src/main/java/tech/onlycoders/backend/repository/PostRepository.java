@@ -13,11 +13,21 @@ import tech.onlycoders.backend.repository.projections.PartialPost;
 public interface PostRepository extends Neo4jRepository<Post, String> {
   Optional<PartialPost> getById(String postId);
 
-  @Query("MATCH (u:User{email:$email})-[:IS_FAVORITE]->(p:Post) RETURN count(p)")
-  int getUserFavoritePostTotalQuantity(String email);
+  @Query("MATCH (u:User{canonicalName:$canonicalName})-[:IS_FAVORITE]->(p:Post) RETURN count(DISTINCT(p))")
+  int getUserFavoritePostTotalQuantity(String canonicalName);
 
-  @Query("MATCH (u:User{email:$email})-[:IS_FAVORITE]->(p:Post) RETURN p  ORDER BY p.id DESC SKIP $skip LIMIT $size")
-  List<Post> getUserFavoritePosts(String email, Integer skip, Integer size);
+  @Query(
+    " MATCH (:User{canonicalName: $canonicalName})-[i:IS_FAVORITE]->(p:Post) " +
+    " WITH p, i " +
+    " MATCH (u:User)-[r:PUBLISH]->(p) " +
+    " OPTIONAL MATCH (p)-[rt:HAS]->(t:Tag) " +
+    " OPTIONAL MATCH (p)-[rm:MENTIONS]->(m:User) " +
+    " WITH u, r, p, i, rt, rm, t, m" +
+    " ORDER BY id(i) DESC " +
+    " RETURN p, collect(r), collect(u), collect(rt), collect(t), collect(rm), collect(m) " +
+    " SKIP $skip LIMIT $size "
+  )
+  List<Post> getUserFavoritePosts(String canonicalName, Integer skip, Integer size);
 
   @Query(
     "MATCH (u:User{canonicalName:$canonicalName})-[r:PUBLISH]->(p:Post) " +

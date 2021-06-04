@@ -33,7 +33,6 @@ import tech.onlycoders.backend.dto.user.response.ReadUserDto;
 import tech.onlycoders.backend.dto.user.response.ReadUserLiteDto;
 import tech.onlycoders.backend.dto.user.response.ReadUserToDeleteDto;
 import tech.onlycoders.backend.dto.workplace.request.CreateWorkplaceDto;
-import tech.onlycoders.backend.dto.workplace.response.ReadWorkplaceDto;
 import tech.onlycoders.backend.dto.workposition.response.ReadWorkPositionDto;
 import tech.onlycoders.backend.exception.ApiException;
 import tech.onlycoders.backend.service.*;
@@ -48,19 +47,22 @@ public class UserController {
   private final TagService tagService;
   private final InstituteService instituteService;
   private final SkillService skillService;
+  private final PostService postService;
 
   public UserController(
     UserService userService,
     WorkplaceService workplaceService,
     TagService tagService,
     InstituteService instituteService,
-    SkillService skillService
+    SkillService skillService,
+    PostService postService
   ) {
     this.userService = userService;
     this.workplaceService = workplaceService;
     this.tagService = tagService;
     this.instituteService = instituteService;
     this.skillService = skillService;
+    this.postService = postService;
   }
 
   @ApiResponses(
@@ -289,8 +291,8 @@ public class UserController {
     @RequestParam(defaultValue = "20") @Min(1) Integer size
   ) throws ApiException {
     var userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-    var email = userDetails.getEmail();
-    var posts = this.userService.getFavoritePosts(email, page, size);
+    var canonicalName = userDetails.getCanonicalName();
+    var posts = this.postService.getFavoritePosts(canonicalName, page, size);
     return ResponseEntity.ok(posts);
   }
 

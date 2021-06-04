@@ -299,35 +299,6 @@ public class UserServiceTest {
   }
 
   @Test
-  public void ShouldReturnFavoritePosts() throws ApiException {
-    var email = ezRandom.nextObject(String.class);
-    var postList = new ArrayList<Post>();
-    postList.add(new Post());
-    var size = 20;
-    var page = 0;
-
-    Mockito.when(this.postRepository.getUserFavoritePostTotalQuantity(email)).thenReturn(1);
-    Mockito.when(this.postRepository.getUserFavoritePosts(email, page, size)).thenReturn(postList);
-
-    var result = this.service.getFavoritePosts(email, page, size);
-    assertNotNull(result);
-  }
-
-  @Test
-  public void ShouldFailReturnFavoritePostsWhenUserNotFound() throws ApiException {
-    var user1 = ezRandom.nextObject(PartialUserImpl.class);
-    var email = ezRandom.nextObject(String.class);
-    var size = 20;
-    var page = 0;
-
-    Mockito.when(this.userRepository.findByEmail(email)).thenReturn(Optional.of(user1));
-    Mockito.when(this.postRepository.getUserFavoritePostTotalQuantity(email)).thenReturn(0);
-
-    var result = this.service.getFavoritePosts(email, page, size);
-    assertNotNull(result);
-  }
-
-  @Test
   public void ShouldUnfollowUser() throws ApiException {
     var user1 = ezRandom.nextObject(PartialUserImpl.class);
     var user2 = ezRandom.nextObject(PartialUserImpl.class);

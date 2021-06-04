@@ -394,4 +394,33 @@ public class PostServiceTest {
     var res = service.updatePost("postId", "canonicalName", requestDto);
     assertNotNull(res);
   }
+
+  @Test
+  public void ShouldReturnFavoritePosts() throws ApiException {
+    var user = ezRandom.nextObject(PartialUserImpl.class);
+
+    var postList = ezRandom.objects(Post.class, 10).collect(Collectors.toList());
+    var size = 20;
+    var page = 0;
+
+    Mockito.when(this.userRepository.findByCanonicalName(user.getCanonicalName())).thenReturn(Optional.of(user));
+    Mockito.when(this.postRepository.getUserFavoritePostTotalQuantity(user.getCanonicalName())).thenReturn(1);
+    Mockito.when(this.postRepository.getUserFavoritePosts(user.getCanonicalName(), page, size)).thenReturn(postList);
+
+    var result = this.service.getFavoritePosts(user.getCanonicalName(), page, size);
+    assertNotNull(result);
+  }
+
+  @Test
+  public void ShouldFailReturnFavoritePostsWhenUserNotFound() throws ApiException {
+    var user = ezRandom.nextObject(PartialUserImpl.class);
+    var size = 20;
+    var page = 0;
+
+    Mockito.when(this.userRepository.findByCanonicalName(user.getCanonicalName())).thenReturn(Optional.of(user));
+    Mockito.when(this.postRepository.getUserFavoritePostTotalQuantity(user.getCanonicalName())).thenReturn(0);
+
+    var result = this.service.getFavoritePosts(user.getCanonicalName(), page, size);
+    assertNotNull(result);
+  }
 }
