@@ -33,6 +33,7 @@ import tech.onlycoders.backend.dto.user.response.ReadUserDto;
 import tech.onlycoders.backend.dto.user.response.ReadUserLiteDto;
 import tech.onlycoders.backend.dto.user.response.ReadUserToDeleteDto;
 import tech.onlycoders.backend.dto.workplace.request.CreateWorkplaceDto;
+import tech.onlycoders.backend.dto.workplace.response.ReadWorkplaceDto;
 import tech.onlycoders.backend.dto.workposition.response.ReadWorkPositionDto;
 import tech.onlycoders.backend.exception.ApiException;
 import tech.onlycoders.backend.service.*;
@@ -432,6 +433,28 @@ public class UserController {
     return ResponseEntity.ok().build();
   }
 
+  @PreAuthorize("hasAuthority('USER')")
+  @ApiResponses(
+    value = {
+      @ApiResponse(
+        responseCode = "200",
+        content = {
+          @Content(mediaType = "application/json", schema = @Schema(implementation = PaginatedWorkPosition.class))
+        }
+      )
+    }
+  )
+  @GetMapping("/{canonicalName}/workplaces")
+  @Operation(summary = "Search Workplaces User")
+  ResponseEntity<PaginateDto<ReadWorkPositionDto>> getUserJobs(
+    @PathVariable String canonicalName,
+    @RequestParam(defaultValue = "0", required = false) @Min(0) Integer page,
+    @RequestParam(defaultValue = "20", required = false) @Min(1) Integer size
+  ) {
+    var pagination = this.workplaceService.getUserJobs(canonicalName, page, size);
+    return ResponseEntity.ok(pagination);
+  }
+
   @ApiResponses(
     value = {
       @ApiResponse(
@@ -458,3 +481,5 @@ public class UserController {
 class PaginatedUsers extends PaginateDto<ReadUserLiteDto> {}
 
 class PaginatedContactRequests extends PaginateDto<ReadContactRequestDto> {}
+
+class PaginatedWorkPosition extends PaginateDto<ReadWorkPositionDto> {}
