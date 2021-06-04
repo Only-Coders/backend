@@ -43,13 +43,11 @@ public interface TagRepository extends Neo4jRepository<Tag, String> {
   List<Tag> getTagsPaginated(Integer skip, Integer size);
 
   @Query(
-    " CALL { " +
-    "   MATCH (x:Person)-[:IS_INTERESTED]->(t:Tag)<-[:IS_INTERESTED]-(:Person{canonicalName: $userCanonicalName})" +
-    "   RETURN DISTINCT(t), count(x) as quantity " +
-    " UNION " +
-    "   MATCH (t:Tag)<-[:IS_INTERESTED]-(:Person{canonicalName: $userCanonicalName}) " +
-    "   RETURN DISTINCT(t), 0 as quantity " +
-    " } RETURN DISTINCT(t), quantity ORDER BY quantity DESC SKIP $skip LIMIT $size"
+    " MATCH (t:Tag)<-[:IS_INTERESTED]-(:User{canonicalName: $userCanonicalName}) " +
+    " OPTIONAL MATCH (u:User)-[:IS_INTERESTED]->(t) " +
+    " WITH t, u " +
+    " RETURN t, count(COALESCE(u.canonicalName, 0)) as quantity " +
+    " ORDER BY quantity DESC SKIP $skip LIMIT $size"
   )
   Set<Tag> getFollowedTags(String userCanonicalName, Integer skip, Integer size);
 
