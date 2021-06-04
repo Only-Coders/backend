@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 import tech.onlycoders.backend.bean.auth.UserDetails;
 import tech.onlycoders.backend.dto.PaginateDto;
 import tech.onlycoders.backend.dto.SortContactsBy;
+import tech.onlycoders.backend.dto.SortUsersBy;
 import tech.onlycoders.backend.dto.contactrequest.request.CreateContactRequestDto;
 import tech.onlycoders.backend.dto.contactrequest.request.ResponseContactRequestDto;
 import tech.onlycoders.backend.dto.contactrequest.response.ReadContactRequestDto;
@@ -90,11 +91,14 @@ public class UserController {
   @GetMapping
   @Operation(summary = "Search users by full name")
   ResponseEntity<PaginateDto<ReadUserLiteDto>> findUsersByName(
-    @RequestParam String partialName,
+    @RequestParam(defaultValue = "") String partialName,
+    @RequestParam(defaultValue = "") String countryName,
+    @RequestParam(defaultValue = "") String skillName,
+    @RequestParam(defaultValue = "FIRSTNAME") SortUsersBy orderBy,
     @RequestParam(defaultValue = "0") @Min(0) Integer page,
     @RequestParam(defaultValue = "20") @Min(1) Integer size
   ) throws ApiException {
-    var persistedPerson = this.userService.findByPartialName(partialName, page, size);
+    var persistedPerson = this.userService.findByPartialName(page, size, partialName, countryName, skillName, orderBy);
     return ResponseEntity.ok(persistedPerson);
   }
 

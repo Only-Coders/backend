@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tech.onlycoders.backend.dto.PaginateDto;
 import tech.onlycoders.backend.dto.SortContactsBy;
+import tech.onlycoders.backend.dto.SortUsersBy;
 import tech.onlycoders.backend.dto.auth.response.AuthResponseDto;
 import tech.onlycoders.backend.dto.contactrequest.request.CreateContactRequestDto;
 import tech.onlycoders.backend.dto.contactrequest.request.ResponseContactRequestDto;
@@ -363,10 +364,20 @@ public class UserService {
     return getReadUserLiteDtoPaginateDto(page, size, users, totalQuantity);
   }
 
-  public PaginateDto<ReadUserLiteDto> findByPartialName(String partialName, Integer page, Integer size) {
+  public PaginateDto<ReadUserLiteDto> findByPartialName(
+    Integer page,
+    Integer size,
+    String partialName,
+    String countryName,
+    String skillName,
+    SortUsersBy orderBy
+  ) {
     var regex = "(?i)" + CanonicalFactory.getCanonicalName(partialName) + ".*";
-    var users = this.userRepository.findByPartialName(regex, page, size);
-    var totalQuantity = this.userRepository.countByPartialName(regex);
+    var countryRegex = "(?i)" + countryName + ".*";
+    var skillNameRegex = "(?i)" + skillName + ".*";
+    var users =
+      this.userRepository.findAllWithFilters(regex, countryRegex, skillNameRegex, orderBy.label, page * size, size);
+    var totalQuantity = this.userRepository.countWithFilters(regex, countryRegex, skillNameRegex);
     return getReadUserLiteDtoPaginateDto(page, size, users, totalQuantity);
   }
 

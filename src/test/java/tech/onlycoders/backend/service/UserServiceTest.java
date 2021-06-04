@@ -19,6 +19,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import tech.onlycoders.backend.dto.SortContactsBy;
+import tech.onlycoders.backend.dto.SortUsersBy;
 import tech.onlycoders.backend.dto.auth.response.AuthResponseDto;
 import tech.onlycoders.backend.dto.contactrequest.request.CreateContactRequestDto;
 import tech.onlycoders.backend.dto.contactrequest.request.ResponseContactRequestDto;
@@ -516,16 +517,21 @@ public class UserServiceTest {
   @Test
   @MockitoSettings(strictness = Strictness.LENIENT)
   void findByPartialName() {
-    var canonicalName = ezRandom.nextObject(String.class);
+    var partialName = ezRandom.nextObject(String.class);
+    var countryName = ezRandom.nextObject(String.class);
+    var skillName = ezRandom.nextObject(String.class);
+    var orderBy = ezRandom.nextObject(SortUsersBy.class);
     var usersList = new ArrayList<User>();
     usersList.add(new User());
     var size = 20;
     var page = 0;
 
-    Mockito.when(this.userRepository.findByPartialName(canonicalName, page, size)).thenReturn(usersList);
-    Mockito.when(this.userRepository.countByPartialName(canonicalName)).thenReturn(1);
+    Mockito
+      .when(this.userRepository.findAllWithFilters(partialName, countryName, skillName, orderBy.label, page, size))
+      .thenReturn(usersList);
+    Mockito.when(this.userRepository.countWithFilters(partialName, countryName, skillName)).thenReturn(1);
 
-    var result = this.service.findByPartialName(canonicalName, page, size);
+    var result = this.service.findByPartialName(page, size, partialName, countryName, skillName, orderBy);
     assertNotNull(result);
   }
 

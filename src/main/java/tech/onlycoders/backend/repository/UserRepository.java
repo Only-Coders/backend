@@ -165,4 +165,33 @@ public interface UserRepository extends Neo4jRepository<User, String> {
 
   @Query("MATCH (u:User{email: $email}) set u += {eliminationDate: null}")
   void removeUserEliminationDate(String email);
+
+  @Query(
+    " MATCH (u:User) " +
+    "   OPTIONAL MATCH (u)-[:POSSESS]->(s:Skill) " +
+    "   OPTIONAL MATCH (u)-[:LIVES]->(c:Country) " +
+    "   OPTIONAL MATCH (u)-[]->()<-[:TO]-(r:Reaction{type:'APPROVE'}) " +
+    "   WITH u, s, c, r " +
+    " WHERE u.fullName =~ $userName AND c.name =~ $countryName AND COALESCE(s.name, '') =~ $skillName " +
+    " WITH u, COUNT(r) as medals " +
+    " RETURN u{.*, medals: medals} ORDER BY u[$sortField] DESC SKIP $skip LIMIT $size "
+  )
+  List<User> findAllWithFilters(
+    String userName,
+    String countryName,
+    String skillName,
+    String sortField,
+    Integer skip,
+    Integer size
+  );
+
+  @Query(
+    " MATCH (u:User) " +
+    " OPTIONAL MATCH (u)-[:POSSESS]->(s:Skill) " +
+    " OPTIONAL MATCH (u)-[:LIVES]->(c:Country) " +
+    "   WITH u, s, c " +
+    " WHERE u.fullName =~ $userName AND c.name =~ $countryName AND COALESCE(s.name, '') =~ $skillName  " +
+    " RETURN COUNT(DISTINCT(u)) "
+  )
+  int countWithFilters(String userName, String countryName, String skillName);
 }
