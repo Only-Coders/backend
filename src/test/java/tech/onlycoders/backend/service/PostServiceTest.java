@@ -124,28 +124,13 @@ public class PostServiceTest {
   @Test
   public void ShouldViewMyPosts() {
     var canonicalName = ezRandom.nextObject(String.class);
-    var postList = new HashSet<Post>();
-    postList.add(new Post());
+    var postList = ezRandom.objects(Post.class, 10).collect(Collectors.toSet());
     var size = 20;
     var page = 0;
 
     Mockito.when(this.postRepository.getPosts(canonicalName, page, size)).thenReturn(postList);
 
     var result = this.service.getMyPosts(canonicalName, page, size);
-    assertNotNull(result);
-  }
-
-  @Test
-  public void ShouldViewCountUserPosts() {
-    var requesterCanonicalName = ezRandom.nextObject(String.class);
-    var size = 20;
-    var page = 0;
-    Mockito
-      .when(this.postRepository.getPosts(requesterCanonicalName, page, size))
-      .thenReturn(ezRandom.objects(Post.class, 10).collect(Collectors.toSet()));
-    Mockito.when(this.postRepository.countUserPosts(requesterCanonicalName)).thenReturn(ezRandom.nextInt(10));
-
-    var result = this.service.getPostsOfUser(requesterCanonicalName, page, size);
     assertNotNull(result);
   }
 
@@ -398,11 +383,13 @@ public class PostServiceTest {
   @Test
   public void ShouldReturnFavoritePosts() throws ApiException {
     var user = ezRandom.nextObject(PartialUserImpl.class);
+    var workPosition = ezRandom.nextObject(WorkPosition.class);
 
     var postList = ezRandom.objects(Post.class, 10).collect(Collectors.toList());
     var size = 20;
     var page = 0;
 
+    Mockito.when(this.workPositionRepository.getUserCurrentPosition(anyString())).thenReturn(Optional.of(workPosition));
     Mockito.when(this.userRepository.findByCanonicalName(user.getCanonicalName())).thenReturn(Optional.of(user));
     Mockito.when(this.postRepository.getUserFavoritePostTotalQuantity(user.getCanonicalName())).thenReturn(1);
     Mockito.when(this.postRepository.getUserFavoritePosts(user.getCanonicalName(), page, size)).thenReturn(postList);
