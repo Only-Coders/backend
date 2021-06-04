@@ -47,7 +47,7 @@ public interface TagRepository extends Neo4jRepository<Tag, String> {
     " OPTIONAL MATCH (u:User)-[:IS_INTERESTED]->(t) " +
     " WITH t, u " +
     " RETURN t, count(COALESCE(u.canonicalName, 0)) as quantity " +
-    " ORDER BY quantity DESC SKIP $skip LIMIT $size"
+    " ORDER BY quantity DESC, t.canonicalName ASC SKIP $skip LIMIT $size"
   )
   Set<Tag> getFollowedTags(String userCanonicalName, Integer skip, Integer size);
 
