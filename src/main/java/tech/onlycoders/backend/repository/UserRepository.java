@@ -18,11 +18,11 @@ public interface UserRepository extends Neo4jRepository<User, String> {
   @Query(
     "CALL { " +
     " MATCH (p:User)-[t:IS_CONNECTED*2..2]-(me:User{email: $email})-[:LIVES]->(c:Country) " +
-    " WHERE  (NOT (p)-[]-(:ContactRequest)-[]-(me) AND NOT (p)-[:IS_CONNECTED]-(me) AND NOT (p)<-[:FOLLOWS]-(me)) " +
+    " WHERE  (p) <> (me) AND (NOT (p)-[]-(:ContactRequest)-[]-(me) AND NOT (p)-[:IS_CONNECTED]-(me) AND NOT (p)<-[:FOLLOWS]-(me)) " +
     " RETURN p, count(t)*(2^128) AS priority " + // Priority 1 - Contacts of my Contacts that lives in my country
     "UNION " +
     " MATCH (c:Country)<-[:LIVES]-(p:User)-[t:IS_CONNECTED*2..2]-(me:User{email: $email}) " +
-    " WHERE (p)-[:LIVES]->(c) AND (NOT (p)-[]-(:ContactRequest)-[]-(me) AND NOT (p)-[:IS_CONNECTED]-(me) AND NOT (p)<-[:FOLLOWS]-(me)) " +
+    " WHERE (p) <> (me) AND (p)-[:LIVES]->(c) AND (NOT (p)-[]-(:ContactRequest)-[]-(me) AND NOT (p)-[:IS_CONNECTED]-(me) AND NOT (p)<-[:FOLLOWS]-(me)) " +
     " RETURN p, count(t)*(2^64) AS priority  " + // Priority 2 - Contacts of my Contacts
     "UNION " +
     " MATCH (p:User)-[]-()-[]-(t:Workplace)-[]-()-[]-(me:User{email: $email}) " +
@@ -30,21 +30,21 @@ public interface UserRepository extends Neo4jRepository<User, String> {
     " RETURN p, count(t)*(2^32) AS priority " + // Priority 3 - People that I've worked with
     "UNION " +
     " MATCH (p:User)-[:IS_INTERESTED]->(t:Tag)<-[:IS_INTERESTED]-(me:User{email: $email})-[:LIVES]->(c:Country) " +
-    " WHERE (p)-[:LIVES]->(c) AND (NOT (p)-[]-(:ContactRequest)-[]-(me) AND NOT (p)-[:IS_CONNECTED]-(me) AND NOT (p)<-[:FOLLOWS]-(me)) " +
+    " WHERE (p) <> (me) AND (p)-[:LIVES]->(c) AND (NOT (p)-[]-(:ContactRequest)-[]-(me) AND NOT (p)-[:IS_CONNECTED]-(me) AND NOT (p)<-[:FOLLOWS]-(me)) " +
     " RETURN p, count(t) AS priority " + // Priority 4 - People that likes what I like and lives in my country
     " UNION " +
     "MATCH (me:User{email:$email})-[:LIVES]->(c:Country)<-[:LIVES]-(p) " +
-    " WHERE NOT (p)-[]-(:ContactRequest)-[]-(me) AND NOT (p)-[:IS_CONNECTED]-(me) AND NOT (p)<-[:FOLLOWS]-(me) " +
+    " WHERE (p) <> (me) AND NOT (p)-[]-(:ContactRequest)-[]-(me) AND NOT (p)-[:IS_CONNECTED]-(me) AND NOT (p)<-[:FOLLOWS]-(me) " +
     " RETURN p, 0.9 AS priority " + // Priority 5 - People that lives in my country
     "UNION " +
     " MATCH (p:User)-[:IS_INTERESTED]->(t:Tag)<-[:IS_INTERESTED]-(me:User{email: $email}) " +
-    " WHERE (NOT (p)-[]-(:ContactRequest)-[]-(me) AND NOT (p)-[:IS_CONNECTED]-(me) AND NOT (p)<-[:FOLLOWS]-(me)) " +
+    " WHERE (p) <> (me) AND (NOT (p)-[]-(:ContactRequest)-[]-(me) AND NOT (p)-[:IS_CONNECTED]-(me) AND NOT (p)<-[:FOLLOWS]-(me)) " +
     " RETURN p, count(t)/(2^32) AS priority " + // Priority 6 - People that likes what I like
     "UNION " +
     " MATCH (me:User{email: $email}) " +
     " WITH me " +
     " MATCH (p:User) " +
-    " WHERE (NOT (p)-[]-(:ContactRequest)-[]-(me) AND NOT (p)-[:IS_CONNECTED]-(me) AND NOT (p)<-[:FOLLOWS]-(me)) " +
+    " WHERE (p) <> (me) AND (NOT (p)-[]-(:ContactRequest)-[]-(me) AND NOT (p)-[:IS_CONNECTED]-(me) AND NOT (p)<-[:FOLLOWS]-(me)) " +
     " RETURN p, 0 AS priority " + // Priority 7 - People
     "} RETURN DISTINCT(p), priority ORDER BY priority DESC;  "
   )
