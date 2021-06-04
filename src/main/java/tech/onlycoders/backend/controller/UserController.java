@@ -14,13 +14,13 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import tech.onlycoders.backend.bean.auth.UserDetails;
-import tech.onlycoders.backend.dto.PaginateDto;
-import tech.onlycoders.backend.dto.SortContactsBy;
-import tech.onlycoders.backend.dto.SortUsersBy;
+import tech.onlycoders.backend.dto.*;
 import tech.onlycoders.backend.dto.contactrequest.request.CreateContactRequestDto;
 import tech.onlycoders.backend.dto.contactrequest.request.ResponseContactRequestDto;
 import tech.onlycoders.backend.dto.contactrequest.response.ReadContactRequestDto;
 import tech.onlycoders.backend.dto.institute.request.CreateInstituteDto;
+import tech.onlycoders.backend.dto.institute.response.ReadDegreeDto;
+import tech.onlycoders.backend.dto.pagination.*;
 import tech.onlycoders.backend.dto.post.response.ReadPostDto;
 import tech.onlycoders.backend.dto.skill.request.CreateSkillDto;
 import tech.onlycoders.backend.dto.skill.response.ReadSkillDto;
@@ -447,6 +447,28 @@ public class UserController {
       )
     }
   )
+  @GetMapping("/{canonicalName}/degrees")
+  @Operation(summary = "Search Workplaces User")
+  ResponseEntity<PaginateDto<ReadDegreeDto>> getUserDegrees(
+    @PathVariable String canonicalName,
+    @RequestParam(defaultValue = "0", required = false) @Min(0) Integer page,
+    @RequestParam(defaultValue = "20", required = false) @Min(1) Integer size
+  ) {
+    var pagination = this.instituteService.getUserDegrees(canonicalName, page, size);
+    return ResponseEntity.ok(pagination);
+  }
+
+  @PreAuthorize("hasAuthority('USER')")
+  @ApiResponses(
+    value = {
+      @ApiResponse(
+        responseCode = "200",
+        content = {
+          @Content(mediaType = "application/json", schema = @Schema(implementation = PaginatedWorkPosition.class))
+        }
+      )
+    }
+  )
   @GetMapping("/{canonicalName}/workplaces")
   @Operation(summary = "Search Workplaces User")
   ResponseEntity<PaginateDto<ReadWorkPositionDto>> getUserJobs(
@@ -480,9 +502,3 @@ public class UserController {
     return ResponseEntity.ok(skills);
   }
 }
-
-class PaginatedUsers extends PaginateDto<ReadUserLiteDto> {}
-
-class PaginatedContactRequests extends PaginateDto<ReadContactRequestDto> {}
-
-class PaginatedWorkPosition extends PaginateDto<ReadWorkPositionDto> {}

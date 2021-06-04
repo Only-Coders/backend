@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import tech.onlycoders.backend.dto.PaginateDto;
 import tech.onlycoders.backend.dto.institute.request.CreateInstituteDto;
 import tech.onlycoders.backend.dto.institute.response.ReadInstituteDto;
+import tech.onlycoders.backend.dto.pagination.PaginatedInstitutes;
 import tech.onlycoders.backend.service.InstituteService;
 
 @RestController
@@ -68,5 +69,3 @@ public class InstituteController {
     return ResponseEntity.ok(instituteDto);
   }
 }
-
-class PaginatedInstitutes extends PaginateDto<ReadInstituteDto> {}

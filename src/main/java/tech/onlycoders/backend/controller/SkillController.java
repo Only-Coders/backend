@@ -13,6 +13,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import tech.onlycoders.backend.dto.PaginateDto;
+import tech.onlycoders.backend.dto.pagination.PaginatedSkillsDto;
 import tech.onlycoders.backend.dto.skill.request.CreateSkillDto;
 import tech.onlycoders.backend.dto.skill.response.ReadSkillDto;
 import tech.onlycoders.backend.service.SkillService;
@@ -67,5 +68,3 @@ public class SkillController {
     return ResponseEntity.ok(pagination);
   }
 }
-
-class PaginatedSkillsDto extends PaginateDto<ReadSkillDto> {}

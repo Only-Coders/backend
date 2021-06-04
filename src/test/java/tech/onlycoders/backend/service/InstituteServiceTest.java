@@ -1,7 +1,6 @@
 package tech.onlycoders.backend.service;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 
 import java.util.Optional;
@@ -15,13 +14,18 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import tech.onlycoders.backend.dto.institute.request.CreateInstituteDto;
 import tech.onlycoders.backend.dto.user.request.EducationExperienceDto;
+import tech.onlycoders.backend.dto.workposition.response.ReadWorkPositionDto;
 import tech.onlycoders.backend.exception.ApiException;
 import tech.onlycoders.backend.mapper.InstituteMapper;
+import tech.onlycoders.backend.model.Degree;
 import tech.onlycoders.backend.model.Institute;
+import tech.onlycoders.backend.model.WorkPosition;
 import tech.onlycoders.backend.repository.DegreeRepository;
 import tech.onlycoders.backend.repository.InstituteRepository;
 import tech.onlycoders.backend.repository.UserRepository;
@@ -45,7 +49,7 @@ public class InstituteServiceTest {
   private final EasyRandom ezRandom = new EasyRandom();
 
   @Spy
-  private final InstituteMapper countryMapper = Mappers.getMapper(InstituteMapper.class);
+  private final InstituteMapper instituteMapper = Mappers.getMapper(InstituteMapper.class);
 
   @Test
   public void ShouldPaginateOrganizations() {
@@ -104,5 +108,19 @@ public class InstituteServiceTest {
     Mockito.when(this.userRepository.findByEmail(email)).thenReturn(Optional.empty());
 
     assertThrows(ApiException.class, () -> this.service.addUserDegree(email, educationExperienceDto));
+  }
+
+  @MockitoSettings(strictness = Strictness.LENIENT)
+  @Test
+  public void ShouldGetWorkingExperiencesUser() {
+    var canonicalName = "canonical";
+    var page = ezRandom.nextInt();
+    var size = ezRandom.nextInt();
+    var workPositions = ezRandom.objects(Degree.class, 10).collect(Collectors.toList());
+
+    Mockito.when(this.degreeRepository.getUserDegrees(canonicalName, page, size)).thenReturn(workPositions);
+    Mockito.when(this.degreeRepository.countUserDegrees(canonicalName)).thenReturn(3);
+    var result = this.service.getUserDegrees(canonicalName, page, size);
+    assertNotNull(result);
   }
 }

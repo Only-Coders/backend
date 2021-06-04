@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tech.onlycoders.backend.dto.PaginateDto;
 import tech.onlycoders.backend.dto.institute.request.CreateInstituteDto;
+import tech.onlycoders.backend.dto.institute.response.ReadDegreeDto;
 import tech.onlycoders.backend.dto.institute.response.ReadInstituteDto;
 import tech.onlycoders.backend.dto.user.request.EducationExperienceDto;
 import tech.onlycoders.backend.exception.ApiException;
@@ -15,6 +16,7 @@ import tech.onlycoders.backend.model.Institute;
 import tech.onlycoders.backend.repository.DegreeRepository;
 import tech.onlycoders.backend.repository.InstituteRepository;
 import tech.onlycoders.backend.repository.UserRepository;
+import tech.onlycoders.backend.utils.PaginationUtils;
 
 @Service
 @Transactional
@@ -72,5 +74,19 @@ public class InstituteService {
     degreeRepository.save(degree);
     degreeRepository.storeDegree(degree.getId(), user.getId());
     return educationExperienceDto;
+  }
+
+  public PaginateDto<ReadDegreeDto> getUserDegrees(String canonicalName, Integer page, Integer size) {
+    var degreeList = degreeRepository.getUserDegrees(canonicalName, page * size, size);
+    var countUserDegrees = degreeRepository.countUserDegrees(canonicalName);
+    var workPositionDtoList = instituteMapper.degreesToReadDegreeDtos(degreeList);
+
+    var amountPages = PaginationUtils.getPagesQuantity(countUserDegrees, size);
+    var pagination = new PaginateDto<ReadDegreeDto>();
+    pagination.setContent(workPositionDtoList);
+    pagination.setCurrentPage(page);
+    pagination.setTotalPages(amountPages);
+    pagination.setTotalElements(countUserDegrees);
+    return pagination;
   }
 }

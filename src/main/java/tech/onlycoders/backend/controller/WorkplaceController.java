@@ -12,6 +12,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import tech.onlycoders.backend.dto.PaginateDto;
+import tech.onlycoders.backend.dto.pagination.PaginatedWorkplaces;
 import tech.onlycoders.backend.dto.workplace.request.CreateWorkplaceDto;
 import tech.onlycoders.backend.dto.workplace.response.ReadWorkplaceDto;
 import tech.onlycoders.backend.service.WorkplaceService;
@@ -68,5 +69,3 @@ public class WorkplaceController {
     return ResponseEntity.ok(workplace);
   }
 }
-
-class PaginatedWorkplaces extends PaginateDto<ReadWorkplaceDto> {}

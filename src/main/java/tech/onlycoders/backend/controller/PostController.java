@@ -16,6 +16,8 @@ import tech.onlycoders.backend.bean.auth.UserDetails;
 import tech.onlycoders.backend.dto.PaginateDto;
 import tech.onlycoders.backend.dto.comment.request.CreateCommentDto;
 import tech.onlycoders.backend.dto.comment.response.ReadCommentDto;
+import tech.onlycoders.backend.dto.pagination.PaginatedComments;
+import tech.onlycoders.backend.dto.pagination.PaginatedPosts;
 import tech.onlycoders.backend.dto.post.request.CreatePostDto;
 import tech.onlycoders.backend.dto.post.request.CreateReactionDto;
 import tech.onlycoders.backend.dto.post.response.ReadPostDto;
@@ -194,7 +196,3 @@ public class PostController {
     return ResponseEntity.ok(updatedPost);
   }
 }
-
-class PaginatedPosts extends PaginateDto<ReadPostDto> {}
-
-class PaginatedComments extends PaginateDto<ReadCommentDto> {}

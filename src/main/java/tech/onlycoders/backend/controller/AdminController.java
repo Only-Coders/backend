@@ -15,6 +15,7 @@ import tech.onlycoders.backend.dto.RoleEnum;
 import tech.onlycoders.backend.dto.admin.request.CreateAdminDto;
 import tech.onlycoders.backend.dto.admin.response.ReadAdminDto;
 import tech.onlycoders.backend.dto.admin.response.ReadGenericUserDto;
+import tech.onlycoders.backend.dto.pagination.PaginatedPeopleDto;
 import tech.onlycoders.backend.exception.ApiException;
 import tech.onlycoders.backend.service.AdminService;
 
@@ -64,5 +65,3 @@ public class AdminController {
     return ResponseEntity.ok(adminService.paginateAllUsers(partialName, role, page, size));
   }
 }
-
-class PaginatedPeopleDto extends PaginateDto<ReadGenericUserDto> {}

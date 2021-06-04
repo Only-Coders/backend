@@ -14,6 +14,8 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import tech.onlycoders.backend.bean.auth.UserDetails;
 import tech.onlycoders.backend.dto.PaginateDto;
+import tech.onlycoders.backend.dto.pagination.PaginatedPosts;
+import tech.onlycoders.backend.dto.pagination.PaginatedTags;
 import tech.onlycoders.backend.dto.post.response.ReadPostDto;
 import tech.onlycoders.backend.dto.tag.request.CreateTagDto;
 import tech.onlycoders.backend.dto.tag.response.ReadTagDto;
@@ -92,5 +94,3 @@ public class TagController {
     return ResponseEntity.ok(pagination);
   }
 }
-
-class PaginatedTags extends PaginateDto<ReadTagDto> {}

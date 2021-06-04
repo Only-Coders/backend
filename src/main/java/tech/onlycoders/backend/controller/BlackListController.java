@@ -11,6 +11,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import tech.onlycoders.backend.dto.PaginateDto;
 import tech.onlycoders.backend.dto.blacklist.response.ReadBlackListDto;
+import tech.onlycoders.backend.dto.pagination.PaginatedBlackList;
 import tech.onlycoders.backend.service.BlackListService;
 
 @RestController
@@ -31,7 +32,7 @@ public class BlackListController {
       @ApiResponse(
         responseCode = "200",
         content = {
-          @Content(mediaType = "application/json", schema = @Schema(implementation = PaginateBlackList.class))
+          @Content(mediaType = "application/json", schema = @Schema(implementation = PaginatedBlackList.class))
         }
       )
     }
@@ -51,7 +52,7 @@ public class BlackListController {
       @ApiResponse(
         responseCode = "200",
         content = {
-          @Content(mediaType = "application/json", schema = @Schema(implementation = PaginateBlackList.class))
+          @Content(mediaType = "application/json", schema = @Schema(implementation = PaginatedBlackList.class))
         }
       )
     }
@@ -61,5 +62,3 @@ public class BlackListController {
     return ResponseEntity.ok().build();
   }
 }
-
-class PaginateBlackList extends PaginateDto<ReadBlackListDto> {}
