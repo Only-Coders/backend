@@ -108,6 +108,9 @@ public class AuthService {
     claims.put("roles", person.getRole().getName());
     claims.put("canonicalName", person.getCanonicalName());
     claims.put("complete", true);
+    claims.put("imageURI", person.getImageURI());
+    claims.put("fullName", person.getFirstName() + " " + person.getLastName());
+    claims.put("defaultPrivacy", person.getDefaultPrivacyIsPublic());
     var newToken = this.jwtService.createToken(claims, person.getEmail());
     return AuthResponseDto.builder().token(newToken).build();
   }
