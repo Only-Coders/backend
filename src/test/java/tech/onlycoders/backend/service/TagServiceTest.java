@@ -133,10 +133,15 @@ public class TagServiceTest {
   public void ShouldListUserFollowedTags() {
     var tags = ezRandom.objects(Tag.class, 10).collect(Collectors.toSet());
     var canonicalName = ezRandom.nextObject(String.class);
+    var tagCanonicalName = ezRandom.nextObject(String.class).toLowerCase();
     var size = 20;
     var page = 0;
-    Mockito.when(this.tagRepository.getFollowedTags(canonicalName, page, size)).thenReturn(tags);
-    Mockito.when(this.tagRepository.getAmountOfFollowedTags(canonicalName)).thenReturn(tags.size());
-    this.service.getFollowedTags(canonicalName, page, size);
+    Mockito
+      .when(this.tagRepository.getFollowedTags(canonicalName, "(?i).*" + tagCanonicalName + ".*", page, size))
+      .thenReturn(tags);
+    Mockito
+      .when(this.tagRepository.getAmountOfFollowedTags(canonicalName, "(?i).*" + tagCanonicalName + ".*"))
+      .thenReturn(tags.size());
+    this.service.getFollowedTags(canonicalName, tagCanonicalName, page, size);
   }
 }

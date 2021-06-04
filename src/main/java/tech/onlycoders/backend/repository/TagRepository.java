@@ -44,13 +44,17 @@ public interface TagRepository extends Neo4jRepository<Tag, String> {
 
   @Query(
     " MATCH (t:Tag)<-[:IS_INTERESTED]-(:User{canonicalName: $userCanonicalName}) " +
-    " OPTIONAL MATCH (u:User)-[:IS_INTERESTED]->(t) " +
-    " WITH t, u " +
+    " OPTIONAL MATCH (u:User)-[:IS_INTERESTED]->(t)  " +
+    " WITH t, u  WHERE t.canonicalName =~ $tagCanonicalName " +
     " RETURN t, count(COALESCE(u.canonicalName, 0)) as quantity " +
     " ORDER BY quantity DESC, t.canonicalName ASC SKIP $skip LIMIT $size"
   )
-  Set<Tag> getFollowedTags(String userCanonicalName, Integer skip, Integer size);
+  Set<Tag> getFollowedTags(String userCanonicalName, String tagCanonicalName, Integer skip, Integer size);
 
-  @Query("MATCH (t:Tag)<-[r:IS_INTERESTED]-(:Person{canonicalName: $userCanonicalName}) RETURN count(r)")
-  Integer getAmountOfFollowedTags(String userCanonicalName);
+  @Query(
+    " MATCH (t:Tag)<-[r:IS_INTERESTED]-(:Person{canonicalName: $userCanonicalName}) " +
+    " WHERE t.canonicalName =~ $tagCanonicalName " +
+    " RETURN count(r)"
+  )
+  Integer getAmountOfFollowedTags(String userCanonicalName, String tagCanonicalName);
 }

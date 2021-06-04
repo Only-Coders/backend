@@ -80,9 +80,15 @@ public class TagService {
     this.userRepository.unFollowTag(user.getId(), tag.getCanonicalName());
   }
 
-  public PaginateDto<ReadTagDto> getFollowedTags(String userCanonicalName, Integer page, Integer size) {
-    Set<Tag> tags = this.tagRepository.getFollowedTags(userCanonicalName, page * size, size);
-    var totalQuantity = this.tagRepository.getAmountOfFollowedTags(userCanonicalName);
+  public PaginateDto<ReadTagDto> getFollowedTags(
+    String userCanonicalName,
+    String tagCanonicalName,
+    Integer page,
+    Integer size
+  ) {
+    var partialCanonicalName = "(?i).*" + tagCanonicalName.toLowerCase() + ".*";
+    Set<Tag> tags = this.tagRepository.getFollowedTags(userCanonicalName, partialCanonicalName, page * size, size);
+    var totalQuantity = this.tagRepository.getAmountOfFollowedTags(userCanonicalName, partialCanonicalName);
     return getReadTagDtoPaginateDto(page, size, new ArrayList<>(tags), totalQuantity);
   }
 

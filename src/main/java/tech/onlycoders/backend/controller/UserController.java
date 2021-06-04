@@ -177,10 +177,11 @@ public class UserController {
   @Operation(summary = "Get the tags that the user follows")
   ResponseEntity<PaginateDto<ReadTagDto>> getUserTags(
     @PathVariable @NotBlank String canonicalName,
+    @RequestParam(defaultValue = "") String tagCanonicalName,
     @RequestParam(defaultValue = "0") @Min(0) Integer page,
     @RequestParam(defaultValue = "20") @Min(1) Integer size
   ) throws ApiException {
-    var tags = this.tagService.getFollowedTags(canonicalName, page, size);
+    var tags = this.tagService.getFollowedTags(canonicalName, tagCanonicalName, page, size);
     return ResponseEntity.ok(tags);
   }
 
