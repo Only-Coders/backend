@@ -426,10 +426,13 @@ public class UserService {
       throw new ApiException(HttpStatus.NOT_FOUND, "error.request-not-found");
     }
 
-    if (response.getAcceptContact()) userRepository.addContact(email, response.getRequesterCanonicalName());
+    if (response.getAcceptContact()) {
+      userRepository.addContact(email, response.getRequesterCanonicalName());
+      userRepository.unfollowUser(requester.getId(), user.getId());
+      userRepository.unfollowUser(user.getId(), requester.getId());
+    }
+
     contactRequestRepository.deleteRequest(requester.getId(), user.getId());
-    userRepository.unfollowUser(requester.getId(), user.getId());
-    userRepository.unfollowUser(user.getId(), requester.getId());
     this.notificatorService.send(
         MessageDTO
           .builder()
