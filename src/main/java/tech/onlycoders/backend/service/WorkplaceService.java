@@ -17,6 +17,7 @@ import tech.onlycoders.backend.model.Workplace;
 import tech.onlycoders.backend.repository.UserRepository;
 import tech.onlycoders.backend.repository.WorkPositionRepository;
 import tech.onlycoders.backend.repository.WorkplaceRepository;
+import tech.onlycoders.backend.utils.PaginationUtils;
 
 @Service
 @Transactional
@@ -75,5 +76,19 @@ public class WorkplaceService {
     this.workPositionRepository.save(workPosition);
     this.workPositionRepository.addUserWorkPosition(workPosition.getId(), user.getId());
     return this.workPositionMapper.workPositionToReadWorkPositionDto(workPosition);
+  }
+
+  public PaginateDto<ReadWorkPositionDto> getUserJobs(String canonicalName, Integer page, Integer size) {
+    var workPositions = workPositionRepository.getUserJobs(canonicalName, page * size, size);
+    var countUserJobs = workPositionRepository.countUserJobs(canonicalName);
+    var workPositionDtoList = workPositionMapper.workPositionsToReadWorkPositionDtos(workPositions);
+
+    var amountPages = PaginationUtils.getPagesQuantity(countUserJobs, size);
+    var pagination = new PaginateDto<ReadWorkPositionDto>();
+    pagination.setContent(workPositionDtoList);
+    pagination.setCurrentPage(page);
+    pagination.setTotalPages(amountPages);
+    pagination.setTotalElements(countUserJobs);
+    return pagination;
   }
 }
