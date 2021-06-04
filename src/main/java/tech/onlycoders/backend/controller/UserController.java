@@ -23,6 +23,7 @@ import tech.onlycoders.backend.dto.contactrequest.response.ReadContactRequestDto
 import tech.onlycoders.backend.dto.institute.request.CreateInstituteDto;
 import tech.onlycoders.backend.dto.post.response.ReadPostDto;
 import tech.onlycoders.backend.dto.skill.request.CreateSkillDto;
+import tech.onlycoders.backend.dto.skill.response.ReadSkillDto;
 import tech.onlycoders.backend.dto.tag.response.ReadTagDto;
 import tech.onlycoders.backend.dto.user.request.AddSkillDto;
 import tech.onlycoders.backend.dto.user.request.EducationExperienceDto;
@@ -429,6 +430,28 @@ public class UserController {
     var email = userDetails.getEmail();
     this.userService.cancelEliminationDate(email);
     return ResponseEntity.ok().build();
+  }
+
+  @ApiResponses(
+    value = {
+      @ApiResponse(
+        responseCode = "200",
+        content = {
+          @Content(mediaType = "application/json", schema = @Schema(implementation = PaginatedSkillsDto.class))
+        }
+      )
+    }
+  )
+  @PreAuthorize("hasAuthority('USER')")
+  @GetMapping("/{canonicalName}/skills")
+  @Operation(summary = "Get the skils that the user has")
+  ResponseEntity<PaginateDto<ReadSkillDto>> getUserSkills(
+    @PathVariable @NotBlank String canonicalName,
+    @RequestParam(defaultValue = "0") @Min(0) Integer page,
+    @RequestParam(defaultValue = "20") @Min(1) Integer size
+  ) throws ApiException {
+    var skills = this.skillService.getUserSkills(canonicalName, page, size);
+    return ResponseEntity.ok(skills);
   }
 }
 

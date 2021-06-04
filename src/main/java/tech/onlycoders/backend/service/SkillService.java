@@ -13,6 +13,7 @@ import tech.onlycoders.backend.model.Skill;
 import tech.onlycoders.backend.repository.SkillRepository;
 import tech.onlycoders.backend.repository.UserRepository;
 import tech.onlycoders.backend.utils.CanonicalFactory;
+import tech.onlycoders.backend.utils.PaginationUtils;
 
 @Service
 @Transactional
@@ -63,5 +64,17 @@ public class SkillService {
       this.userRepository.findByEmail(email)
         .orElseThrow(() -> new ApiException(HttpStatus.INTERNAL_SERVER_ERROR, "error.500"));
     this.userRepository.addSkill(user.getId(), skill.getCanonicalName());
+  }
+
+  public PaginateDto<ReadSkillDto> getUserSkills(String userCanonicalName, Integer page, Integer size) {
+    var skills = skillRepository.getUserSkills(userCanonicalName, page * size, size);
+    var totalQuantity = skillRepository.getUserSkillsQuantity(userCanonicalName);
+
+    var pagination = new PaginateDto<ReadSkillDto>();
+    pagination.setContent(skillMapper.listSkillsToListReadSkillDto(skills));
+    pagination.setCurrentPage(page);
+    pagination.setTotalPages(PaginationUtils.getPagesQuantity(totalQuantity, size));
+    pagination.setTotalElements(totalQuantity);
+    return pagination;
   }
 }

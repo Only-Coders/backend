@@ -1,9 +1,9 @@
 package tech.onlycoders.backend.service;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 
+import java.util.ArrayList;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import org.jeasy.random.EasyRandom;
@@ -86,5 +86,18 @@ public class SkillServiceTest {
     var skill = ezRandom.nextObject(Skill.class);
     var email = ezRandom.nextObject(String.class);
     assertThrows(ApiException.class, () -> this.service.addSkillToUser(email, skill.getCanonicalName()));
+  }
+
+  @Test
+  void ShouldReturnUserSkills() {
+    var list = new ArrayList<Skill>();
+    list.add(ezRandom.nextObject(Skill.class));
+
+    Mockito.when(this.skillRepository.getUserSkillsQuantity(anyString())).thenReturn(1);
+    Mockito.when(this.skillRepository.getUserSkills(anyString(), anyInt(), anyInt())).thenReturn(list);
+
+    var res = this.service.getUserSkills("user", 0, 10);
+
+    assertNotNull(res);
   }
 }
