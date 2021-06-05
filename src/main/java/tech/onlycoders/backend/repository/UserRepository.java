@@ -27,40 +27,40 @@ public interface UserRepository extends Neo4jRepository<User, String> {
     "     MATCH (c)<-[:LIVES]-(p:User)-[t:IS_CONNECTED*2..2]-(me) " +
     "     WHERE p <> me AND NOT p IN myContacts " +
     "     RETURN p, count(t)*(2^128) AS priority " +
-    "     LIMIT 100 " +
+    "     LIMIT $size " +
     "   UNION " +
     "     WITH me, c, myContacts " +
     "     MATCH (p:User)-[t:IS_CONNECTED*2..2]-(me) " +
     "     WHERE p <> me AND  NOT p IN myContacts " +
     "     RETURN p, count(t)*(2^64) AS priority " +
-    "     LIMIT 100 " +
+    "     LIMIT $size " +
     "   UNION " +
     "     WITH me, c, myContacts " +
     "     MATCH (p:User)-[:WORKS]-(:WorkPosition)-[:ON]-(t:Workplace)-[:ON]-(:WorkPosition)-[:WORKS]-(me) " +
     "     WHERE p <> me AND NOT p IN myContacts  " +
     "     RETURN p, count(t)*(2^32) AS priority " +
-    "     LIMIT 100 " +
+    "     LIMIT $size " +
     "   UNION " +
     "     WITH me, c, tag, myContacts " +
     "     MATCH (c)<-[:LIVES]-(p:User)-[:IS_INTERESTED]->(tag) " +
     "     WHERE tag IS NOT NULL AND p <> me AND NOT p IN myContacts " +
     "     RETURN p, count(tag) AS priority " +
-    "     LIMIT 100 " +
+    "     LIMIT $size " +
     "   UNION " +
     "     WITH me, c, myContacts " +
     "     MATCH (c)<-[:LIVES]-(p) " +
     "     WHERE p <> me AND NOT p IN myContacts " +
     "     RETURN p, 0.9 AS priority " +
-    "     LIMIT 100 " +
+    "     LIMIT $size " +
     "   UNION " +
     "     WITH me, c, tag, myContacts " +
     "     MATCH (p:User)-[:IS_INTERESTED]->(tag) " +
     "     WHERE tag IS NOT NULL AND p <> me AND NOT p IN myContacts " +
     "     RETURN p, count(tag)/(2^32) AS priority " +
-    "     LIMIT 100 " +
+    "     LIMIT $size " +
     " } " +
     " RETURN DISTINCT (p), priority ORDER BY priority DESC " +
-    " LIMIT 100; "
+    " LIMIT $size; "
   )
   Set<User> findSuggestedUsers(String email, Integer size);
 
@@ -198,11 +198,12 @@ public interface UserRepository extends Neo4jRepository<User, String> {
 
   @Query(
     " MATCH (u:User) " +
-    "   OPTIONAL MATCH (u)-[:POSSESS]->(s:Skill) " +
-    "   OPTIONAL MATCH (u)-[:LIVES]->(c:Country) " +
-    "   OPTIONAL MATCH (u)-[]->()<-[:TO]-(r:Reaction{type:'APPROVE'}) " +
-    "   WITH u, s, c, r " +
-    " WHERE u.fullName =~ $userName AND c.name =~ $countryName AND COALESCE(s.name, '') =~ $skillName " +
+    " OPTIONAL MATCH (u)-[:POSSESS]->(s:Skill) " +
+    " OPTIONAL MATCH (u)-[:LIVES]->(c:Country) " +
+    " OPTIONAL MATCH (u)-[]->()<-[:TO]-(r:Reaction{type:'APPROVE'}) " +
+    " WITH u, s, c, r " +
+    " WHERE (replace(u.fullName,' ','') =~ $userName OR u.fullName =~ $userName ) " +
+    " AND c.name =~ $countryName AND COALESCE(s.name, '') =~ $skillName " +
     " WITH u, COUNT(r) as medals " +
     " RETURN u{.*, medals: medals} ORDER BY u[$sortField] DESC SKIP $skip LIMIT $size "
   )
