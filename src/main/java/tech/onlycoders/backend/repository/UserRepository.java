@@ -16,37 +16,51 @@ public interface UserRepository extends Neo4jRepository<User, String> {
   Optional<PartialUser> findByCanonicalName(String canonicalName);
 
   @Query(
-    "CALL { " +
-    " MATCH (p:User)-[t:IS_CONNECTED*2..2]-(me:User{email: $email})-[:LIVES]->(c:Country) " +
-    " WHERE  (p) <> (me) AND (NOT (p)-[]-(:ContactRequest)-[]-(me) AND NOT (p)-[:IS_CONNECTED]-(me) AND NOT (p)<-[:FOLLOWS]-(me)) " +
-    " RETURN p, count(t)*(2^128) AS priority " + // Priority 1 - Contacts of my Contacts that lives in my country
-    "UNION " +
-    " MATCH (c:Country)<-[:LIVES]-(p:User)-[t:IS_CONNECTED*2..2]-(me:User{email: $email}) " +
-    " WHERE (p) <> (me) AND (p)-[:LIVES]->(c) AND (NOT (p)-[]-(:ContactRequest)-[]-(me) AND NOT (p)-[:IS_CONNECTED]-(me) AND NOT (p)<-[:FOLLOWS]-(me)) " +
-    " RETURN p, count(t)*(2^64) AS priority  " + // Priority 2 - Contacts of my Contacts
-    "UNION " +
-    " MATCH (p:User)-[]-()-[]-(t:Workplace)-[]-()-[]-(me:User{email: $email}) " +
-    " WHERE (p) <> (me) AND (NOT (p)-[]-(:ContactRequest)-[]-(me) AND NOT (p)-[:IS_CONNECTED]-(me) AND NOT (p)<-[:FOLLOWS]-(me)) " +
-    " RETURN p, count(t)*(2^32) AS priority " + // Priority 3 - People that I've worked with
-    "UNION " +
-    " MATCH (p:User)-[:IS_INTERESTED]->(t:Tag)<-[:IS_INTERESTED]-(me:User{email: $email})-[:LIVES]->(c:Country) " +
-    " WHERE (p) <> (me) AND (p)-[:LIVES]->(c) AND (NOT (p)-[]-(:ContactRequest)-[]-(me) AND NOT (p)-[:IS_CONNECTED]-(me) AND NOT (p)<-[:FOLLOWS]-(me)) " +
-    " RETURN p, count(t) AS priority " + // Priority 4 - People that likes what I like and lives in my country
-    " UNION " +
-    "MATCH (me:User{email:$email})-[:LIVES]->(c:Country)<-[:LIVES]-(p) " +
-    " WHERE (p) <> (me) AND NOT (p)-[]-(:ContactRequest)-[]-(me) AND NOT (p)-[:IS_CONNECTED]-(me) AND NOT (p)<-[:FOLLOWS]-(me) " +
-    " RETURN p, 0.9 AS priority " + // Priority 5 - People that lives in my country
-    "UNION " +
-    " MATCH (p:User)-[:IS_INTERESTED]->(t:Tag)<-[:IS_INTERESTED]-(me:User{email: $email}) " +
-    " WHERE (p) <> (me) AND (NOT (p)-[]-(:ContactRequest)-[]-(me) AND NOT (p)-[:IS_CONNECTED]-(me) AND NOT (p)<-[:FOLLOWS]-(me)) " +
-    " RETURN p, count(t)/(2^32) AS priority " + // Priority 6 - People that likes what I like
-    "UNION " +
-    " MATCH (me:User{email: $email}) " +
-    " WITH me " +
-    " MATCH (p:User) " +
-    " WHERE (p) <> (me) AND (NOT (p)-[]-(:ContactRequest)-[]-(me) AND NOT (p)-[:IS_CONNECTED]-(me) AND NOT (p)<-[:FOLLOWS]-(me)) " +
-    " RETURN p, 0 AS priority " + // Priority 7 - People
-    "} RETURN DISTINCT(p), priority ORDER BY priority DESC;  "
+    " MATCH (me:User{email: $email})-[:LIVES]->(c:Country) " +
+    " OPTIONAL MATCH (tag:Tag)<-[:IS_INTERESTED]-(me) " +
+    " OPTIONAL MATCH (p:User)-[:IS_CONNECTED]-(me) " +
+    " OPTIONAL MATCH (p2:user)-[:SENDS|:TO]-(:ContactRequest)-[:SENDS|:TO]-(me) " +
+    " OPTIONAL MATCH (p3:User)<-[:FOLLOWS]-(me) " +
+    " WITH me, c, tag, collect(DISTINCT p)+collect(DISTINCT p2)+collect(DISTINCT p3) as myContacts " +
+    " CALL { " +
+    "     WITH me, c, tag, myContacts " +
+    "     MATCH (c)<-[:LIVES]-(p:User)-[t:IS_CONNECTED*2..2]-(me) " +
+    "     WHERE p <> me AND NOT p IN myContacts " +
+    "     RETURN p, count(t)*(2^128) AS priority " +
+    "     LIMIT 100 " +
+    "   UNION " +
+    "     WITH me, c, myContacts " +
+    "     MATCH (p:User)-[t:IS_CONNECTED*2..2]-(me) " +
+    "     WHERE p <> me AND  NOT p IN myContacts " +
+    "     RETURN p, count(t)*(2^64) AS priority " +
+    "     LIMIT 100 " +
+    "   UNION " +
+    "     WITH me, c, myContacts " +
+    "     MATCH (p:User)-[:WORKS]-(:WorkPosition)-[:ON]-(t:Workplace)-[:ON]-(:WorkPosition)-[:WORKS]-(me) " +
+    "     WHERE p <> me AND NOT p IN myContacts  " +
+    "     RETURN p, count(t)*(2^32) AS priority " +
+    "     LIMIT 100 " +
+    "   UNION " +
+    "     WITH me, c, tag, myContacts " +
+    "     MATCH (c)<-[:LIVES]-(p:User)-[:IS_INTERESTED]->(tag) " +
+    "     WHERE tag IS NOT NULL AND p <> me AND NOT p IN myContacts " +
+    "     RETURN p, count(tag) AS priority " +
+    "     LIMIT 100 " +
+    "   UNION " +
+    "     WITH me, c, myContacts " +
+    "     MATCH (c)<-[:LIVES]-(p) " +
+    "     WHERE p <> me AND NOT p IN myContacts " +
+    "     RETURN p, 0.9 AS priority " +
+    "     LIMIT 100 " +
+    "   UNION " +
+    "     WITH me, c, tag, myContacts " +
+    "     MATCH (p:User)-[:IS_INTERESTED]->(tag) " +
+    "     WHERE tag IS NOT NULL AND p <> me AND NOT p IN myContacts " +
+    "     RETURN p, count(tag)/(2^32) AS priority " +
+    "     LIMIT 100 " +
+    " } " +
+    " RETURN DISTINCT (p), priority ORDER BY priority DESC " +
+    " LIMIT 100; "
   )
   Set<User> findSuggestedUsers(String email, Integer size);
 
