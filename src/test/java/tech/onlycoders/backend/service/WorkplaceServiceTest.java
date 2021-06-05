@@ -131,4 +131,18 @@ public class WorkplaceServiceTest {
     var result = this.service.getUserJobs(canonicalName, page, size);
     assertNotNull(result);
   }
+
+  @Test
+  public void ShouldRemoveWorkExperience() throws ApiException {
+    Mockito.when(this.workPositionRepository.isOwner(anyString(), anyString())).thenReturn(true);
+
+    this.service.removeWorkExperience("email", "id");
+  }
+
+  @Test
+  public void ShouldFailRemoveWorkExperienceWhenIsNotOwner() throws ApiException {
+    Mockito.when(this.workPositionRepository.isOwner(anyString(), anyString())).thenReturn(false);
+
+    assertThrows(Exception.class, () -> this.service.removeWorkExperience("email", "id"));
+  }
 }
