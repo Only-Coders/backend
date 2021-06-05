@@ -169,12 +169,6 @@ public interface UserRepository extends Neo4jRepository<User, String> {
   )
   void addContact(String email, String requesterCanonicalName);
 
-  @Query("MATCH (u:User) WHERE u.fullName =~ $likeName RETURN (u) SKIP $skip LIMIT $size")
-  List<User> findByPartialName(String likeName, Integer skip, Integer size);
-
-  @Query("MATCH (u:User) WHERE u.fullName =~ $likeName RETURN count(u)")
-  Integer countByPartialName(String likeName);
-
   @Query("MATCH (:User{email: $canonicalName })-[]->()<-[:TO]-(r:Reaction{type:'APPROVE'}) return count(r)")
   Integer countUserMedals(String canonicalName);
 

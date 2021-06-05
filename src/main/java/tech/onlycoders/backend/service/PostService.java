@@ -1,7 +1,6 @@
 package tech.onlycoders.backend.service;
 
 import java.util.*;
-import java.util.stream.Collectors;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -499,7 +498,7 @@ public class PostService {
     Integer page,
     Integer size
   ) {
-    var totalQuantity = postRepository.getPostsByTagQuantity(requesterCanonicalName, tagCanonicalName);
+    var totalQuantity = postRepository.countPostsByTag(requesterCanonicalName, tagCanonicalName);
     var posts = postRepository.getPostsByTag(requesterCanonicalName, tagCanonicalName, page * size, size);
 
     var pageQuantity = PaginationUtils.getPagesQuantity(totalQuantity, size);

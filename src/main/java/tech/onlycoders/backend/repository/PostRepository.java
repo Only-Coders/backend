@@ -54,35 +54,63 @@ public interface PostRepository extends Neo4jRepository<Post, String> {
   Integer countUserPublicPosts(String canonicalName);
 
   @Query(
-    "CALL{ \n" +
-    "        MATCH (:User{canonicalName: $canonicalName})-[:FOLLOWS]->(u:User)-[r:PUBLISH]->(p:Post{isPublic:true})\n" +
-    "        RETURN p,r,u\n" +
-    "    UNION\n" +
-    "        MATCH (:User{canonicalName: $canonicalName})-[:IS_CONNECTED]-(u:User)-[r:PUBLISH]->(p:Post)\n" +
-    "        RETURN p,r,u\n" +
-    "    UNION\n" +
-    "        MATCH (u:User{canonicalName: $canonicalName})-[r:PUBLISH]->(p:Post)\n" +
-    "        RETURN p,r,u\n" +
-    "    UNION\n" +
-    "        MATCH (:User{canonicalName: $canonicalName})-[:IS_INTERESTED]->(:Tag)<-[:HAS]-(p:Post{isPublic:true})<-[r:PUBLISH]-(u:User)\n" +
-    "        RETURN p,r,u\n" +
-    "} \n" +
-    "OPTIONAL MATCH (p)-[rt:HAS]->(t:Tag)\n" +
-    "OPTIONAL MATCH (p)-[rm:MENTIONS]->(m:User)\n" +
-    "RETURN p, collect(r), collect(u), collect(rm), collect(m), collect(rt), collect(t) \n" +
-    "ORDER BY p.createdAt DESC \n" +
-    "SKIP $skip LIMIT $size"
+    " MATCH (target:User{canonicalName: $canonicalName}) " +
+    " WITH target " +
+    " CALL{ " +
+    "   WITH target " +
+    "   MATCH (target)-[:FOLLOWS]->(u:User)-[r:PUBLISH]->(p:Post{isPublic: true }) " +
+    "   RETURN p, r, u " +
+    " UNION " +
+    "   WITH target " +
+    "   MATCH (target)-[:IS_CONNECTED]-(u:User)-[r:PUBLISH]->(p:Post) " +
+    "   RETURN p, r, u " +
+    " UNION " +
+    "   WITH target " +
+    "   MATCH (target)-[r:PUBLISH]->(p:Post) " +
+    "   RETURN p, r, target as u " +
+    " UNION " +
+    "   WITH target " +
+    "   MATCH (target)-[:IS_INTERESTED]->(:Tag)<-[:HAS]-(p:Post{isPublic: true })<-[r:PUBLISH]-(u:User) " +
+    "   RETURN p, r, u " +
+    " UNION " +
+    "   WITH target " +
+    "   MATCH (target)<-[:MENTIONS]-(p:Post)<-[r:PUBLISH]-(u:User) " +
+    "   RETURN p, r, u " +
+    " } " +
+    " OPTIONAL MATCH (p)-[rt:HAS]->(t:Tag) " +
+    " OPTIONAL MATCH (p)-[rm:MENTIONS]->(m:User) " +
+    " RETURN DISTINCT(p), collect(r), collect(u), collect(rm), collect(m), collect(rt), collect(t) " +
+    " ORDER BY p.createdAt DESC " +
+    " SKIP $skip " +
+    " LIMIT $size "
   )
   Set<Post> getFeedPosts(String canonicalName, int skip, Integer size);
 
   @Query(
-    "CALL{ \n" +
-    "    MATCH (:User{canonicalName: $canonicalName})-[:FOLLOWS]->(u:User)-[r:PUBLISH]->(p:Post{isPublic:true}) RETURN p\n" +
-    "    UNION\n" +
-    "    MATCH (:User{canonicalName: $canonicalName})-[:IS_CONNECTED]-(u:User)-[r:PUBLISH]->(p:Post) RETURN p\n" +
-    "    UNION\n" +
-    "    MATCH (:User{canonicalName: $canonicalName})-[:IS_INTERESTED]->(:Tag)<-[:HAS]-(p:Post{isPublic:true}) RETURN p\n" +
-    "} RETURN count(p)"
+    " MATCH (target:User{canonicalName: $canonicalName}) " +
+    " WITH target " +
+    " CALL{ " +
+    "   WITH target " +
+    "   MATCH (target)-[:FOLLOWS]->(:User)-[:PUBLISH]->(p:Post{isPublic: true }) " +
+    "   RETURN p" +
+    " UNION " +
+    "   WITH target " +
+    "   MATCH (target)-[:IS_CONNECTED]-(:User)-[:PUBLISH]->(p:Post) " +
+    "   RETURN p" +
+    " UNION " +
+    "   WITH target " +
+    "   MATCH (target)-[:PUBLISH]->(p:Post) " +
+    "   RETURN p" +
+    " UNION " +
+    "   WITH target " +
+    "   MATCH (target)-[:IS_INTERESTED]->(:Tag)<-[:HAS]-(p:Post{isPublic: true })<-[:PUBLISH]-(:User) " +
+    "   RETURN p" +
+    " UNION " +
+    "   WITH target " +
+    "   MATCH (target)<-[:MENTIONS]-(p:Post)<-[:PUBLISH]-(:User) " +
+    "   RETURN p" +
+    " } " +
+    " RETURN COUNT(DISTINCT(p)) "
   )
   int getFeedPostsQuantity(String canonicalName);
 
@@ -112,11 +140,17 @@ public interface PostRepository extends Neo4jRepository<Post, String> {
   boolean postIsPublic(String postId);
 
   @Query(
-    "CALL { " +
-    "  MATCH (c:Comment{id:$commentId})-[]->(Post)<-[:PUBLISH]-(:User{canonicalName: $canonicalName}) RETURN c " +
-    "  UNION " +
-    "  MATCH (c:Comment{id: $commentId})<-[:WRITES]-(:User{canonicalName:$canonicalName}) RETURN c " +
-    "} DETACH DELETE c RETURN COUNT(c)>=1;"
+    " MATCH (c:Comment{id:$commentId}) " +
+    " WITH c  " +
+    " MATCH (u:User{canonicalName:$canonicalName})  " +
+    " WITH c, u  " +
+    " CALL {  " +
+    "     WITH c, u  " +
+    "     MATCH (c)-[]->(Post)<-[:PUBLISH]-(u) RETURN c as target " +
+    "   UNION  " +
+    "     WITH c, u  " +
+    "     MATCH (c)<-[:WRITES]-(u) RETURN c as target " +
+    " } DETACH DELETE target RETURN COUNT(target)>=1; "
   )
   Boolean removeComment(String canonicalName, String commentId);
 
@@ -130,31 +164,38 @@ public interface PostRepository extends Neo4jRepository<Post, String> {
   Boolean isFavorite(String postId, String canonicalName);
 
   @Query(
-    "CALL{ \n" +
-    "        MATCH (:User{canonicalName: $requesterCanonicalName})-[:IS_CONNECTED]-(u:User)" +
-    "-[r:PUBLISH]->(p:Post{isPublic:false})-[rt:HAS]->(t:Tag{canonicalName:$tagCanonicalName})\n" +
-    "        RETURN p\n" +
-    "    UNION\n" +
-    "        MATCH (t:Tag{canonicalName:$tagCanonicalName})<-[rt:HAS]-(p:Post{isPublic:true})<-[r:PUBLISH]-(u:User)\n" +
-    "        RETURN p\n" +
-    "} \n" +
-    "RETURN count(p)\n"
+    " MATCH (tag:Tag{canonicalName: $tagCanonicalName}) " +
+    " WITH tag " +
+    " CALL {  " +
+    "     WITH tag " +
+    "     MATCH (:User{canonicalName: $requesterCanonicalName})-[:IS_CONNECTED]-(:User)-[:PUBLISH]->(p:Post{isPublic:false})-[rt:HAS]->(tag) " +
+    "     RETURN p " +
+    "   UNION " +
+    "     WITH tag " +
+    "     MATCH (tag)<-[:HAS]-(p:Post{isPublic:true})<-[:PUBLISH]-(:User) " +
+    "     RETURN p " +
+    " }  " +
+    " OPTIONAL MATCH (p)-[rm:MENTIONS]->(m:User) " +
+    " RETURN COUNT(DISTINCT(p)) "
   )
-  int getPostsByTagQuantity(String requesterCanonicalName, String tagCanonicalName);
+  int countPostsByTag(String requesterCanonicalName, String tagCanonicalName);
 
   @Query(
-    "CALL{ \n" +
-    "        MATCH (:User{canonicalName: $requesterCanonicalName})-[:IS_CONNECTED]-(u:User)" +
-    "-[r:PUBLISH]->(p:Post{isPublic:false})-[rt:HAS]->(t:Tag{canonicalName:$tagCanonicalName})\n" +
-    "        RETURN p,r,u,rt,t\n" +
-    "    UNION\n" +
-    "        MATCH (t:Tag{canonicalName:$tagCanonicalName})<-[rt:HAS]-(p:Post{isPublic:true})<-[r:PUBLISH]-(u:User)\n" +
-    "        RETURN p,r,u,rt,t\n" +
-    "} \n" +
-    "OPTIONAL MATCH (p)-[rm:MENTIONS]->(m:User)\n" +
-    "RETURN p, collect(r), collect(u), collect(rm), collect(m), collect(rt), collect(t) \n" +
-    "ORDER BY p.createdAt DESC \n" +
-    "SKIP $skip LIMIT $size"
+    " MATCH (tag:Tag{canonicalName: $tagCanonicalName}) " +
+    " WITH tag " +
+    " CALL {  " +
+    "     WITH tag " +
+    "     MATCH (:User{canonicalName: $requesterCanonicalName})-[:IS_CONNECTED]-(u:User)-[r:PUBLISH]->(p:Post{isPublic:false})-[rt:HAS]->(tag) " +
+    "     RETURN p,r,u,rt,tag as t " +
+    "   UNION " +
+    "     WITH tag " +
+    "     MATCH (tag)<-[rt:HAS]-(p:Post{isPublic:true})<-[r:PUBLISH]-(u:User) " +
+    "     RETURN p,r,u,rt,tag as t " +
+    " }  " +
+    " OPTIONAL MATCH (p)-[rm:MENTIONS]->(m:User) " +
+    " RETURN p, collect(r), collect(u), collect(rm), collect(m), collect(rt), collect(t)  " +
+    " ORDER BY p.createdAt DESC " +
+    " SKIP $skip LIMIT $size "
   )
   Set<Post> getPostsByTag(String requesterCanonicalName, String tagCanonicalName, int skip, int size);
 }
