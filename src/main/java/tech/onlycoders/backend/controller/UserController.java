@@ -447,7 +447,7 @@ public class UserController {
       )
     }
   )
-  @GetMapping("/{canonicalName}/degrees")
+  @GetMapping("/{canonicalName}/institutes")
   @Operation(summary = "Search Workplaces User")
   ResponseEntity<PaginateDto<ReadDegreeDto>> getUserDegrees(
     @PathVariable String canonicalName,
