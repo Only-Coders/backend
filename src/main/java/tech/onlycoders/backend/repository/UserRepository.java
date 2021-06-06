@@ -198,14 +198,14 @@ public interface UserRepository extends Neo4jRepository<User, String> {
 
   @Query(
     " MATCH (u:User) " +
+    " WHERE u.fullName =~ $userName OR replace(u.fullName,' ','') =~ $userName " +
     " OPTIONAL MATCH (u)-[:POSSESS]->(s:Skill) " +
     " OPTIONAL MATCH (u)-[:LIVES]->(c:Country) " +
-    " OPTIONAL MATCH (u)-[]->()<-[:TO]-(r:Reaction{type:'APPROVE'}) " +
-    " WITH u, s, c, r " +
-    " WHERE (replace(u.fullName,' ','') =~ $userName OR u.fullName =~ $userName ) " +
-    " AND c.name =~ $countryName AND COALESCE(s.name, '') =~ $skillName " +
-    " WITH u, COUNT(r) as medals " +
-    " RETURN u{.*, medals: medals} ORDER BY u[$sortField] DESC SKIP $skip LIMIT $size "
+    " OPTIONAL MATCH (u)-[:PUBLISH]->(:Post)<-[:TO]-(r:Reaction{type:'APPROVE'}) " +
+    " WHERE c.name =~ $countryName AND COALESCE(s.name, '') =~ $skillName " +
+    " WITH u, COUNT (r) as medals " +
+    " RETURN u{.*, medals: medals} " +
+    " ORDER BY u[$sortField] DESC SKIP $skip LIMIT $size "
   )
   List<User> findAllWithFilters(
     String userName,
