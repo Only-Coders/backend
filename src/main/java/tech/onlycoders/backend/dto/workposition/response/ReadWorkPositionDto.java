@@ -13,6 +13,8 @@ import tech.onlycoders.backend.dto.workplace.response.ReadWorkplaceDto;
 @Builder
 public class ReadWorkPositionDto {
 
+  private String id;
+
   private ReadWorkplaceDto workplace;
 
   private Date since;

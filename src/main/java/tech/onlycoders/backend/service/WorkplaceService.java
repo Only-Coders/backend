@@ -91,4 +91,11 @@ public class WorkplaceService {
     pagination.setTotalElements(countUserJobs);
     return pagination;
   }
+
+  public void removeWorkExperience(String email, String workPositionId) throws ApiException {
+    if (!workPositionRepository.isOwner(email, workPositionId)) {
+      throw new ApiException(HttpStatus.FORBIDDEN, "error.user-not-owner");
+    }
+    workPositionRepository.remove(workPositionId);
+  }
 }

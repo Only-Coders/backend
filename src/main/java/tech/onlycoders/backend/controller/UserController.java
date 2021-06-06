@@ -501,4 +501,15 @@ public class UserController {
     var skills = this.skillService.getUserSkills(canonicalName, page, size);
     return ResponseEntity.ok(skills);
   }
+
+  @ApiResponses(value = { @ApiResponse(responseCode = "200", content = { @Content(mediaType = "application/json") }) })
+  @PreAuthorize("hasAuthority('USER')")
+  @DeleteMapping("/workplaces/{id}")
+  @Operation(summary = "Remove a working experience.")
+  ResponseEntity<?> removeWorkingExperience(@PathVariable String id) throws ApiException {
+    var userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    var email = userDetails.getEmail();
+    this.workplaceService.removeWorkExperience(email, id);
+    return ResponseEntity.ok().build();
+  }
 }

@@ -34,4 +34,10 @@ public interface WorkPositionRepository extends Neo4jRepository<WorkPosition, St
     "MATCH (p:Workplace)<-[o:ON]-(w:WorkPosition)<-[r:WORKS]-(u:User{canonicalName: $canonicalName}) return count(w)"
   )
   Integer countUserJobs(String canonicalName);
+
+  @Query("MATCH (w:WorkPosition{id: $workPositionId})<-[:WORKS]-(:User{email: $email}) return count(w) > 0")
+  boolean isOwner(String email, String workPositionId);
+
+  @Query("MATCH (w:WorkPosition{id: $workPositionId}) DETACH DELETE w")
+  void remove(String workPositionId);
 }
