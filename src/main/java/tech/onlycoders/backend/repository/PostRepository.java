@@ -183,14 +183,20 @@ public interface PostRepository extends Neo4jRepository<Post, String> {
   @Query(
     " MATCH (tag:Tag{canonicalName: $tagCanonicalName}) " +
     " WITH tag " +
+    " MATCH (me:User{canonicalName: $requesterCanonicalName}) " +
+    " WITH tag, me" +
     " CALL {  " +
-    "     WITH tag " +
-    "     MATCH (:User{canonicalName: $requesterCanonicalName})-[:IS_CONNECTED]-(u:User)-[r:PUBLISH]->(p:Post{isPublic:false})-[rt:HAS]->(tag) " +
+    "     WITH tag, me " +
+    "     MATCH (me)-[:IS_CONNECTED]-(u:User)-[r:PUBLISH]->(p:Post{isPublic:false})-[rt:HAS]->(tag) " +
     "     RETURN p,r,u,rt,tag as t " +
     "   UNION " +
     "     WITH tag " +
     "     MATCH (tag)<-[rt:HAS]-(p:Post{isPublic:true})<-[r:PUBLISH]-(u:User) " +
     "     RETURN p,r,u,rt,tag as t " +
+    "   UNION " +
+    "     WITH tag, me " +
+    "     MATCH (tag)<-[rt:HAS]-(p:Post)<-[r:PUBLISH]-(me) " +
+    "     RETURN p,r,me as u,rt,tag as t " +
     " }  " +
     " OPTIONAL MATCH (p)-[rm:MENTIONS]->(m:User) " +
     " RETURN p, collect(r), collect(u), collect(rm), collect(m), collect(rt), collect(t)  " +

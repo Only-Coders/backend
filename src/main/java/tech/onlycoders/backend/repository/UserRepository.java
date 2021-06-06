@@ -197,10 +197,9 @@ public interface UserRepository extends Neo4jRepository<User, String> {
   void removeUserEliminationDate(String email);
 
   @Query(
-    " MATCH (u:User) " +
+    " MATCH (u:User)-[:LIVES]->(c:Country) " +
     " WHERE u.fullName =~ $userName OR replace(u.fullName,' ','') =~ $userName " +
     " OPTIONAL MATCH (u)-[:POSSESS]->(s:Skill) " +
-    " OPTIONAL MATCH (u)-[:LIVES]->(c:Country) " +
     " OPTIONAL MATCH (u)-[:PUBLISH]->(:Post)<-[:TO]-(r:Reaction{type:'APPROVE'}) " +
     " WHERE c.name =~ $countryName AND COALESCE(s.name, '') =~ $skillName " +
     " WITH u, COUNT (r) as medals " +
