@@ -77,4 +77,11 @@ public class SkillService {
     pagination.setTotalElements(totalQuantity);
     return pagination;
   }
+
+  public void removeUserSkill(String skillCanonicalId, String canonicalName) throws ApiException {
+    var successfullyDeletedSkill = this.skillRepository.deleteUserSkill(skillCanonicalId, canonicalName);
+    if (!successfullyDeletedSkill) {
+      throw new ApiException(HttpStatus.NOT_FOUND, "error.skill-not-found");
+    }
+  }
 }

@@ -166,6 +166,17 @@ public class UserController {
     return ResponseEntity.ok().build();
   }
 
+  @ApiResponses(value = { @ApiResponse(responseCode = "200", content = { @Content(mediaType = "application/json") }) })
+  @PreAuthorize("hasAuthority('USER')")
+  @DeleteMapping("/skills/{skillCanonicalName}")
+  @Operation(summary = "Remove a skill from the user.")
+  ResponseEntity<?> removeUserSkill(@PathVariable String skillCanonicalName) throws ApiException {
+    var userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    var canonicalName = userDetails.getCanonicalName();
+    this.skillService.removeUserSkill(skillCanonicalName, canonicalName);
+    return ResponseEntity.ok().build();
+  }
+
   @ApiResponses(
     value = {
       @ApiResponse(
