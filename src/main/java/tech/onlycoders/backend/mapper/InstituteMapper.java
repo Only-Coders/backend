@@ -13,4 +13,5 @@ public interface InstituteMapper {
   List<ReadInstituteDto> listInstitutesToListReadInstituteDto(List<Institute> institutes);
   ReadInstituteDto instituteToReadInstituteDto(Institute organization);
   List<ReadDegreeDto> degreesToReadDegreeDtos(List<Degree> degree);
+  ReadDegreeDto degreeToReadDegreeDto(Degree degree);
 }
