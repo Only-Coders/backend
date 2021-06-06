@@ -58,8 +58,7 @@ public class InstituteService {
     return this.instituteMapper.instituteToReadInstituteDto(institute);
   }
 
-  public EducationExperienceDto addUserDegree(String email, EducationExperienceDto educationExperienceDto)
-    throws ApiException {
+  public ReadDegreeDto addUserDegree(String email, EducationExperienceDto educationExperienceDto) throws ApiException {
     var institute =
       this.instituteRepository.findById(educationExperienceDto.getId())
         .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "error.workplace-not-found"));
@@ -73,7 +72,7 @@ public class InstituteService {
     degree.setDegree(educationExperienceDto.getDegree());
     degreeRepository.save(degree);
     degreeRepository.storeDegree(degree.getId(), user.getId());
-    return educationExperienceDto;
+    return instituteMapper.degreeToReadDegreeDto(degree);
   }
 
   public PaginateDto<ReadDegreeDto> getUserDegrees(String canonicalName, Integer page, Integer size) {
@@ -88,5 +87,12 @@ public class InstituteService {
     pagination.setTotalPages(amountPages);
     pagination.setTotalElements(countUserDegrees);
     return pagination;
+  }
+
+  public void removeDegree(String email, String degreeId) throws ApiException {
+    if (!degreeRepository.isOwner(email, degreeId)) {
+      throw new ApiException(HttpStatus.FORBIDDEN, "error.user-not-owner");
+    }
+    degreeRepository.remove(degreeId);
   }
 }

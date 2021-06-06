@@ -12,6 +12,8 @@ import lombok.NoArgsConstructor;
 @Builder
 public class ReadDegreeDto {
 
+  private String id;
+
   private ReadInstituteDto institute;
 
   private Date since;

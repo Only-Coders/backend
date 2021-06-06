@@ -20,4 +20,10 @@ public interface DegreeRepository extends Neo4jRepository<Degree, String> {
 
   @Query(" MATCH (i:Institute)<-[]-()<-[]-(u:User{canonicalName: $canonicalName}) RETURN COUNT(i)")
   Integer countUserDegrees(String canonicalName);
+
+  @Query(" MATCH (d:Degree{id: $degreeId})<-[:STUDIES]-(u:User{email: $email}) RETURN count(d) > 0")
+  boolean isOwner(String email, String degreeId);
+
+  @Query(" MATCH (d:Degree{id: $degreeId}) DETACH DELETE d")
+  void remove(String degreeId);
 }

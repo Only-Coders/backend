@@ -448,7 +448,7 @@ public class UserController {
     }
   )
   @GetMapping("/{canonicalName}/institutes")
-  @Operation(summary = "Search Workplaces User")
+  @Operation(summary = "Search User Institutes")
   ResponseEntity<PaginateDto<ReadDegreeDto>> getUserDegrees(
     @PathVariable String canonicalName,
     @RequestParam(defaultValue = "0", required = false) @Min(0) Integer page,
@@ -510,6 +510,17 @@ public class UserController {
     var userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     var email = userDetails.getEmail();
     this.workplaceService.removeWorkExperience(email, id);
+    return ResponseEntity.ok().build();
+  }
+
+  @ApiResponses(value = { @ApiResponse(responseCode = "200", content = { @Content(mediaType = "application/json") }) })
+  @PreAuthorize("hasAuthority('USER')")
+  @DeleteMapping("/institutes/{id}")
+  @Operation(summary = "Remove a user institute.")
+  ResponseEntity<?> removeDegree(@PathVariable String id) throws ApiException {
+    var userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    var email = userDetails.getEmail();
+    this.instituteService.removeDegree(email, id);
     return ResponseEntity.ok().build();
   }
 }

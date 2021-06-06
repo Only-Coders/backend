@@ -123,4 +123,18 @@ public class InstituteServiceTest {
     var result = this.service.getUserDegrees(canonicalName, page, size);
     assertNotNull(result);
   }
+
+  @Test
+  public void ShouldRemoveWorkExperience() throws ApiException {
+    Mockito.when(this.degreeRepository.isOwner(anyString(), anyString())).thenReturn(true);
+
+    this.service.removeDegree("email", "id");
+  }
+
+  @Test
+  public void ShouldFailRemoveWorkExperienceWhenIsNotOwner() throws ApiException {
+    Mockito.when(this.degreeRepository.isOwner(anyString(), anyString())).thenReturn(false);
+
+    assertThrows(Exception.class, () -> this.service.removeDegree("email", "id"));
+  }
 }
