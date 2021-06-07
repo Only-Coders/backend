@@ -19,6 +19,7 @@ import tech.onlycoders.backend.dto.contactrequest.request.CreateContactRequestDt
 import tech.onlycoders.backend.dto.contactrequest.request.ResponseContactRequestDto;
 import tech.onlycoders.backend.dto.contactrequest.response.ReadContactRequestDto;
 import tech.onlycoders.backend.dto.institute.request.CreateInstituteDto;
+import tech.onlycoders.backend.dto.institute.request.UpdateDegreeDto;
 import tech.onlycoders.backend.dto.institute.response.ReadDegreeDto;
 import tech.onlycoders.backend.dto.pagination.*;
 import tech.onlycoders.backend.dto.post.response.ReadPostDto;
@@ -33,6 +34,7 @@ import tech.onlycoders.backend.dto.user.response.ReadUserDto;
 import tech.onlycoders.backend.dto.user.response.ReadUserLiteDto;
 import tech.onlycoders.backend.dto.user.response.ReadUserToDeleteDto;
 import tech.onlycoders.backend.dto.workplace.request.CreateWorkplaceDto;
+import tech.onlycoders.backend.dto.workposition.request.UpdateWorkPositionDto;
 import tech.onlycoders.backend.dto.workposition.response.ReadWorkPositionDto;
 import tech.onlycoders.backend.exception.ApiException;
 import tech.onlycoders.backend.service.*;
@@ -526,12 +528,35 @@ public class UserController {
 
   @ApiResponses(value = { @ApiResponse(responseCode = "200", content = { @Content(mediaType = "application/json") }) })
   @PreAuthorize("hasAuthority('USER')")
+  @PutMapping("/workplaces/{id}")
+  @Operation(summary = "Updates a user work experience")
+  ResponseEntity<?> updateWorkingExperience(@PathVariable String id, UpdateWorkPositionDto updateWorkPositionDto)
+    throws ApiException {
+    var userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    var email = userDetails.getEmail();
+    this.workplaceService.updateWorkExperience(email, id, updateWorkPositionDto);
+    return ResponseEntity.ok().build();
+  }
+
+  @ApiResponses(value = { @ApiResponse(responseCode = "200", content = { @Content(mediaType = "application/json") }) })
+  @PreAuthorize("hasAuthority('USER')")
   @DeleteMapping("/institutes/{id}")
   @Operation(summary = "Remove a user institute.")
   ResponseEntity<?> removeDegree(@PathVariable String id) throws ApiException {
     var userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     var email = userDetails.getEmail();
     this.instituteService.removeDegree(email, id);
+    return ResponseEntity.ok().build();
+  }
+
+  @ApiResponses(value = { @ApiResponse(responseCode = "200", content = { @Content(mediaType = "application/json") }) })
+  @PreAuthorize("hasAuthority('USER')")
+  @PutMapping("/institutes/{id}")
+  @Operation(summary = "Updates a user degree")
+  ResponseEntity<?> updateDegree(@PathVariable String id, UpdateDegreeDto updateDegreeDto) throws ApiException {
+    var userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    var email = userDetails.getEmail();
+    this.instituteService.updateDegree(email, id, updateDegreeDto);
     return ResponseEntity.ok().build();
   }
 }

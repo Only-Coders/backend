@@ -3,7 +3,6 @@ package tech.onlycoders.backend.service;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 
-import java.util.HashSet;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import org.jeasy.random.EasyRandom;
@@ -21,14 +20,13 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import tech.onlycoders.backend.dto.user.request.WorkExperienceDto;
 import tech.onlycoders.backend.dto.workplace.request.CreateWorkplaceDto;
+import tech.onlycoders.backend.dto.workposition.request.UpdateWorkPositionDto;
 import tech.onlycoders.backend.dto.workposition.response.ReadWorkPositionDto;
 import tech.onlycoders.backend.exception.ApiException;
 import tech.onlycoders.backend.mapper.WorkPositionMapper;
 import tech.onlycoders.backend.mapper.WorkPositionMapperImpl;
 import tech.onlycoders.backend.mapper.WorkplaceMapper;
 import tech.onlycoders.backend.mapper.WorkplaceMapperImpl;
-import tech.onlycoders.backend.model.Comment;
-import tech.onlycoders.backend.model.Post;
 import tech.onlycoders.backend.model.WorkPosition;
 import tech.onlycoders.backend.model.Workplace;
 import tech.onlycoders.backend.repository.UserRepository;
@@ -134,15 +132,43 @@ public class WorkplaceServiceTest {
 
   @Test
   public void ShouldRemoveWorkExperience() throws ApiException {
-    Mockito.when(this.workPositionRepository.isOwner(anyString(), anyString())).thenReturn(true);
+    Mockito.when(this.workPositionRepository.isOwner("email", "id")).thenReturn(true);
 
     this.service.removeWorkExperience("email", "id");
   }
 
   @Test
   public void ShouldFailRemoveWorkExperienceWhenIsNotOwner() throws ApiException {
-    Mockito.when(this.workPositionRepository.isOwner(anyString(), anyString())).thenReturn(false);
+    Mockito.when(this.workPositionRepository.isOwner("email", "id")).thenReturn(false);
 
     assertThrows(Exception.class, () -> this.service.removeWorkExperience("email", "id"));
+  }
+
+  @Test
+  public void ShouldUpdateWorkExperience() throws ApiException {
+    var workPosition = ezRandom.nextObject(WorkPosition.class);
+    var updateDto = ezRandom.nextObject(UpdateWorkPositionDto.class);
+    var workPositionId = ezRandom.nextObject(String.class);
+    var email = ezRandom.nextObject(String.class);
+    Mockito
+      .when(this.workPositionRepository.findUserWorkExperience(email, workPositionId))
+      .thenReturn(Optional.of(workPosition));
+
+    this.service.updateWorkExperience(email, workPositionId, updateDto);
+    assertEquals(workPosition.getPosition(), updateDto.getPosition());
+    assertEquals(workPosition.getSince(), updateDto.getSince());
+    assertEquals(workPosition.getUntil(), updateDto.getUntil());
+  }
+
+  @Test
+  public void ShouldFailToUpdateWorkExperience() {
+    var updateDto = ezRandom.nextObject(UpdateWorkPositionDto.class);
+    var workPositionId = ezRandom.nextObject(String.class);
+    var email = ezRandom.nextObject(String.class);
+    Mockito
+      .when(this.workPositionRepository.findUserWorkExperience(email, workPositionId))
+      .thenReturn(Optional.empty());
+
+    assertThrows(ApiException.class, () -> this.service.updateWorkExperience(email, workPositionId, updateDto));
   }
 }
