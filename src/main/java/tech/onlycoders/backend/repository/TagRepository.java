@@ -57,4 +57,40 @@ public interface TagRepository extends Neo4jRepository<Tag, String> {
     " RETURN count(r)"
   )
   Integer getAmountOfFollowedTags(String userCanonicalName, String tagCanonicalName);
+
+  @Query(
+    " MATCH (me:User{canonicalName: $canonicalName}) " +
+    " OPTIONAL MATCH (tags:Tag)<-[:IS_INTERESTED]-(me) " +
+    " OPTIONAL MATCH (myContacts:User)-[:IS_CONNECTED]-(me) " +
+    " OPTIONAL MATCH (myFollowed:User)<-[:FOLLOWS]-(me) " +
+    " WITH me, collect(tags) as myTags, myFollowed, myContacts " +
+    " CALL { " +
+    "     WITH myTags, myContacts " +
+    "     MATCH  (:User)-[i:IS_INTERESTED]-(t:Tag)<-[:IS_INTERESTED]-(myContacts) " +
+    "     WHERE NOT t IN myTags " +
+    "     RETURN t, count(i)*(2^64) AS priority " +
+    "     LIMIT $limit " +
+    "   UNION " +
+    "     WITH myTags, myFollowed " +
+    "     MATCH (:User)-[i:IS_INTERESTED]-(t:Tag)<-[:IS_INTERESTED]-(myFollowed) " +
+    "     WHERE NOT t IN myTags " +
+    "     RETURN t, count(i)*(2^32) AS priority " +
+    "     LIMIT $limit " +
+    "   UNION " +
+    "     WITH  myTags " +
+    "     MATCH (t:Tag)<-[i:IS_INTERESTED]-(:User) " +
+    "     WHERE NOT t IN myTags " +
+    "     RETURN t , count(i) AS priority " +
+    "     LIMIT $limit " +
+    "   UNION " +
+    "     WITH  myTags " +
+    "     MATCH (t:Tag) " +
+    "     WHERE NOT t IN myTags " +
+    "     RETURN t , 0 AS priority " +
+    "     LIMIT $limit " +
+    " } " +
+    " RETURN DISTINCT(t), priority ORDER BY priority DESC " +
+    " LIMIT $limit "
+  )
+  Set<Tag> findSuggestedTags(String canonicalName, Integer limit);
 }

@@ -112,4 +112,18 @@ public class TagService {
     pagination.setTotalElements(totalQuantity);
     return pagination;
   }
+
+  public List<ReadTagDto> getSuggestedTags(String canonicalName, Integer size) {
+    var users = tagRepository.findSuggestedTags(canonicalName, size);
+    var readTagDtos = tagMapper.listTagsToListReadTagDto(new ArrayList<>(users));
+    readTagDtos
+      .stream()
+      .parallel()
+      .forEach(
+        tag -> {
+          tag.setFollowerQuantity(this.tagRepository.getFollowerQuantity(tag.getCanonicalName()));
+        }
+      );
+    return readTagDtos;
+  }
 }
