@@ -19,7 +19,9 @@ import org.mockito.quality.Strictness;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import tech.onlycoders.backend.dto.institute.request.CreateInstituteDto;
+import tech.onlycoders.backend.dto.institute.request.UpdateDegreeDto;
 import tech.onlycoders.backend.dto.user.request.EducationExperienceDto;
+import tech.onlycoders.backend.dto.workposition.request.UpdateWorkPositionDto;
 import tech.onlycoders.backend.dto.workposition.response.ReadWorkPositionDto;
 import tech.onlycoders.backend.exception.ApiException;
 import tech.onlycoders.backend.mapper.InstituteMapper;
@@ -136,5 +138,29 @@ public class InstituteServiceTest {
     Mockito.when(this.degreeRepository.isOwner(anyString(), anyString())).thenReturn(false);
 
     assertThrows(Exception.class, () -> this.service.removeDegree("email", "id"));
+  }
+
+  @Test
+  public void ShouldUpdateDegree() throws ApiException {
+    var degree = ezRandom.nextObject(Degree.class);
+    var updateDto = ezRandom.nextObject(UpdateDegreeDto.class);
+    var degreeId = ezRandom.nextObject(String.class);
+    var email = ezRandom.nextObject(String.class);
+    Mockito.when(this.degreeRepository.findUserDegree(email, degreeId)).thenReturn(Optional.of(degree));
+
+    this.service.updateDegree(email, degreeId, updateDto);
+    assertEquals(degree.getDegree(), updateDto.getDegree());
+    assertEquals(degree.getSince(), updateDto.getSince());
+    assertEquals(degree.getUntil(), updateDto.getUntil());
+  }
+
+  @Test
+  public void ShouldFailToUpdateDegree() {
+    var updateDto = ezRandom.nextObject(UpdateDegreeDto.class);
+    var degreeId = ezRandom.nextObject(String.class);
+    var email = ezRandom.nextObject(String.class);
+    Mockito.when(this.degreeRepository.findUserDegree(email, degreeId)).thenReturn(Optional.empty());
+
+    assertThrows(ApiException.class, () -> this.service.updateDegree(email, degreeId, updateDto));
   }
 }

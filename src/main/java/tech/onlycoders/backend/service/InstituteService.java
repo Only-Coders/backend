@@ -6,9 +6,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tech.onlycoders.backend.dto.PaginateDto;
 import tech.onlycoders.backend.dto.institute.request.CreateInstituteDto;
+import tech.onlycoders.backend.dto.institute.request.UpdateDegreeDto;
 import tech.onlycoders.backend.dto.institute.response.ReadDegreeDto;
 import tech.onlycoders.backend.dto.institute.response.ReadInstituteDto;
 import tech.onlycoders.backend.dto.user.request.EducationExperienceDto;
+import tech.onlycoders.backend.dto.workposition.request.UpdateWorkPositionDto;
 import tech.onlycoders.backend.exception.ApiException;
 import tech.onlycoders.backend.mapper.InstituteMapper;
 import tech.onlycoders.backend.model.Degree;
@@ -94,5 +96,15 @@ public class InstituteService {
       throw new ApiException(HttpStatus.FORBIDDEN, "error.user-not-owner");
     }
     degreeRepository.remove(degreeId);
+  }
+
+  public void updateDegree(String email, String degreeId, UpdateDegreeDto updateDegreeDto) throws ApiException {
+    var degree = degreeRepository
+      .findUserDegree(email, degreeId)
+      .orElseThrow(() -> new ApiException(HttpStatus.FORBIDDEN, "error.degree-not-found"));
+    degree.setDegree(updateDegreeDto.getDegree());
+    degree.setSince(updateDegreeDto.getSince());
+    degree.setUntil(updateDegreeDto.getUntil());
+    degreeRepository.save(degree);
   }
 }
