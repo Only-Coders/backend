@@ -354,9 +354,9 @@ public class UserService {
     String skillName,
     SortUsersBy orderBy
   ) {
-    var regex = "(?i)" + CanonicalFactory.getCanonicalName(partialName) + ".*";
-    var countryRegex = "(?i)" + countryName + ".*";
-    var skillNameRegex = "(?i)" + skillName + ".*";
+    var regex = "(?i).*" + CanonicalFactory.getCanonicalName(partialName) + ".*";
+    var countryRegex = "(?i).*" + countryName + ".*";
+    var skillNameRegex = "(?i).*" + skillName + ".*";
     var users =
       this.userRepository.findAllWithFilters(regex, countryRegex, skillNameRegex, orderBy.label, page * size, size);
     var totalQuantity = this.userRepository.countWithFilters(regex, countryRegex, skillNameRegex);
