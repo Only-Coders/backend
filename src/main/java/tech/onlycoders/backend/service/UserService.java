@@ -15,11 +15,11 @@ import tech.onlycoders.backend.dto.auth.response.AuthResponseDto;
 import tech.onlycoders.backend.dto.contactrequest.request.CreateContactRequestDto;
 import tech.onlycoders.backend.dto.contactrequest.request.ResponseContactRequestDto;
 import tech.onlycoders.backend.dto.contactrequest.response.ReadContactRequestDto;
-import tech.onlycoders.backend.dto.post.response.ReadPostDto;
 import tech.onlycoders.backend.dto.user.GitPlatform;
 import tech.onlycoders.backend.dto.user.GitProfileDto;
 import tech.onlycoders.backend.dto.user.request.CreateUserDto;
 import tech.onlycoders.backend.dto.user.request.UpdateUserBlockedStatusDto;
+import tech.onlycoders.backend.dto.user.request.UpdateUserDto;
 import tech.onlycoders.backend.dto.user.response.ReadUserDto;
 import tech.onlycoders.backend.dto.user.response.ReadUserLiteDto;
 import tech.onlycoders.backend.dto.user.response.ReadUserToDeleteDto;
@@ -103,7 +103,7 @@ public class UserService {
 
     var posts = this.postRepository.countUserPosts(targetCanonicalName);
     var currentPosition = this.workPositionRepository.getUserCurrentPositions(targetCanonicalName);
-    var dto = userMapper.userToReadPersonDto(partialUser);
+    var dto = userMapper.partialUserToReadPersonDto(partialUser);
     dto.setMedalQty(medals);
     dto.setFollowerQty(followers);
     dto.setContactQty(contacts);
@@ -459,5 +459,64 @@ public class UserService {
 
   public void cancelEliminationDate(String email) {
     this.userRepository.removeUserEliminationDate(email);
+  }
+
+  public ReadUserDto updateProfile(String canonicalName, UpdateUserDto updateUserDto) throws ApiException {
+    var userId =
+      this.userRepository.getIdByCanonicalName(canonicalName)
+        .orElseThrow(() -> new ApiException(HttpStatus.INTERNAL_SERVER_ERROR, "error.user-not-found"));
+    var user =
+      this.userRepository.findById(userId)
+        .orElseThrow(() -> new ApiException(HttpStatus.INTERNAL_SERVER_ERROR, "error.user-not-found"));
+
+    user.setBirthDate(updateUserDto.getBirthDate());
+    user.setDescription(updateUserDto.getDescription());
+    user.setFirstName(updateUserDto.getFirstName());
+    user.setLastName(updateUserDto.getLastName());
+    user.setImageURI(updateUserDto.getImageURI());
+
+    if (!user.getCountry().getCode().equals(updateUserDto.getCountryCode())) {
+      user.setCountry(
+        countryRepository
+          .findById(updateUserDto.getCountryCode())
+          .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "error.country-not-found"))
+      );
+    }
+
+    if (updateUserDto.getGitProfile() != null && user.getGitProfile() == null) {
+      //Se agrego el usuario de git
+      var gitPlatform = gitPlatformRepository
+        .findById(updateUserDto.getGitProfile().getPlatform().toString())
+        .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "error.git-platform-not-found"));
+      var gitProfile = GitProfile
+        .builder()
+        .username(updateUserDto.getGitProfile().getUserName())
+        .platform(gitPlatform)
+        .build();
+      user.setGitProfile(gitProfile);
+    } else if (updateUserDto.getGitProfile() == null && user.getGitProfile() != null) {
+      //Se elimino el usuario de git
+      user.setGitProfile(null);
+    } else if (
+      !user.getGitProfile().getPlatform().getId().equals(updateUserDto.getGitProfile().getPlatform().toString())
+    ) {
+      //Se cambio la platafoma de git
+      var gitPlatform = gitPlatformRepository
+        .findById(updateUserDto.getGitProfile().getPlatform().toString())
+        .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "error.git-platform-not-found"));
+      var gitProfile = GitProfile
+        .builder()
+        .username(updateUserDto.getGitProfile().getUserName())
+        .platform(gitPlatform)
+        .build();
+      user.setGitProfile(gitProfile);
+    } else if (!user.getGitProfile().getUsername().equals(updateUserDto.getGitProfile().getUserName())) {
+      //Se cambio el nombre de usuario de git
+      user.getGitProfile().setUsername(updateUserDto.getGitProfile().getUserName());
+    }
+
+    userRepository.save(user);
+
+    return userMapper.userToReadPersonDto(user);
   }
 }

@@ -224,4 +224,7 @@ public interface UserRepository extends Neo4jRepository<User, String> {
     " RETURN COUNT(DISTINCT(u)) "
   )
   int countWithFilters(String userName, String countryName, String skillName);
+
+  @Query("MATCH (u:User{canonicalName:$canonicalName}) return u.id")
+  Optional<String> getIdByCanonicalName(String canonicalName);
 }
