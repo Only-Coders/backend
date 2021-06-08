@@ -15,6 +15,7 @@ public class ReadUserLiteDto {
   public String canonicalName;
   public String firstName;
   public String lastName;
+  public String fullName;
   public String imageURI;
   public Integer amountOfMedals;
   public ReadWorkPositionDto currentPosition;
