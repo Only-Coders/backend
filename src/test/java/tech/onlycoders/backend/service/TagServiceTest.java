@@ -53,7 +53,7 @@ public class TagServiceTest {
 
   @Test
   public void ShouldPaginateTagsByName() {
-    var tags = ezRandom.objects(Tag.class, 10).collect(Collectors.toList());
+    var tags = ezRandom.objects(Tag.class, 10).collect(Collectors.toSet());
 
     Mockito.when(this.tagRepository.getTagQuantityByName(anyString())).thenReturn(10);
     Mockito.when(this.tagRepository.getTagsByNamePaginated(anyString(), anyInt(), anyInt())).thenReturn(tags);

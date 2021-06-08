@@ -204,4 +204,13 @@ public interface PostRepository extends Neo4jRepository<Post, String> {
     " SKIP $skip LIMIT $size "
   )
   Set<Post> getPostsByTag(String requesterCanonicalName, String tagCanonicalName, int skip, int size);
+
+  @Query(
+    " MATCH (u:User)-[r:PUBLISH]->(p:Post{id: $postId }) " +
+    " OPTIONAL MATCH (p)-[rt:HAS]->(t:Tag) " +
+    " OPTIONAL MATCH (p)-[rm:MENTIONS]->(m:User) " +
+    " RETURN p, collect(r), collect(u), collect(rm), collect(m), collect(rt), collect(t) " +
+    " LIMIT 1 "
+  )
+  Post getCreatedPost(String postId);
 }

@@ -78,12 +78,15 @@ public class PostServiceTest {
 
   @Test
   public void ShouldCreatePostWhenDataIsOk() throws ApiException {
+    var newPost = ezRandom.nextObject(Post.class);
     var requestDto = ezRandom.nextObject(CreatePostDto.class);
-    var publisher = new PartialUserImpl();
-    var tag = new Tag();
+    var publisher = ezRandom.nextObject(PartialUserImpl.class);
+    var tag = ezRandom.nextObject(Tag.class);
+
     Mockito.when(userRepository.findByCanonicalName(anyString())).thenReturn(Optional.of(publisher));
     Mockito.when(tagRepository.findByCanonicalName(anyString())).thenReturn(Optional.of(tag));
-    Mockito.when(postRepository.save(any(Post.class))).thenReturn(new Post());
+    Mockito.when(postRepository.save(any(Post.class))).thenReturn(newPost);
+    Mockito.when(postRepository.getCreatedPost(newPost.getId())).thenReturn(newPost);
 
     var res = service.createPost("canonicalName", requestDto);
     assertNotNull(res);
@@ -91,11 +94,13 @@ public class PostServiceTest {
 
   @Test
   public void ShouldCreatePostAndTagWhenTagDoesntExist() throws ApiException {
+    var newPost = ezRandom.nextObject(Post.class);
     var requestDto = ezRandom.nextObject(CreatePostDto.class);
-    var publisher = new PartialUserImpl();
+    var publisher = ezRandom.nextObject(PartialUserImpl.class);
+
     Mockito.when(userRepository.findByCanonicalName(anyString())).thenReturn(Optional.of(publisher));
-    Mockito.when(tagRepository.findByCanonicalName(anyString())).thenReturn(Optional.empty());
-    Mockito.when(postRepository.save(any(Post.class))).thenReturn(new Post());
+    Mockito.when(postRepository.save(any(Post.class))).thenReturn(newPost);
+    Mockito.when(postRepository.getCreatedPost(newPost.getId())).thenReturn(newPost);
 
     var res = service.createPost("canonicalName", requestDto);
     assertNotNull(res);
