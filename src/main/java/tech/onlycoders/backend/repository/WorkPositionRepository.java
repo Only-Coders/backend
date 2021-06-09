@@ -40,4 +40,7 @@ public interface WorkPositionRepository extends Neo4jRepository<WorkPosition, St
 
   @Query("MATCH (w:WorkPosition{id: $workPositionId}) DETACH DELETE w")
   void remove(String workPositionId);
+
+  @Query("MATCH (w:WorkPosition{id: $workPositionId})<-[:WORKS]-(:User{email: $email}) RETURN w")
+  Optional<WorkPosition> findUserWorkExperience(String email, String workExperienceId);
 }

@@ -170,7 +170,11 @@ public interface UserRepository extends Neo4jRepository<User, String> {
   )
   void addContact(String email, String requesterCanonicalName);
 
-  @Query("MATCH (:User{email: $canonicalName })-[]->()<-[:TO]-(r:Reaction{type:'APPROVE'}) return count(r)")
+  @Query(
+    " MATCH (source:User{canonicalName: $canonicalName })-[:PUBLISH]->(:Post)<-[:TO]-(r:Reaction{type:'APPROVE'})<-[:MAKES]-(u:User) " +
+    " WHERE source <> u " +
+    " RETURN COUNT(r) "
+  )
   Integer countUserMedals(String canonicalName);
 
   @Query("MATCH (:User{canonicalName:$canonicalName})<-[:FOLLOWS]-(u:User) return count(u)")

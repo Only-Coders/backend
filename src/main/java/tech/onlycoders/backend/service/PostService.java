@@ -162,7 +162,7 @@ public class PostService {
   public PaginateDto<ReadPostDto> getMyPosts(String canonicalName, Integer page, Integer size) {
     var posts = postRepository.getPosts(canonicalName, page * size, size);
     var totalQuantity = postRepository.countUserPosts(canonicalName);
-    return getReadPostDtoPaginateDto(canonicalName, page, size, posts, totalQuantity);
+    return getReadPostDtoPaginateDto(canonicalName, canonicalName, page, size, posts, totalQuantity);
   }
 
   public PaginateDto<ReadPostDto> getUserPosts(
@@ -174,16 +174,17 @@ public class PostService {
     if (userRepository.areUsersConnected(requesterCanonicalName, targetCanonicalName)) {
       var posts = postRepository.getPosts(targetCanonicalName, page * size, size);
       var totalQuantity = postRepository.countUserPosts(targetCanonicalName);
-      return getReadPostDtoPaginateDto(targetCanonicalName, page, size, posts, totalQuantity);
+      return getReadPostDtoPaginateDto(requesterCanonicalName, targetCanonicalName, page, size, posts, totalQuantity);
     } else {
       var skip = page * size;
       var posts = postRepository.getUserPublicPosts(targetCanonicalName, skip, size);
       var totalQuantity = postRepository.countUserPublicPosts(targetCanonicalName);
-      return getReadPostDtoPaginateDto(targetCanonicalName, page, size, posts, totalQuantity);
+      return getReadPostDtoPaginateDto(requesterCanonicalName, targetCanonicalName, page, size, posts, totalQuantity);
     }
   }
 
   private PaginateDto<ReadPostDto> getReadPostDtoPaginateDto(
+    String sourceCanonicalName,
     String targetCanonicalName,
     Integer page,
     Integer size,
@@ -192,7 +193,7 @@ public class PostService {
   ) {
     var pagesQuantity = PaginationUtils.getPagesQuantity(totalQuantity, size);
     var readPostDtoList = postMapper.listPostToListPostDto(new ArrayList<>(posts));
-    var paginated = expandPostData(targetCanonicalName, readPostDtoList);
+    var paginated = expandPostData(sourceCanonicalName, targetCanonicalName, readPostDtoList);
     paginated.setCurrentPage(page);
     paginated.setTotalElements(totalQuantity);
     paginated.setTotalPages(pagesQuantity);
@@ -208,14 +209,18 @@ public class PostService {
     var totalQuantity = this.postRepository.getUserFavoritePostTotalQuantity(canonicalName);
     var pagesQuantity = PaginationUtils.getPagesQuantity(totalQuantity, size);
     var readPostDtoList = postMapper.listPostToListPostDto(posts);
-    var paginated = expandPostData(canonicalName, readPostDtoList);
+    var paginated = expandPostData(canonicalName, canonicalName, readPostDtoList);
     paginated.setCurrentPage(page);
     paginated.setTotalElements(totalQuantity);
     paginated.setTotalPages(pagesQuantity);
     return paginated;
   }
 
-  private PaginateDto<ReadPostDto> expandPostData(String canonicalName, List<ReadPostDto> readPostDtoList) {
+  private PaginateDto<ReadPostDto> expandPostData(
+    String requesterCanonicalName,
+    String canonicalName,
+    List<ReadPostDto> readPostDtoList
+  ) {
     HashMap<String, Integer> medalsCache = new HashMap<>();
     readPostDtoList
       .parallelStream()
@@ -229,8 +234,8 @@ public class PostService {
           }
           post.setReactions(getPostReactionQuantity(post.getId()));
           post.setCommentQuantity(postRepository.getPostCommentsQuantity(post.getId()));
-          post.setMyReaction(getPostUserReaction(canonicalName, post.getId()));
-          post.setIsFavorite(postRepository.isFavorite(post.getId(), canonicalName));
+          post.setMyReaction(getPostUserReaction(requesterCanonicalName, post.getId()));
+          post.setIsFavorite(postRepository.isFavorite(post.getId(), requesterCanonicalName));
           var medals = getAmountOfMedals(medalsCache, post.getPublisher().getCanonicalName());
           post.getPublisher().setAmountOfMedals(medals);
         }
@@ -246,7 +251,7 @@ public class PostService {
     var skip = page * size;
     var pageQuantity = PaginationUtils.getPagesQuantity(totalQuantity, size);
     var readPostDtoList = postMapper.setPostToListPostDto(postRepository.getFeedPosts(canonicalName, skip, size));
-    var paginated = expandPostData(canonicalName, readPostDtoList);
+    var paginated = expandPostData(canonicalName, canonicalName, readPostDtoList);
     paginated.setCurrentPage(page);
     paginated.setTotalElements(totalQuantity);
     paginated.setTotalPages(pageQuantity);
@@ -504,7 +509,7 @@ public class PostService {
     var pageQuantity = PaginationUtils.getPagesQuantity(totalQuantity, size);
     var readPostDtoList = postMapper.setPostToListPostDto(posts);
 
-    var pagination = expandPostData(requesterCanonicalName, readPostDtoList);
+    var pagination = expandPostData(requesterCanonicalName, requesterCanonicalName, readPostDtoList);
     pagination.setCurrentPage(page);
     pagination.setTotalPages(pageQuantity);
     pagination.setTotalElements(totalQuantity);
