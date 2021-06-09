@@ -51,6 +51,7 @@ public class UserService {
   private final PostRepository postRepository;
   private final RoleRepository roleRepository;
   private final ContactRequestRepository contactRequestRepository;
+  private final GitProfileRepository gitProfileRepository;
 
   private final AuthService authService;
   private final NotificatorService notificatorService;
@@ -71,6 +72,7 @@ public class UserService {
     PostRepository postRepository,
     RoleRepository roleRepository,
     ContactRequestRepository contactRequestRepository,
+    GitProfileRepository gitProfileRepository,
     NotificatorService notificatorService,
     PostMapper postMapper,
     ContactRequestMapper contactRequestMapper,
@@ -87,6 +89,7 @@ public class UserService {
     this.postRepository = postRepository;
     this.roleRepository = roleRepository;
     this.contactRequestRepository = contactRequestRepository;
+    this.gitProfileRepository = gitProfileRepository;
     this.notificatorService = notificatorService;
     this.postMapper = postMapper;
     this.contactRequestMapper = contactRequestMapper;
@@ -462,25 +465,24 @@ public class UserService {
   }
 
   public ReadUserDto updateProfile(String canonicalName, UpdateUserDto updateUserDto) throws ApiException {
-    var userId =
-      this.userRepository.getIdByCanonicalName(canonicalName)
-        .orElseThrow(() -> new ApiException(HttpStatus.INTERNAL_SERVER_ERROR, "error.user-not-found"));
     var user =
-      this.userRepository.findById(userId)
+      this.userRepository.findByCanonicalName(canonicalName)
         .orElseThrow(() -> new ApiException(HttpStatus.INTERNAL_SERVER_ERROR, "error.user-not-found"));
 
-    user.setBirthDate(updateUserDto.getBirthDate());
-    user.setDescription(updateUserDto.getDescription());
-    user.setFirstName(updateUserDto.getFirstName());
-    user.setLastName(updateUserDto.getLastName());
-    user.setImageURI(updateUserDto.getImageURI());
+    userRepository.updateProfile(
+      canonicalName,
+      updateUserDto.getBirthDate(),
+      updateUserDto.getDescription(),
+      updateUserDto.getFirstName(),
+      updateUserDto.getLastName(),
+      updateUserDto.getImageURI()
+    );
 
     if (!user.getCountry().getCode().equals(updateUserDto.getCountryCode())) {
-      user.setCountry(
-        countryRepository
-          .findById(updateUserDto.getCountryCode())
-          .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "error.country-not-found"))
-      );
+      countryRepository
+        .findById(updateUserDto.getCountryCode())
+        .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "error.country-not-found"));
+      userRepository.setCountry(canonicalName, updateUserDto.getCountryCode());
     }
 
     if (updateUserDto.getGitProfile() != null && user.getGitProfile() == null) {
@@ -488,15 +490,10 @@ public class UserService {
       var gitPlatform = gitPlatformRepository
         .findById(updateUserDto.getGitProfile().getPlatform().toString())
         .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "error.git-platform-not-found"));
-      var gitProfile = GitProfile
-        .builder()
-        .username(updateUserDto.getGitProfile().getUserName())
-        .platform(gitPlatform)
-        .build();
-      user.setGitProfile(gitProfile);
+      userRepository.setGitProfile(canonicalName, updateUserDto.getGitProfile().getUserName(), gitPlatform.getId());
     } else if (updateUserDto.getGitProfile() == null && user.getGitProfile() != null) {
       //Se elimino el usuario de git
-      user.setGitProfile(null);
+      userRepository.removeGitProfile(canonicalName);
     } else if (
       !user.getGitProfile().getPlatform().getId().equals(updateUserDto.getGitProfile().getPlatform().toString())
     ) {
@@ -504,19 +501,15 @@ public class UserService {
       var gitPlatform = gitPlatformRepository
         .findById(updateUserDto.getGitProfile().getPlatform().toString())
         .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "error.git-platform-not-found"));
-      var gitProfile = GitProfile
-        .builder()
-        .username(updateUserDto.getGitProfile().getUserName())
-        .platform(gitPlatform)
-        .build();
-      user.setGitProfile(gitProfile);
+      userRepository.setGitProfile(canonicalName, updateUserDto.getGitProfile().getUserName(), gitPlatform.getId());
     } else if (!user.getGitProfile().getUsername().equals(updateUserDto.getGitProfile().getUserName())) {
       //Se cambio el nombre de usuario de git
-      user.getGitProfile().setUsername(updateUserDto.getGitProfile().getUserName());
+      userRepository.updateGitPtofile(canonicalName, updateUserDto.getGitProfile().getUserName());
     }
+    user =
+      this.userRepository.findByCanonicalName(canonicalName)
+        .orElseThrow(() -> new ApiException(HttpStatus.INTERNAL_SERVER_ERROR, "error.user-not-found"));
 
-    userRepository.save(user);
-
-    return userMapper.userToReadPersonDto(user);
+    return userMapper.partialUserToReadPersonDto(user);
   }
 }

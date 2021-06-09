@@ -1,5 +1,6 @@
 package tech.onlycoders.backend.repository;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -225,6 +226,38 @@ public interface UserRepository extends Neo4jRepository<User, String> {
   )
   int countWithFilters(String userName, String countryName, String skillName);
 
-  @Query("MATCH (u:User{canonicalName:$canonicalName}) return u.id")
-  Optional<String> getIdByCanonicalName(String canonicalName);
+  @Query(
+    "MATCH (u:User{canonicalName:$canonicalName}) " +
+    "SET u += {birthDate: $birthDate, firstName: $firstName, lastName: $lastName, imageURI: $imageURI}"
+  )
+  void updateProfile(
+    String canonicalName,
+    Date birthDate,
+    String description,
+    String firstName,
+    String lastName,
+    String imageURI
+  );
+
+  @Query(
+    "MATCH (u:User{canonicalName:$canonicalName}) with u " +
+    "MATCH (c:Country{code:$countryCode}) with c " +
+    "MATCH (u)-[l:LIVES]->(:Country) DELETE l with c" +
+    "MERGE (u)-[:LIVES]->(c)"
+  )
+  void setCountry(String canonicalName, String countryCode);
+
+  @Query(
+    "MATCH (u:User{canonicalName:$canonicalName}) with u " +
+    "MATCH (p:GitPlatform{id:platformId}) with p " +
+    "MATCH (u)-[g:USES]->(:GitPlatform) DELETE g with p" +
+    "MERGE (u)-[:USES{userName: $userName}]->(c)"
+  )
+  void setGitProfile(String canonicalName, String userName, String platformId);
+
+  @Query("MATCH (u:User{canonicalName:$canonicalName})-[g:USES]->(:GitPlatform) DELETE g")
+  void removeGitProfile(String canonicalName);
+
+  @Query("MATCH (:User{canonicalName:$canonicalName})-[g:USES]->(:GitPlatform) SET g += {userName: $userName}")
+  void updateGitPtofile(String canonicalName, String userName);
 }

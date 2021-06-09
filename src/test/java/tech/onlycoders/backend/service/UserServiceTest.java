@@ -31,6 +31,7 @@ import tech.onlycoders.backend.exception.ApiException;
 import tech.onlycoders.backend.mapper.*;
 import tech.onlycoders.backend.model.*;
 import tech.onlycoders.backend.repository.*;
+import tech.onlycoders.backend.utils.PartialGitProfileImpl;
 import tech.onlycoders.backend.utils.PartialPostImpl;
 import tech.onlycoders.backend.utils.PartialUserImpl;
 
@@ -553,15 +554,12 @@ public class UserServiceTest {
   @Test
   public void ShouldUpdateUserAndDeleteGitProfile() throws ApiException {
     var platform = ezRandom.nextObject(GitPlatform.class);
-    var user = ezRandom.nextObject(User.class);
-    user.setGitProfile(GitProfile.builder().platform(platform).username(ezRandom.nextObject(String.class)).build());
+    var user = ezRandom.nextObject(PartialUserImpl.class);
+    user.setGitProfile(ezRandom.nextObject(PartialGitProfileImpl.class));
     var userDto = UpdateUserDto.builder().countryCode(ezRandom.nextObject(String.class)).build();
     var country = ezRandom.nextObject(Country.class);
 
-    Mockito
-      .when(this.userRepository.getIdByCanonicalName(user.getCanonicalName()))
-      .thenReturn(Optional.of(user.getId()));
-    Mockito.when(this.userRepository.findById(anyString())).thenReturn(Optional.of(user));
+    Mockito.when(this.userRepository.findByCanonicalName(anyString())).thenReturn(Optional.of(user));
     Mockito.when(this.countryRepository.findById(anyString())).thenReturn(Optional.of(country));
 
     var res = this.service.updateProfile(user.getCanonicalName(), userDto);
@@ -571,8 +569,8 @@ public class UserServiceTest {
   @Test
   public void ShouldUpdateUserAndUpdateGitPlatform() throws ApiException {
     var platform = ezRandom.nextObject(GitPlatform.class);
-    var user = ezRandom.nextObject(User.class);
-    user.setGitProfile(GitProfile.builder().platform(platform).username(ezRandom.nextObject(String.class)).build());
+    var user = ezRandom.nextObject(PartialUserImpl.class);
+    user.setGitProfile(ezRandom.nextObject(PartialGitProfileImpl.class));
     var userDto = UpdateUserDto
       .builder()
       .countryCode(ezRandom.nextObject(String.class))
@@ -580,10 +578,7 @@ public class UserServiceTest {
       .build();
     var country = ezRandom.nextObject(Country.class);
 
-    Mockito
-      .when(this.userRepository.getIdByCanonicalName(user.getCanonicalName()))
-      .thenReturn(Optional.of(user.getId()));
-    Mockito.when(this.userRepository.findById(anyString())).thenReturn(Optional.of(user));
+    Mockito.when(this.userRepository.findByCanonicalName(anyString())).thenReturn(Optional.of(user));
     Mockito.when(this.countryRepository.findById(anyString())).thenReturn(Optional.of(country));
     Mockito.when(this.gitPlatformRepository.findById(anyString())).thenReturn(Optional.of(platform));
 
@@ -594,7 +589,7 @@ public class UserServiceTest {
   @Test
   public void ShouldUpdateUserAndAddGitProfile() throws ApiException {
     var platform = ezRandom.nextObject(GitPlatform.class);
-    var user = ezRandom.nextObject(User.class);
+    var user = ezRandom.nextObject(PartialUserImpl.class);
     user.setGitProfile(null);
     var userDto = UpdateUserDto
       .builder()
@@ -603,10 +598,7 @@ public class UserServiceTest {
       .build();
     var country = ezRandom.nextObject(Country.class);
 
-    Mockito
-      .when(this.userRepository.getIdByCanonicalName(user.getCanonicalName()))
-      .thenReturn(Optional.of(user.getId()));
-    Mockito.when(this.userRepository.findById(anyString())).thenReturn(Optional.of(user));
+    Mockito.when(this.userRepository.findByCanonicalName(anyString())).thenReturn(Optional.of(user));
     Mockito.when(this.countryRepository.findById(anyString())).thenReturn(Optional.of(country));
     Mockito.when(this.gitPlatformRepository.findById(anyString())).thenReturn(Optional.of(platform));
 
@@ -617,7 +609,7 @@ public class UserServiceTest {
   @Test
   public void ShouldUpdateUserAndUpdateGitUser() throws ApiException {
     var platform = ezRandom.nextObject(GitPlatform.class);
-    var user = ezRandom.nextObject(User.class);
+    var user = ezRandom.nextObject(PartialUserImpl.class);
     var userDto = UpdateUserDto
       .builder()
       .countryCode(ezRandom.nextObject(String.class))
@@ -630,13 +622,10 @@ public class UserServiceTest {
       )
       .build();
     platform.setId(tech.onlycoders.backend.dto.user.GitPlatform.GITHUB.toString());
-    user.setGitProfile(GitProfile.builder().platform(platform).username(ezRandom.nextObject(String.class)).build());
+    user.setGitProfile(ezRandom.nextObject(PartialGitProfileImpl.class));
     var country = ezRandom.nextObject(Country.class);
 
-    Mockito
-      .when(this.userRepository.getIdByCanonicalName(user.getCanonicalName()))
-      .thenReturn(Optional.of(user.getId()));
-    Mockito.when(this.userRepository.findById(anyString())).thenReturn(Optional.of(user));
+    Mockito.when(this.userRepository.findByCanonicalName(anyString())).thenReturn(Optional.of(user));
     Mockito.when(this.countryRepository.findById(anyString())).thenReturn(Optional.of(country));
 
     var res = this.service.updateProfile(user.getCanonicalName(), userDto);
