@@ -22,11 +22,11 @@ public class PartialCountryImpl implements PartialUser.PartialCountry {
 
   @Override
   public String getName() {
-    return null;
+    return name;
   }
 
   @Override
   public String getCode() {
-    return null;
+    return code;
   }
 }

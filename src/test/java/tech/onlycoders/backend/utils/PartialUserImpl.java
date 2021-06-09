@@ -190,7 +190,7 @@ public class PartialUserImpl implements PartialUser {
   }
 
   @Override
-  public PartialCountry getCountry() {
+  public PartialCountryImpl getCountry() {
     return country;
   }
 
