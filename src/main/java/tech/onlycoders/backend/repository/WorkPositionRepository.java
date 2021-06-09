@@ -26,7 +26,7 @@ public interface WorkPositionRepository extends Neo4jRepository<WorkPosition, St
 
   @Query(
     "MATCH (p:Workplace)<-[o:ON]-(w:WorkPosition)<-[r:WORKS]-(u:User{canonicalName: $canonicalName}) return w, collect(r), collect(o)" +
-    " ,  collect(p) SKIP $skip LIMIT $size ORDER BY w.since DESC;"
+    " ,  collect(p) ORDER BY w.since DESC SKIP $skip LIMIT $size ;"
   )
   List<WorkPosition> getUserJobs(String canonicalName, Integer skip, Integer size);
 

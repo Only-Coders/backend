@@ -15,7 +15,7 @@ public interface DegreeRepository extends Neo4jRepository<Degree, String> {
   @Query(
     " MATCH (i:Institute)<-[a:AT]-(d:Degree)<-[]-(u:User{canonicalName: $canonicalName}) " +
     " RETURN d, COLLECT(a), COLLECT(i) " +
-    " SKIP $skip LIMIT $size ORDER BY d.since DESC;"
+    " ORDER BY d.since DESC SKIP $skip LIMIT $size ;"
   )
   List<Degree> getUserDegrees(String canonicalName, Integer skip, Integer size);
 
