@@ -13,5 +13,7 @@ public class ReadTagDto {
 
   private String canonicalName;
 
+  private String name;
+
   private Long followerQuantity;
 }

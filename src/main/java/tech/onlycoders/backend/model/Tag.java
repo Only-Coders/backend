@@ -21,6 +21,8 @@ public class Tag {
   @Id
   private String canonicalName;
 
+  private String name;
+
   @LastModifiedDate
   @DateLong
   private Date updatedAt;
@@ -28,6 +30,4 @@ public class Tag {
   @DateLong
   @CreatedDate
   private Date createdAt;
-  //  @Version
-  //  private Long version;
 }
