@@ -18,7 +18,10 @@ public interface UserMapper {
   ReadUserLiteDto userToReadPersonLiteDto(PartialUser partialUser);
 
   @Mapping(target = "gitProfile", ignore = true)
-  ReadUserDto userToReadPersonDto(PartialUser person);
+  ReadUserDto partialUserToReadPersonDto(PartialUser person);
+
+  @Mapping(target = "gitProfile", ignore = true)
+  ReadUserDto userToReadPersonDto(User person);
 
   default Boolean mapBoolean(Optional<Boolean> value) {
     return value.orElse(false);

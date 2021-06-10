@@ -5,6 +5,7 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import tech.onlycoders.backend.dto.user.GitProfileDto;
@@ -12,7 +13,8 @@ import tech.onlycoders.backend.dto.user.GitProfileDto;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class CreateUserDto {
+@Builder
+public class UpdateUserDto {
 
   private Date birthDate;
 
@@ -29,6 +31,7 @@ public class CreateUserDto {
 
   private String imageURI;
 
-  @Valid
-  private CreateCountryDto country;
+  @NotBlank(message = "countryCode is required")
+  @NotNull(message = "countryCode is required")
+  private String countryCode;
 }

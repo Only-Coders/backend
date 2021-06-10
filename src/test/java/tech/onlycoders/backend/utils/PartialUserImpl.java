@@ -20,10 +20,15 @@ public class PartialUserImpl implements PartialUser {
   private Date securityUpdate;
   private PartialRoleImpl partialRoleImpl;
   private PartialGitProfileImpl gitProfile;
+  private PartialCountryImpl country;
 
   public PartialUserImpl() {}
 
   public PartialUserImpl(
+    String id,
+    Boolean defaultPrivacyIsPublic,
+    Boolean blocked,
+    Date eliminationDate,
     String firstName,
     String lastName,
     String fullName,
@@ -32,8 +37,13 @@ public class PartialUserImpl implements PartialUser {
     String canonicalName,
     Date securityUpdate,
     PartialRoleImpl partialRoleImpl,
-    PartialGitProfileImpl gitProfile
+    PartialGitProfileImpl gitProfile,
+    PartialCountryImpl country
   ) {
+    this.id = id;
+    this.defaultPrivacyIsPublic = defaultPrivacyIsPublic;
+    this.blocked = blocked;
+    this.eliminationDate = eliminationDate;
     this.firstName = firstName;
     this.lastName = lastName;
     this.fullName = fullName;
@@ -43,6 +53,7 @@ public class PartialUserImpl implements PartialUser {
     this.securityUpdate = securityUpdate;
     this.partialRoleImpl = partialRoleImpl;
     this.gitProfile = gitProfile;
+    this.country = country;
   }
 
   public void setFirstName(String firstName) {
@@ -77,6 +88,30 @@ public class PartialUserImpl implements PartialUser {
 
   public void setGitProfile(PartialGitProfileImpl gitProfile) {
     this.gitProfile = gitProfile;
+  }
+
+  public void setId(String id) {
+    this.id = id;
+  }
+
+  public void setDefaultPrivacyIsPublic(Boolean defaultPrivacyIsPublic) {
+    this.defaultPrivacyIsPublic = defaultPrivacyIsPublic;
+  }
+
+  public void setBlocked(Boolean blocked) {
+    this.blocked = blocked;
+  }
+
+  public void setEliminationDate(Date eliminationDate) {
+    this.eliminationDate = eliminationDate;
+  }
+
+  public void setPartialRoleImpl(PartialRoleImpl partialRoleImpl) {
+    this.partialRoleImpl = partialRoleImpl;
+  }
+
+  public void setCountry(PartialCountryImpl country) {
+    this.country = country;
   }
 
   @Override
@@ -155,8 +190,8 @@ public class PartialUserImpl implements PartialUser {
   }
 
   @Override
-  public PartialCountry getCountry() {
-    return null;
+  public PartialCountryImpl getCountry() {
+    return country;
   }
 
   @Override

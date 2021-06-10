@@ -12,7 +12,6 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import tech.onlycoders.backend.dto.post.request.CreateReactionDto;
 import tech.onlycoders.backend.exception.ApiException;
-import tech.onlycoders.backend.model.Comment;
 import tech.onlycoders.backend.model.Post;
 import tech.onlycoders.backend.model.Reaction;
 import tech.onlycoders.backend.model.User;

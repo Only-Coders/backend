@@ -26,10 +26,7 @@ import tech.onlycoders.backend.dto.post.response.ReadPostDto;
 import tech.onlycoders.backend.dto.skill.request.CreateSkillDto;
 import tech.onlycoders.backend.dto.skill.response.ReadSkillDto;
 import tech.onlycoders.backend.dto.tag.response.ReadTagDto;
-import tech.onlycoders.backend.dto.user.request.AddSkillDto;
-import tech.onlycoders.backend.dto.user.request.EducationExperienceDto;
-import tech.onlycoders.backend.dto.user.request.UpdateUserBlockedStatusDto;
-import tech.onlycoders.backend.dto.user.request.WorkExperienceDto;
+import tech.onlycoders.backend.dto.user.request.*;
 import tech.onlycoders.backend.dto.user.response.ReadUserDto;
 import tech.onlycoders.backend.dto.user.response.ReadUserLiteDto;
 import tech.onlycoders.backend.dto.user.response.ReadUserToDeleteDto;
@@ -549,6 +546,24 @@ public class UserController {
     return ResponseEntity.ok().build();
   }
 
+  @ApiResponses(
+    value = {
+      @ApiResponse(
+        responseCode = "200",
+        content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ReadUserDto.class)) }
+      )
+    }
+  )
+  @PreAuthorize("hasAuthority('USER')")
+  @PutMapping
+  @Operation(summary = "Gets user profile")
+  ResponseEntity<ReadUserDto> getProfile(@RequestBody UpdateUserDto updateUserDto) throws ApiException {
+    var userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    var canonicalName = userDetails.getCanonicalName();
+    var persistedPerson = this.userService.updateProfile(canonicalName, updateUserDto);
+    return ResponseEntity.ok(persistedPerson);
+  }
+  
   @ApiResponses(value = { @ApiResponse(responseCode = "200", content = { @Content(mediaType = "application/json") }) })
   @PreAuthorize("hasAuthority('USER')")
   @PutMapping("/institutes/{id}")
