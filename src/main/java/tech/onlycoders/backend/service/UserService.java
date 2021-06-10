@@ -360,8 +360,15 @@ public class UserService {
     var regex = "(?i).*" + CanonicalFactory.getCanonicalName(partialName) + ".*";
     var countryRegex = "(?i).*" + countryName + ".*";
     var skillNameRegex = "(?i).*" + skillName + ".*";
-    var users =
-      this.userRepository.findAllWithFilters(regex, countryRegex, skillNameRegex, orderBy.label, page * size, size);
+
+    List<User> users;
+    if (orderBy == SortUsersBy.MEDALS) {
+      users =
+        this.userRepository.findAllWithFiltersAndSortByMedals(regex, countryRegex, skillNameRegex, page * size, size);
+    } else {
+      var field = orderBy.label;
+      users = this.userRepository.findAllWithFilters(regex, countryRegex, skillNameRegex, field, page * size, size);
+    }
     var totalQuantity = this.userRepository.countWithFilters(regex, countryRegex, skillNameRegex);
     return getReadUserLiteDtoPaginateDto(page, size, users, totalQuantity);
   }
@@ -504,7 +511,7 @@ public class UserService {
       userRepository.setGitProfile(canonicalName, updateUserDto.getGitProfile().getUserName(), gitPlatform.getId());
     } else if (!user.getGitProfile().getUsername().equals(updateUserDto.getGitProfile().getUserName())) {
       //Se cambio el nombre de usuario de git
-      userRepository.updateGitPtofile(canonicalName, updateUserDto.getGitProfile().getUserName());
+      userRepository.updateGitProfile(canonicalName, updateUserDto.getGitProfile().getUserName());
     }
     user =
       this.userRepository.findByCanonicalName(canonicalName)

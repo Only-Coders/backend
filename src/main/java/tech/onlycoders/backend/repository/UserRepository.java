@@ -209,7 +209,7 @@ public interface UserRepository extends Neo4jRepository<User, String> {
     " WHERE c.name =~ $countryName AND COALESCE(s.name, '') =~ $skillName " +
     " WITH u, COUNT (r) as medals " +
     " RETURN u{.*, medals: medals} " +
-    " ORDER BY u[$sortField] DESC SKIP $skip LIMIT $size "
+    " ORDER BY toLower(u[$sortField]) ASC SKIP $skip LIMIT $size "
   )
   List<User> findAllWithFilters(
     String userName,
@@ -217,6 +217,24 @@ public interface UserRepository extends Neo4jRepository<User, String> {
     String skillName,
     String sortField,
     Integer skip,
+    Integer size
+  );
+
+  @Query(
+    " MATCH (u:User)-[:LIVES]->(c:Country) " +
+    " WHERE u.fullName =~ $userName OR replace(u.fullName,' ','') =~ $userName " +
+    " OPTIONAL MATCH (u)-[:POSSESS]->(s:Skill) " +
+    " OPTIONAL MATCH (u)-[:PUBLISH]->(:Post)<-[:TO]-(r:Reaction{type:'APPROVE'}) " +
+    " WHERE c.name =~ $countryName AND COALESCE(s.name, '') =~ $skillName " +
+    " WITH u, COUNT (r) as medals " +
+    " RETURN u{.*, medals: medals} " +
+    " ORDER BY u.medals DESC SKIP $skip LIMIT $size "
+  )
+  List<User> findAllWithFiltersAndSortByMedals(
+    String userName,
+    String countryName,
+    String skillName,
+    int skip,
     Integer size
   );
 
@@ -263,5 +281,5 @@ public interface UserRepository extends Neo4jRepository<User, String> {
   void removeGitProfile(String canonicalName);
 
   @Query("MATCH (:User{canonicalName:$canonicalName})-[g:USES]->(:GitPlatform) SET g += {userName: $userName}")
-  void updateGitPtofile(String canonicalName, String userName);
+  void updateGitProfile(String canonicalName, String userName);
 }

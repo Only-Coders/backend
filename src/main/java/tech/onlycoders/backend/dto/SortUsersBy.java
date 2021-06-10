@@ -1,6 +1,7 @@
 package tech.onlycoders.backend.dto;
 
 public enum SortUsersBy {
+  FULLNAME("fullName"),
   FIRSTNAME("firstName"),
   LASTNAME("lastName"),
   MEDALS("medals");
