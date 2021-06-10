@@ -50,4 +50,5 @@ public interface UserMapper {
   User createUserDtoToUser(CreateUserDto createUser);
 
   List<ReadUserLiteDto> listUserToListReadUserLiteDto(List<User> users);
+  List<ReadUserDto> listUserToListReadUserDto(List<User> users);
 }

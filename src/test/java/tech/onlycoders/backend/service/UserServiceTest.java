@@ -505,7 +505,7 @@ public class UserServiceTest {
       .thenReturn(usersList);
     Mockito.when(this.userRepository.countWithFilters(partialName, countryName, skillName)).thenReturn(1);
 
-    var result = this.service.findByPartialName(page, size, partialName, countryName, skillName, orderBy);
+    var result = this.service.findByPartialName("", page, size, partialName, countryName, skillName, orderBy);
     assertNotNull(result);
   }
 

@@ -93,7 +93,7 @@ public class UserController {
   @PreAuthorize("hasAuthority('USER')")
   @GetMapping
   @Operation(summary = "Search users by full name")
-  ResponseEntity<PaginateDto<ReadUserLiteDto>> findUsersByName(
+  ResponseEntity<PaginateDto<ReadUserDto>> findUsersByName(
     @RequestParam(defaultValue = "") String partialName,
     @RequestParam(defaultValue = "") String countryName,
     @RequestParam(defaultValue = "") String skillName,
@@ -101,7 +101,10 @@ public class UserController {
     @RequestParam(defaultValue = "0") @Min(0) Integer page,
     @RequestParam(defaultValue = "20") @Min(1) Integer size
   ) throws ApiException {
-    var persistedPerson = this.userService.findByPartialName(page, size, partialName, countryName, skillName, orderBy);
+    var userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    var canonicalName = userDetails.getCanonicalName();
+    var persistedPerson =
+      this.userService.findByPartialName(canonicalName, page, size, partialName, countryName, skillName, orderBy);
     return ResponseEntity.ok(persistedPerson);
   }
 
@@ -563,7 +566,7 @@ public class UserController {
     var persistedPerson = this.userService.updateProfile(canonicalName, updateUserDto);
     return ResponseEntity.ok(persistedPerson);
   }
-  
+
   @ApiResponses(value = { @ApiResponse(responseCode = "200", content = { @Content(mediaType = "application/json") }) })
   @PreAuthorize("hasAuthority('USER')")
   @PutMapping("/institutes/{id}")

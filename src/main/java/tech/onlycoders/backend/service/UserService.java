@@ -51,13 +51,11 @@ public class UserService {
   private final PostRepository postRepository;
   private final RoleRepository roleRepository;
   private final ContactRequestRepository contactRequestRepository;
-  private final GitProfileRepository gitProfileRepository;
 
   private final AuthService authService;
   private final NotificatorService notificatorService;
 
   private final UserMapper userMapper;
-  private final PostMapper postMapper;
   private final ContactRequestMapper contactRequestMapper;
 
   public UserService(
@@ -89,9 +87,7 @@ public class UserService {
     this.postRepository = postRepository;
     this.roleRepository = roleRepository;
     this.contactRequestRepository = contactRequestRepository;
-    this.gitProfileRepository = gitProfileRepository;
     this.notificatorService = notificatorService;
-    this.postMapper = postMapper;
     this.contactRequestMapper = contactRequestMapper;
   }
 
@@ -349,7 +345,8 @@ public class UserService {
     return getReadUserLiteDtoPaginateDto(page, size, users, totalQuantity);
   }
 
-  public PaginateDto<ReadUserLiteDto> findByPartialName(
+  public PaginateDto<ReadUserDto> findByPartialName(
+    String canonicalName,
     Integer page,
     Integer size,
     String partialName,
@@ -370,7 +367,25 @@ public class UserService {
       users = this.userRepository.findAllWithFilters(regex, countryRegex, skillNameRegex, field, page * size, size);
     }
     var totalQuantity = this.userRepository.countWithFilters(regex, countryRegex, skillNameRegex);
-    return getReadUserLiteDtoPaginateDto(page, size, users, totalQuantity);
+    var dtos = getReadUserDtoPaginateDto(page, size, users, totalQuantity);
+
+    dtos
+      .getContent()
+      .stream()
+      .parallel()
+      .forEach(
+        user -> {
+          Boolean isFollowing = this.userRepository.isFollowingAnotherUser(canonicalName, user.getCanonicalName());
+          Boolean isConnected = this.userRepository.areUsersConnected(canonicalName, user.getCanonicalName());
+          Boolean pendingRequest = this.userRepository.hasPendingRequest(canonicalName, user.getCanonicalName());
+          Boolean requestHasBeenSent = this.userRepository.requestHasBeenSent(canonicalName, user.getCanonicalName());
+          user.setFollowing(isFollowing);
+          user.setConnected(isConnected);
+          user.setPendingRequest(pendingRequest);
+          user.setRequestHasBeenSent(requestHasBeenSent);
+        }
+      );
+    return dtos;
   }
 
   private PaginateDto<ReadUserLiteDto> getReadUserLiteDtoPaginateDto(
@@ -396,6 +411,38 @@ public class UserService {
           var currentPosition = this.workPositionRepository.getUserCurrentPosition(user.getCanonicalName());
           var medals = this.userRepository.countUserMedals(user.getCanonicalName());
           user.setAmountOfMedals(medals);
+          currentPosition.ifPresent(
+            workPosition -> user.setCurrentPosition(workPositionMapper.workPositionToReadWorkPositionDto(workPosition))
+          );
+        }
+      );
+
+    return paginated;
+  }
+
+  private PaginateDto<ReadUserDto> getReadUserDtoPaginateDto(
+    Integer page,
+    Integer size,
+    List<User> users,
+    Integer totalQuantity
+  ) {
+    var pagesQuantity = PaginationUtils.getPagesQuantity(totalQuantity, size);
+
+    var paginated = new PaginateDto<ReadUserDto>();
+    paginated.setCurrentPage(page);
+    paginated.setTotalElements(totalQuantity);
+    paginated.setTotalPages(pagesQuantity);
+    paginated.setContent(userMapper.listUserToListReadUserDto(users));
+
+    paginated
+      .getContent()
+      .stream()
+      .parallel()
+      .forEach(
+        user -> {
+          var currentPosition = this.workPositionRepository.getUserCurrentPosition(user.getCanonicalName());
+          var medals = this.userRepository.countUserMedals(user.getCanonicalName());
+          user.setMedalQty(medals);
           currentPosition.ifPresent(
             workPosition -> user.setCurrentPosition(workPositionMapper.workPositionToReadWorkPositionDto(workPosition))
           );
