@@ -20,10 +20,10 @@ public interface TagRepository extends Neo4jRepository<Tag, String> {
 
   @Query(
     "CALL { " +
-    "   MATCH (t:Tag)<-[:IS_INTERESTED]-(p:Person) WHERE t.canonicalName =~ $likeName " +
+    "   MATCH (t:Tag)<-[:IS_INTERESTED]-(p:Person) WHERE COALESCE(t.name, '') =~ $likeName OR t.canonicalName =~ $likeName" +
     "   RETURN DISTINCT(t), count(p) as quantity " +
     "UNION " +
-    "   MATCH (t:Tag) WHERE t.canonicalName =~ $likeName " +
+    "   MATCH (t:Tag) WHERE COALESCE(t.name, '') =~ $likeName OR t.canonicalName =~ $likeName " +
     "   RETURN DISTINCT(t), 0 as quantity " +
     "} RETURN DISTINCT(t), quantity ORDER BY quantity DESC SKIP $skip LIMIT $size "
   )
