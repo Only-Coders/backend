@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 import org.jeasy.random.EasyRandom;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mapstruct.factory.Mappers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -23,6 +24,7 @@ import tech.onlycoders.backend.dto.SortUsersBy;
 import tech.onlycoders.backend.dto.auth.response.AuthResponseDto;
 import tech.onlycoders.backend.dto.contactrequest.request.CreateContactRequestDto;
 import tech.onlycoders.backend.dto.contactrequest.request.ResponseContactRequestDto;
+import tech.onlycoders.backend.dto.language.request.UpdateUserLanguageDto;
 import tech.onlycoders.backend.dto.user.GitProfileDto;
 import tech.onlycoders.backend.dto.user.request.CreateUserDto;
 import tech.onlycoders.backend.dto.user.request.UpdateUserBlockedStatusDto;
@@ -83,6 +85,9 @@ public class UserServiceTest {
   @Mock
   private SkillRepository skillRepository;
 
+  @Mock
+  private LanguageRepository languageRepository;
+
   private final EasyRandom ezRandom = new EasyRandom();
 
   @Mock
@@ -102,6 +107,9 @@ public class UserServiceTest {
 
   @Spy
   private final ContactRequestMapper contactRequestMapper = new ContactRequestMapperImpl();
+
+  @Spy
+  private final LanguageMapper languageMapper = Mappers.getMapper(LanguageMapper.class);
 
   @Test
   public void ShouldFailWhenFirebaseReturnsException() {
@@ -630,5 +638,38 @@ public class UserServiceTest {
 
     var res = this.service.updateProfile(user.getCanonicalName(), userDto);
     assertNotNull(res);
+  }
+
+  @Test
+  public void ShouldGetUserLanguage() {
+    Mockito
+      .when(this.languageRepository.getUserLanguage(anyString()))
+      .thenReturn(Language.builder().name("English").code("en").build());
+
+    var res = this.service.getUserLanguage("canonical");
+
+    assertNotNull(res);
+  }
+
+  @Test
+  public void ShouldSetUserLanguage() throws ApiException {
+    var dto = new UpdateUserLanguageDto();
+    dto.setCode("en");
+
+    Mockito
+      .when(this.languageRepository.findById(anyString()))
+      .thenReturn(Optional.of(Language.builder().name("English").code("en").build()));
+
+    this.service.setUserLanguage("canonical", dto);
+  }
+
+  @Test
+  public void ShouldFailSetUserLanguageWhenLangNotFound() {
+    var dto = new UpdateUserLanguageDto();
+    dto.setCode("en");
+
+    Mockito.when(this.languageRepository.findById(anyString())).thenReturn(Optional.empty());
+
+    assertThrows(Exception.class, () -> this.service.setUserLanguage("canonical", dto));
   }
 }
