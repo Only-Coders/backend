@@ -51,4 +51,7 @@ public class User extends Person {
 
   @Relationship(type = "POSSESS", direction = Relationship.Direction.OUTGOING)
   public Set<Skill> skills = new HashSet<>();
+
+  @Relationship(type = "SPEAKS", direction = Relationship.Direction.OUTGOING)
+  public Language language;
 }

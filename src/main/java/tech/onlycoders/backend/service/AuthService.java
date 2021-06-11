@@ -69,6 +69,7 @@ public class AuthService {
       var user = optionalUser.get();
       extendClaims(user, claims);
       claims.put("eliminationDate", user.getEliminationDate().orElse(null));
+      claims.put("language", (user.getLanguage().isPresent() ? user.getLanguage().get().getCode() : null));
       this.workPositionRepository.getUserCurrentPosition(user.getCanonicalName())
         .ifPresentOrElse(
           workPosition ->
@@ -111,6 +112,7 @@ public class AuthService {
     claims.put("imageURI", person.getImageURI());
     claims.put("fullName", person.getFirstName() + " " + person.getLastName());
     claims.put("defaultPrivacy", person.getDefaultPrivacyIsPublic());
+    claims.put("language", (person.getLanguage() != null ? person.getLanguage().getCode() : null));
     var newToken = this.jwtService.createToken(claims, person.getEmail());
     return AuthResponseDto.builder().token(newToken).build();
   }

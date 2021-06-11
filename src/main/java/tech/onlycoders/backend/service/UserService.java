@@ -30,6 +30,7 @@ import tech.onlycoders.backend.mapper.UserMapper;
 import tech.onlycoders.backend.mapper.WorkPositionMapper;
 import tech.onlycoders.backend.model.ContactRequest;
 import tech.onlycoders.backend.model.GitProfile;
+import tech.onlycoders.backend.model.Language;
 import tech.onlycoders.backend.model.User;
 import tech.onlycoders.backend.repository.*;
 import tech.onlycoders.backend.utils.CanonicalFactory;
@@ -164,6 +165,8 @@ public class UserService {
         user.setGitProfile(gitProfile);
       }
       user.setRole(role);
+      var lang = Language.builder().code("en").name("English").build();
+      user.setLanguage(lang);
       this.userRepository.save(user);
       return this.authService.postCreateUser(user);
     }

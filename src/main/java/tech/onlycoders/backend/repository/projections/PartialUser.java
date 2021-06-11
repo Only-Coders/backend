@@ -8,6 +8,7 @@ public interface PartialUser {
   Optional<Boolean> getBlocked();
   Optional<Date> getEliminationDate();
   Optional<Date> getBirthDate();
+  Optional<PartialLanguage> getLanguage();
 
   Date getCreatedAt();
 
@@ -50,6 +51,12 @@ public interface PartialUser {
   }
 
   interface PartialCountry {
+    String getName();
+
+    String getCode();
+  }
+
+  interface PartialLanguage {
     String getName();
 
     String getCode();
