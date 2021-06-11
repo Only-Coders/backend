@@ -21,6 +21,7 @@ import tech.onlycoders.backend.dto.contactrequest.response.ReadContactRequestDto
 import tech.onlycoders.backend.dto.institute.request.CreateInstituteDto;
 import tech.onlycoders.backend.dto.institute.request.UpdateDegreeDto;
 import tech.onlycoders.backend.dto.institute.response.ReadDegreeDto;
+import tech.onlycoders.backend.dto.language.response.ReadLanguageDto;
 import tech.onlycoders.backend.dto.pagination.*;
 import tech.onlycoders.backend.dto.post.response.ReadPostDto;
 import tech.onlycoders.backend.dto.skill.request.CreateSkillDto;
@@ -576,5 +577,22 @@ public class UserController {
     var email = userDetails.getEmail();
     this.instituteService.updateDegree(email, id, updateDegreeDto);
     return ResponseEntity.ok().build();
+  }
+
+  @ApiResponses(
+    value = {
+      @ApiResponse(
+        responseCode = "200",
+        content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ReadLanguageDto.class)) }
+      )
+    }
+  )
+  @PreAuthorize("hasAuthority('USER')")
+  @GetMapping("/language")
+  @Operation(summary = "Get my language.")
+  ResponseEntity<ReadLanguageDto> getMyLanguage() {
+    var userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    var canonicalName = userDetails.getCanonicalName();
+    return ResponseEntity.ok(this.userService.getUserLanguage(canonicalName));
   }
 }

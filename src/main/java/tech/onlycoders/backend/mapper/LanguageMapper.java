@@ -11,4 +11,6 @@ import tech.onlycoders.backend.model.Language;
 @Mapper(componentModel = "spring", injectionStrategy = InjectionStrategy.CONSTRUCTOR)
 public interface LanguageMapper {
   List<ReadLanguageDto> listLanguagesToListReadLanguageDto(List<Language> languages);
+
+  ReadLanguageDto LanguageToReadLanguageDto(Language userLanguage);
 }

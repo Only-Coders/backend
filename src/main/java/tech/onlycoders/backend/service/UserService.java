@@ -15,6 +15,7 @@ import tech.onlycoders.backend.dto.auth.response.AuthResponseDto;
 import tech.onlycoders.backend.dto.contactrequest.request.CreateContactRequestDto;
 import tech.onlycoders.backend.dto.contactrequest.request.ResponseContactRequestDto;
 import tech.onlycoders.backend.dto.contactrequest.response.ReadContactRequestDto;
+import tech.onlycoders.backend.dto.language.response.ReadLanguageDto;
 import tech.onlycoders.backend.dto.user.GitPlatform;
 import tech.onlycoders.backend.dto.user.GitProfileDto;
 import tech.onlycoders.backend.dto.user.request.CreateUserDto;
@@ -24,10 +25,7 @@ import tech.onlycoders.backend.dto.user.response.ReadUserDto;
 import tech.onlycoders.backend.dto.user.response.ReadUserLiteDto;
 import tech.onlycoders.backend.dto.user.response.ReadUserToDeleteDto;
 import tech.onlycoders.backend.exception.ApiException;
-import tech.onlycoders.backend.mapper.ContactRequestMapper;
-import tech.onlycoders.backend.mapper.PostMapper;
-import tech.onlycoders.backend.mapper.UserMapper;
-import tech.onlycoders.backend.mapper.WorkPositionMapper;
+import tech.onlycoders.backend.mapper.*;
 import tech.onlycoders.backend.model.ContactRequest;
 import tech.onlycoders.backend.model.GitProfile;
 import tech.onlycoders.backend.model.Language;
@@ -52,12 +50,14 @@ public class UserService {
   private final PostRepository postRepository;
   private final RoleRepository roleRepository;
   private final ContactRequestRepository contactRequestRepository;
+  private final LanguageRepository languageRepository;
 
   private final AuthService authService;
   private final NotificatorService notificatorService;
 
   private final UserMapper userMapper;
   private final ContactRequestMapper contactRequestMapper;
+  private final LanguageMapper languageMapper;
 
   public UserService(
     WorkPositionRepository workPositionRepository,
@@ -75,6 +75,8 @@ public class UserService {
     NotificatorService notificatorService,
     PostMapper postMapper,
     ContactRequestMapper contactRequestMapper,
+    LanguageRepository languageRepository,
+    LanguageMapper languageMapper,
     Neo4jTemplate template
   ) {
     this.workPositionRepository = workPositionRepository;
@@ -90,6 +92,8 @@ public class UserService {
     this.contactRequestRepository = contactRequestRepository;
     this.notificatorService = notificatorService;
     this.contactRequestMapper = contactRequestMapper;
+    this.languageRepository = languageRepository;
+    this.languageMapper = languageMapper;
   }
 
   public ReadUserDto getProfile(String sourceCanonicalName, String targetCanonicalName) throws ApiException {
@@ -568,5 +572,9 @@ public class UserService {
         .orElseThrow(() -> new ApiException(HttpStatus.INTERNAL_SERVER_ERROR, "error.user-not-found"));
 
     return userMapper.partialUserToReadPersonDto(user);
+  }
+
+  public ReadLanguageDto getUserLanguage(String canonicalName) {
+    return languageMapper.LanguageToReadLanguageDto(languageRepository.getUserLanguage(canonicalName));
   }
 }

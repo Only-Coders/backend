@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 import org.jeasy.random.EasyRandom;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mapstruct.factory.Mappers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -83,6 +84,9 @@ public class UserServiceTest {
   @Mock
   private SkillRepository skillRepository;
 
+  @Mock
+  private LanguageRepository languageRepository;
+
   private final EasyRandom ezRandom = new EasyRandom();
 
   @Mock
@@ -102,6 +106,9 @@ public class UserServiceTest {
 
   @Spy
   private final ContactRequestMapper contactRequestMapper = new ContactRequestMapperImpl();
+
+  @Spy
+  private final LanguageMapper languageMapper = Mappers.getMapper(LanguageMapper.class);
 
   @Test
   public void ShouldFailWhenFirebaseReturnsException() {
@@ -629,6 +636,17 @@ public class UserServiceTest {
     Mockito.when(this.countryRepository.findById(anyString())).thenReturn(Optional.of(country));
 
     var res = this.service.updateProfile(user.getCanonicalName(), userDto);
+    assertNotNull(res);
+  }
+
+  @Test
+  public void ShouldGetUserLanguage() {
+    Mockito
+      .when(this.languageRepository.getUserLanguage(anyString()))
+      .thenReturn(Language.builder().name("English").code("en").build());
+
+    var res = this.service.getUserLanguage("canonical");
+
     assertNotNull(res);
   }
 }
