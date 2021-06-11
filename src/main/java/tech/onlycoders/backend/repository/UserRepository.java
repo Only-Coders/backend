@@ -202,13 +202,13 @@ public interface UserRepository extends Neo4jRepository<User, String> {
   void removeUserEliminationDate(String email);
 
   @Query(
-    " MATCH (u:User)-[:LIVES]->(c:Country) " +
-    " WHERE u.fullName =~ $userName OR replace(u.fullName,' ','') =~ $userName " +
+    " MATCH (u:User)-[l:LIVES]->(c:Country) " +
+    " WHERE (u.fullName =~ $userName OR replace(u.fullName,' ','') =~ $userName) AND c.name =~ $countryName " +
     " OPTIONAL MATCH (u)-[:POSSESS]->(s:Skill) " +
     " OPTIONAL MATCH (u)-[:PUBLISH]->(:Post)<-[:TO]-(r:Reaction{type:'APPROVE'}) " +
-    " WHERE c.name =~ $countryName AND COALESCE(s.name, '') =~ $skillName " +
-    " WITH u, COUNT (r) as medals " +
-    " RETURN u{.*, medals: medals} " +
+    " WHERE COALESCE(s.name, '') =~ $skillName " +
+    " WITH u, l, c, COUNT (r) as medals " +
+    " RETURN u{.*, medals: medals}, COLLECT(l), COLLECT(c) " +
     " ORDER BY toLower(u[$sortField]) ASC SKIP $skip LIMIT $size "
   )
   List<User> findAllWithFilters(
@@ -221,13 +221,13 @@ public interface UserRepository extends Neo4jRepository<User, String> {
   );
 
   @Query(
-    " MATCH (u:User)-[:LIVES]->(c:Country) " +
-    " WHERE u.fullName =~ $userName OR replace(u.fullName,' ','') =~ $userName " +
+    " MATCH (u:User)-[l:LIVES]->(c:Country) " +
+    " WHERE (u.fullName =~ $userName OR replace(u.fullName,' ','') =~ $userName) AND c.name =~ $countryName " +
     " OPTIONAL MATCH (u)-[:POSSESS]->(s:Skill) " +
     " OPTIONAL MATCH (u)-[:PUBLISH]->(:Post)<-[:TO]-(r:Reaction{type:'APPROVE'}) " +
-    " WHERE c.name =~ $countryName AND COALESCE(s.name, '') =~ $skillName " +
-    " WITH u, COUNT (r) as medals " +
-    " RETURN u{.*, medals: medals} " +
+    " WHERE COALESCE(s.name, '') =~ $skillName " +
+    " WITH u, l, c, COUNT (r) as medals " +
+    " RETURN u{.*, medals: medals}, collect(l), collect(c) " +
     " ORDER BY u.medals DESC SKIP $skip LIMIT $size "
   )
   List<User> findAllWithFiltersAndSortByMedals(
