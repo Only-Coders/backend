@@ -135,6 +135,11 @@ public class PartialUserImpl implements PartialUser {
   }
 
   @Override
+  public Optional<PartialLanguage> getLanguage() {
+    return Optional.of(new PartialLanguageImpl("English", "en"));
+  }
+
+  @Override
   public Date getCreatedAt() {
     return null;
   }
