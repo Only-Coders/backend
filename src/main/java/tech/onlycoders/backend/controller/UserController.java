@@ -21,6 +21,7 @@ import tech.onlycoders.backend.dto.contactrequest.response.ReadContactRequestDto
 import tech.onlycoders.backend.dto.institute.request.CreateInstituteDto;
 import tech.onlycoders.backend.dto.institute.request.UpdateDegreeDto;
 import tech.onlycoders.backend.dto.institute.response.ReadDegreeDto;
+import tech.onlycoders.backend.dto.language.request.UpdateUserLanguageDto;
 import tech.onlycoders.backend.dto.language.response.ReadLanguageDto;
 import tech.onlycoders.backend.dto.pagination.*;
 import tech.onlycoders.backend.dto.post.response.ReadPostDto;
@@ -594,5 +595,16 @@ public class UserController {
     var userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     var canonicalName = userDetails.getCanonicalName();
     return ResponseEntity.ok(this.userService.getUserLanguage(canonicalName));
+  }
+
+  @ApiResponses(value = { @ApiResponse(responseCode = "200", content = { @Content(mediaType = "application/json") }) })
+  @PreAuthorize("hasAuthority('USER')")
+  @PutMapping("/language")
+  @Operation(summary = "Set my language.")
+  ResponseEntity<ReadLanguageDto> setMyLanguage(@RequestBody UpdateUserLanguageDto languageDto) throws ApiException {
+    var userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    var canonicalName = userDetails.getCanonicalName();
+    this.userService.setUserLanguage(canonicalName, languageDto);
+    return ResponseEntity.ok().build();
   }
 }

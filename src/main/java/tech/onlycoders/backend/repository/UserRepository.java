@@ -263,17 +263,17 @@ public interface UserRepository extends Neo4jRepository<User, String> {
 
   @Query(
     "MATCH (u:User{canonicalName:$canonicalName}) with u " +
-    "MATCH (c:Country{code:$countryCode}) with c " +
-    "MATCH (u)-[l:LIVES]->(:Country) DELETE l with c" +
+    "MATCH (c:Country{code:$countryCode}) with c,u " +
+    "MATCH (u)-[l:LIVES]->(:Country) DELETE l with c,u " +
     "MERGE (u)-[:LIVES]->(c)"
   )
   void setCountry(String canonicalName, String countryCode);
 
   @Query(
     "MATCH (u:User{canonicalName:$canonicalName}) with u " +
-    "MATCH (p:GitPlatform{id:platformId}) with p " +
-    "MATCH (u)-[g:USES]->(:GitPlatform) DELETE g with p" +
-    "MERGE (u)-[:USES{userName: $userName}]->(c)"
+    "MATCH (p:GitPlatform{id:platformId}) with p,u " +
+    "MATCH (u)-[g:USES]->(:GitPlatform) DELETE g with p,u " +
+    "MERGE (u)-[:USES{userName: $userName}]->(p)"
   )
   void setGitProfile(String canonicalName, String userName, String platformId);
 

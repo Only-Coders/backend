@@ -9,4 +9,12 @@ import tech.onlycoders.backend.model.Language;
 public interface LanguageRepository extends Neo4jRepository<Language, String> {
   @Query("MATCH (:User{canonicalName:$canonicalName})-[:SPEAKS]->(l:Language) RETURN l")
   Language getUserLanguage(String canonicalName);
+
+  @Query(
+    "MATCH (u:User{canonicalName:$canonicalName}) with u " +
+    "MATCH (l:Language{code:$code}) with u,l " +
+    "MATCH (u)-[s:SPEAKS]->(:Language) DELETE s with u,l " +
+    "MERGE (u)-[:SPEAKS]->(l)"
+  )
+  void setUserLanguage(String canonicalName, String code);
 }

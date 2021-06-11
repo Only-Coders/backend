@@ -24,6 +24,7 @@ import tech.onlycoders.backend.dto.SortUsersBy;
 import tech.onlycoders.backend.dto.auth.response.AuthResponseDto;
 import tech.onlycoders.backend.dto.contactrequest.request.CreateContactRequestDto;
 import tech.onlycoders.backend.dto.contactrequest.request.ResponseContactRequestDto;
+import tech.onlycoders.backend.dto.language.request.UpdateUserLanguageDto;
 import tech.onlycoders.backend.dto.user.GitProfileDto;
 import tech.onlycoders.backend.dto.user.request.CreateUserDto;
 import tech.onlycoders.backend.dto.user.request.UpdateUserBlockedStatusDto;
@@ -648,5 +649,27 @@ public class UserServiceTest {
     var res = this.service.getUserLanguage("canonical");
 
     assertNotNull(res);
+  }
+
+  @Test
+  public void ShouldSetUserLanguage() throws ApiException {
+    var dto = new UpdateUserLanguageDto();
+    dto.setCode("en");
+
+    Mockito
+      .when(this.languageRepository.findById(anyString()))
+      .thenReturn(Optional.of(Language.builder().name("English").code("en").build()));
+
+    this.service.setUserLanguage("canonical", dto);
+  }
+
+  @Test
+  public void ShouldFailSetUserLanguageWhenLangNotFound() {
+    var dto = new UpdateUserLanguageDto();
+    dto.setCode("en");
+
+    Mockito.when(this.languageRepository.findById(anyString())).thenReturn(Optional.empty());
+
+    assertThrows(Exception.class, () -> this.service.setUserLanguage("canonical", dto));
   }
 }

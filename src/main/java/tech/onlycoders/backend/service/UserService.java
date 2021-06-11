@@ -15,6 +15,7 @@ import tech.onlycoders.backend.dto.auth.response.AuthResponseDto;
 import tech.onlycoders.backend.dto.contactrequest.request.CreateContactRequestDto;
 import tech.onlycoders.backend.dto.contactrequest.request.ResponseContactRequestDto;
 import tech.onlycoders.backend.dto.contactrequest.response.ReadContactRequestDto;
+import tech.onlycoders.backend.dto.language.request.UpdateUserLanguageDto;
 import tech.onlycoders.backend.dto.language.response.ReadLanguageDto;
 import tech.onlycoders.backend.dto.user.GitPlatform;
 import tech.onlycoders.backend.dto.user.GitProfileDto;
@@ -576,5 +577,12 @@ public class UserService {
 
   public ReadLanguageDto getUserLanguage(String canonicalName) {
     return languageMapper.LanguageToReadLanguageDto(languageRepository.getUserLanguage(canonicalName));
+  }
+
+  public void setUserLanguage(String canonicalName, UpdateUserLanguageDto languageDto) throws ApiException {
+    var lang = languageRepository
+      .findById(languageDto.getCode())
+      .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "error.language-not-found"));
+    languageRepository.setUserLanguage(canonicalName, lang.getCode());
   }
 }
