@@ -3,6 +3,7 @@ package tech.onlycoders.backend.service;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 
+import java.util.ArrayList;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import org.jeasy.random.EasyRandom;
@@ -27,12 +28,10 @@ import tech.onlycoders.backend.mapper.WorkPositionMapper;
 import tech.onlycoders.backend.mapper.WorkPositionMapperImpl;
 import tech.onlycoders.backend.mapper.WorkplaceMapper;
 import tech.onlycoders.backend.mapper.WorkplaceMapperImpl;
+import tech.onlycoders.backend.model.Language;
 import tech.onlycoders.backend.model.WorkPosition;
 import tech.onlycoders.backend.model.Workplace;
-import tech.onlycoders.backend.repository.DataReportRepository;
-import tech.onlycoders.backend.repository.UserRepository;
-import tech.onlycoders.backend.repository.WorkPositionRepository;
-import tech.onlycoders.backend.repository.WorkplaceRepository;
+import tech.onlycoders.backend.repository.*;
 import tech.onlycoders.backend.utils.PartialUserImpl;
 
 @ExtendWith(MockitoExtension.class)
@@ -44,6 +43,9 @@ public class DataReportServiceTest {
   @Mock
   private DataReportRepository repoMock;
 
+  @Mock
+  private LanguageRepository languageRepository;
+
   private final EasyRandom ezRandom = new EasyRandom();
 
   @Test
@@ -52,6 +54,17 @@ public class DataReportServiceTest {
     Mockito.when(repoMock.getBlacklistedUsersQuantity()).thenReturn(1);
     Mockito.when(repoMock.getBlockedUsersQuantity()).thenReturn(1);
     var res = service.getUsersQuantity();
+
+    assertNotNull(res);
+  }
+
+  @Test
+  public void ShouldGetLanguageUse() {
+    var list = new ArrayList<Language>();
+    list.add(Language.builder().code("en").name("English").build());
+    Mockito.when(this.languageRepository.findAll()).thenReturn(list);
+    Mockito.when(this.languageRepository.getLanguageUseQuantity(anyString())).thenReturn(1);
+    var res = service.getLanguageUse();
 
     assertNotNull(res);
   }
