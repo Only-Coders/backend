@@ -375,11 +375,17 @@ public class PostServiceTest {
   @Test
   public void ShouldUpdatePostWhenDataIsOk() throws ApiException {
     var requestDto = ezRandom.nextObject(CreatePostDto.class);
+
+    var post = ezRandom.nextObject(PartialPostImpl.class);
+    var createdPost = ezRandom.nextObject(Post.class);
     var publisher = new PartialUserImpl();
 
+    Mockito
+      .when(tagRepository.findByCanonicalName(anyString()))
+      .thenReturn(Optional.of(ezRandom.nextObject(Tag.class)));
     Mockito.when(userRepository.findByCanonicalName(anyString())).thenReturn(Optional.of(publisher));
-    Mockito.when(postRepository.findById(anyString())).thenReturn(Optional.of(Post.builder().build()));
-    Mockito.when(postRepository.save(any(Post.class))).thenReturn(new Post());
+    Mockito.when(postRepository.getById(anyString())).thenReturn(Optional.of(post));
+    Mockito.when(postRepository.getCreatedPost(anyString())).thenReturn(createdPost);
 
     var res = service.updatePost("postId", "canonicalName", requestDto);
     assertNotNull(res);

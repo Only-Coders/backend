@@ -14,7 +14,7 @@ public interface PostMapper {
   @Mapping(target = "commentQuantity", ignore = true)
   @Mapping(target = "reactions", ignore = true)
   @Mapping(target = "myReaction", ignore = true)
-  ReadPostDto postToReadPersonDto(Post post);
+  ReadPostDto postToReadPostDto(Post post);
 
   @Mapping(target = "userFavorites", ignore = true)
   @Mapping(target = "tags", ignore = true)

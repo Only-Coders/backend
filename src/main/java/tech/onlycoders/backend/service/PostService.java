@@ -105,7 +105,7 @@ public class PostService {
     postRepository.linkWithPublisher(post.getId(), publisher.getId());
     userRepository.updateDefaultPrivacy(publisher.getId(), post.getIsPublic());
 
-    var dto = postMapper.postToReadPersonDto(this.postRepository.getCreatedPost(postId));
+    var dto = postMapper.postToReadPostDto(this.postRepository.getCreatedPost(postId));
     var listDto = Collections.singletonList(dto);
 
     this.expandPostData(publisherCanonicalName, listDto);
@@ -435,7 +435,7 @@ public class PostService {
       .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "error.user-not-found"));
 
     var originalPost = postRepository
-      .findById(postId)
+      .getById(postId)
       .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "error.post-not-found"));
 
     var mentions = getPersonList(createPostDto.getMentionCanonicalNames());
@@ -446,14 +446,18 @@ public class PostService {
       publisher.getLastName()
     );
 
-    var tags = getOrSaveTagList(createPostDto.getTagNames());
+    postRepository.removePostTags(originalPost.getId());
+    postRepository.removePostMentions(originalPost.getId());
 
-    originalPost.setTags(tags);
-    originalPost.setMessage(createPostDto.getMessage());
-    originalPost.setIsPublic(createPostDto.getIsPublic());
-    originalPost.setUrl(createPostDto.getUrl());
-    originalPost.setType(createPostDto.getType());
-    originalPost = postRepository.save(originalPost);
+    var tags = getOrSaveTagList(createPostDto.getTagNames());
+    tags.forEach(tag -> postRepository.mentionTag(postId, tag.getTag().getCanonicalName(), tag.getDisplayName()));
+
+    var newMessage = createPostDto.getMessage();
+    var newPrivacy = createPostDto.getIsPublic();
+    var newUrl = createPostDto.getUrl();
+    var newType = createPostDto.getType();
+
+    postRepository.updatePost(originalPost.getId(), newMessage, newPrivacy, newUrl, newType);
 
     mentions.forEach(partialUser -> postRepository.mentionUser(postId, partialUser.getId()));
     postRepository.linkWithPublisher(originalPost.getId(), publisher.getId());
@@ -465,7 +469,9 @@ public class PostService {
           )
     );
 
-    return postMapper.postToReadPersonDto(originalPost);
+    var updatedPost = postRepository.getCreatedPost(originalPost.getId());
+
+    return postMapper.postToReadPostDto(updatedPost);
   }
 
   public void reportPost(String canonicalName, String postId, CreatePostReportDto createPostReportDto)

@@ -7,6 +7,7 @@ import org.springframework.data.neo4j.repository.Neo4jRepository;
 import org.springframework.data.neo4j.repository.query.Query;
 import org.springframework.stereotype.Repository;
 import tech.onlycoders.backend.model.Post;
+import tech.onlycoders.backend.model.PostType;
 import tech.onlycoders.backend.repository.projections.PartialPost;
 
 @Repository
@@ -213,4 +214,20 @@ public interface PostRepository extends Neo4jRepository<Post, String> {
     " LIMIT 1 "
   )
   Post getCreatedPost(String postId);
+
+  @Query("MATCH (p:Post{id:$postId})-[h:HAS]->(:Tag) DELETE h")
+  void removePostTags(String postId);
+
+  @Query("MATCH (p:Post{id:$postId})-[m:MENTIONS]->(:User) DELETE m")
+  void removePostMentions(String postId);
+
+  @Query(
+    "MATCH (p:Post{id: $postId}) WITH p MATCH (t:Tag{canonicalName: $tag}) MERGE (p)-[:HAS{displayName: $displayName}]->(t);"
+  )
+  void mentionTag(String postId, String tag, String displayName);
+
+  @Query(
+    "MATCH (p:Post{id:$postId})  SET p += {message: $newMessage, type: $newType, url: $newUrl, isPublic: $newIsPublic }"
+  )
+  void updatePost(String postId, String newMessage, Boolean newIsPublic, String newUrl, PostType newType);
 }
