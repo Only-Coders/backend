@@ -561,8 +561,8 @@ public class UserController {
   )
   @PreAuthorize("hasAuthority('USER')")
   @PutMapping
-  @Operation(summary = "Gets user profile")
-  ResponseEntity<ReadUserDto> getProfile(@RequestBody UpdateUserDto updateUserDto) throws ApiException {
+  @Operation(summary = "Updates user profile")
+  ResponseEntity<ReadUserDto> getProfile(@RequestBody @Valid UpdateUserDto updateUserDto) throws ApiException {
     var userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     var canonicalName = userDetails.getCanonicalName();
     var persistedPerson = this.userService.updateProfile(canonicalName, updateUserDto);
