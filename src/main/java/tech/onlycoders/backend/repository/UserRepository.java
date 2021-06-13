@@ -254,7 +254,7 @@ public interface UserRepository extends Neo4jRepository<User, String> {
   )
   void updateProfile(
     String canonicalName,
-    Date birthDate,
+    Long birthDate,
     String description,
     String firstName,
     String lastName,

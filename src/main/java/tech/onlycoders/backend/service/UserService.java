@@ -533,7 +533,7 @@ public class UserService {
 
     userRepository.updateProfile(
       canonicalName,
-      updateUserDto.getBirthDate(),
+      updateUserDto.getBirthDate().toInstant().toEpochMilli(),
       updateUserDto.getDescription(),
       updateUserDto.getFirstName(),
       updateUserDto.getLastName(),
