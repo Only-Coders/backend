@@ -96,6 +96,9 @@ public class UserServiceTest {
   @Mock
   private PostRepository postRepository;
 
+  @Mock
+  private BlacklistRepository blacklistRepository;
+
   @Spy
   private final UserMapper userMapper = new UserMapperImpl();
 
@@ -664,5 +667,14 @@ public class UserServiceTest {
     Mockito.when(this.languageRepository.findById(anyString())).thenReturn(Optional.empty());
 
     assertThrows(Exception.class, () -> this.service.setUserLanguage("canonical", dto));
+  }
+
+  @Test
+  public void ShouldDeleteAndBanUser() throws ApiException {
+    var user = ezRandom.nextObject(PartialUserImpl.class);
+
+    Mockito.when(this.userRepository.findByCanonicalName(anyString())).thenReturn(Optional.of(user));
+
+    this.service.deleteAndBanUser("asd");
   }
 }
