@@ -270,8 +270,8 @@ public interface UserRepository extends Neo4jRepository<User, String> {
   void setCountry(String canonicalName, String countryCode);
 
   @Query(
-    "MATCH (u:User{canonicalName:$canonicalName}) with u " +
-    "MATCH (p:GitPlatform{id:platformId}) with p,u " +
+    "MATCH (u:User{canonicalName: $canonicalName}) with u " +
+    "MATCH (p:GitPlatform{id: $platformId}) with p,u " +
     "MATCH (u)-[g:USES]->(:GitPlatform) DELETE g with p,u " +
     "MERGE (u)-[:USES{userName: $userName}]->(p)"
   )
