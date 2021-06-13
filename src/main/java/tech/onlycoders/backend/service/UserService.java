@@ -1,10 +1,7 @@
 package tech.onlycoders.backend.service;
 
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
-import org.springframework.data.neo4j.core.Neo4jTemplate;
+import java.util.*;
+import java.util.stream.Collectors;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,11 +23,11 @@ import tech.onlycoders.backend.dto.user.response.ReadUserDto;
 import tech.onlycoders.backend.dto.user.response.ReadUserLiteDto;
 import tech.onlycoders.backend.dto.user.response.ReadUserToDeleteDto;
 import tech.onlycoders.backend.exception.ApiException;
-import tech.onlycoders.backend.mapper.*;
-import tech.onlycoders.backend.model.ContactRequest;
-import tech.onlycoders.backend.model.GitProfile;
-import tech.onlycoders.backend.model.Language;
-import tech.onlycoders.backend.model.User;
+import tech.onlycoders.backend.mapper.ContactRequestMapper;
+import tech.onlycoders.backend.mapper.LanguageMapper;
+import tech.onlycoders.backend.mapper.UserMapper;
+import tech.onlycoders.backend.mapper.WorkPositionMapper;
+import tech.onlycoders.backend.model.*;
 import tech.onlycoders.backend.repository.*;
 import tech.onlycoders.backend.utils.CanonicalFactory;
 import tech.onlycoders.backend.utils.GlobalVariables;
@@ -72,13 +69,10 @@ public class UserService {
     PostRepository postRepository,
     RoleRepository roleRepository,
     ContactRequestRepository contactRequestRepository,
-    GitProfileRepository gitProfileRepository,
     NotificatorService notificatorService,
-    PostMapper postMapper,
     ContactRequestMapper contactRequestMapper,
     LanguageRepository languageRepository,
-    LanguageMapper languageMapper,
-    Neo4jTemplate template
+    LanguageMapper languageMapper
   ) {
     this.workPositionRepository = workPositionRepository;
     this.workPositionMapper = workPositionMapper;
@@ -157,6 +151,13 @@ public class UserService {
       var user = userMapper.createUserDtoToUser(createUserDto);
       user.setEmail(email);
       user.setCountry(country);
+
+      user.setConfigs(
+        Arrays
+          .stream(EventType.values())
+          .map(eventType -> NotificationConfig.builder().push(true).email(true).type(eventType).build())
+          .collect(Collectors.toSet())
+      );
 
       if (createUserDto.getGitProfile() != null) {
         var gitPlatform = gitPlatformRepository
