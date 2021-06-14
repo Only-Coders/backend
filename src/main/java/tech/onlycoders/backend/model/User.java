@@ -54,4 +54,7 @@ public class User extends Person {
 
   @Relationship(type = "SPEAKS", direction = Relationship.Direction.OUTGOING)
   public Language language;
+
+  @Relationship(type = "OWNS", direction = Relationship.Direction.OUTGOING)
+  public List<FCMToken> FCMToken = new ArrayList<>();
 }

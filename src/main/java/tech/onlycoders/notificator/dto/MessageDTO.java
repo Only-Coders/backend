@@ -1,6 +1,7 @@
 package tech.onlycoders.notificator.dto;
 
 import java.io.Serializable;
+import java.util.Date;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -15,4 +16,7 @@ public class MessageDTO implements Serializable {
   private EventType eventType;
   private String message;
   private String to;
+
+  @Builder.Default
+  private Date createdAt = new Date();
 }

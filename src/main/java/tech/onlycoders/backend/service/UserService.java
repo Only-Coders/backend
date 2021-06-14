@@ -16,6 +16,7 @@ import tech.onlycoders.backend.dto.language.request.UpdateUserLanguageDto;
 import tech.onlycoders.backend.dto.language.response.ReadLanguageDto;
 import tech.onlycoders.backend.dto.user.GitPlatform;
 import tech.onlycoders.backend.dto.user.GitProfileDto;
+import tech.onlycoders.backend.dto.user.request.AddFCMTokenDto;
 import tech.onlycoders.backend.dto.user.request.CreateUserDto;
 import tech.onlycoders.backend.dto.user.request.UpdateUserBlockedStatusDto;
 import tech.onlycoders.backend.dto.user.request.UpdateUserDto;
@@ -57,6 +58,7 @@ public class UserService {
   private final UserMapper userMapper;
   private final ContactRequestMapper contactRequestMapper;
   private final LanguageMapper languageMapper;
+  private final FCMTokenRepository fcmTokenRepository;
 
   public UserService(
     WorkPositionRepository workPositionRepository,
@@ -73,8 +75,9 @@ public class UserService {
     NotificatorService notificatorService,
     ContactRequestMapper contactRequestMapper,
     LanguageRepository languageRepository,
+    BlacklistRepository blacklistRepository,
     LanguageMapper languageMapper,
-    BlacklistRepository blacklistRepository
+    FCMTokenRepository fcmTokenRepository
   ) {
     this.workPositionRepository = workPositionRepository;
     this.workPositionMapper = workPositionMapper;
@@ -92,6 +95,7 @@ public class UserService {
     this.languageRepository = languageRepository;
     this.languageMapper = languageMapper;
     this.blacklistRepository = blacklistRepository;
+    this.fcmTokenRepository = fcmTokenRepository;
   }
 
   public ReadUserDto getProfile(String sourceCanonicalName, String targetCanonicalName) throws ApiException {
@@ -541,7 +545,8 @@ public class UserService {
       updateUserDto.getDescription(),
       updateUserDto.getFirstName(),
       updateUserDto.getLastName(),
-      updateUserDto.getImageURI()
+      updateUserDto.getImageURI(),
+      updateUserDto.getFirstName() + " " + updateUserDto.getLastName()
     );
 
     if (!user.getCountry().getCode().equals(updateUserDto.getCountryCode())) {
@@ -597,5 +602,11 @@ public class UserService {
     var ban = BlackList.builder().email(user.getEmail()).build();
     blacklistRepository.save(ban);
     userRepository.deleteUser(user.getEmail());
+  }
+
+  public void addFCMToken(String canonicalName, AddFCMTokenDto addFCMToken) {
+    var fcmToken = FCMToken.builder().token(addFCMToken.getFcmToken()).build();
+    this.fcmTokenRepository.save(fcmToken);
+    this.fcmTokenRepository.addUserToken(canonicalName, fcmToken.getId());
   }
 }

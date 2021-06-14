@@ -14,7 +14,9 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import tech.onlycoders.backend.bean.auth.UserDetails;
-import tech.onlycoders.backend.dto.*;
+import tech.onlycoders.backend.dto.PaginateDto;
+import tech.onlycoders.backend.dto.SortContactsBy;
+import tech.onlycoders.backend.dto.SortUsersBy;
 import tech.onlycoders.backend.dto.contactrequest.request.CreateContactRequestDto;
 import tech.onlycoders.backend.dto.contactrequest.request.ResponseContactRequestDto;
 import tech.onlycoders.backend.dto.contactrequest.response.ReadContactRequestDto;
@@ -614,6 +616,17 @@ public class UserController {
   @Operation(summary = "Delete and Ban a user.")
   ResponseEntity<?> deleteAndBanUser(@PathVariable String canonicalName) throws ApiException {
     this.userService.deleteAndBanUser(canonicalName);
+    return ResponseEntity.ok().build();
+  }
+
+  @ApiResponses(value = { @ApiResponse(responseCode = "200", content = { @Content(mediaType = "application/json") }) })
+  @PreAuthorize("hasAuthority('USER')")
+  @PostMapping("fcm-token")
+  @Operation(summary = "Add a FCM token to the user account.")
+  ResponseEntity<?> addFCMToken(@RequestBody AddFCMTokenDto addFCMTokenDto) throws ApiException {
+    var userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    var canonicalName = userDetails.getCanonicalName();
+    this.userService.addFCMToken(canonicalName, addFCMTokenDto);
     return ResponseEntity.ok().build();
   }
 }
