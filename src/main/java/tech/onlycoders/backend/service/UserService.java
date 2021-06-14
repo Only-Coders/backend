@@ -49,6 +49,7 @@ public class UserService {
   private final RoleRepository roleRepository;
   private final ContactRequestRepository contactRequestRepository;
   private final LanguageRepository languageRepository;
+  private final BlacklistRepository blacklistRepository;
 
   private final AuthService authService;
   private final NotificatorService notificatorService;
@@ -72,7 +73,8 @@ public class UserService {
     NotificatorService notificatorService,
     ContactRequestMapper contactRequestMapper,
     LanguageRepository languageRepository,
-    LanguageMapper languageMapper
+    LanguageMapper languageMapper,
+    BlacklistRepository blacklistRepository
   ) {
     this.workPositionRepository = workPositionRepository;
     this.workPositionMapper = workPositionMapper;
@@ -89,6 +91,7 @@ public class UserService {
     this.contactRequestMapper = contactRequestMapper;
     this.languageRepository = languageRepository;
     this.languageMapper = languageMapper;
+    this.blacklistRepository = blacklistRepository;
   }
 
   public ReadUserDto getProfile(String sourceCanonicalName, String targetCanonicalName) throws ApiException {
@@ -585,5 +588,14 @@ public class UserService {
       .findById(languageDto.getCode())
       .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "error.language-not-found"));
     languageRepository.setUserLanguage(canonicalName, lang.getCode());
+  }
+
+  public void deleteAndBanUser(String canonicalName) throws ApiException {
+    var user = userRepository
+      .findByCanonicalName(canonicalName)
+      .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "error.user-not-found"));
+    var ban = BlackList.builder().email(user.getEmail()).build();
+    blacklistRepository.save(ban);
+    userRepository.deleteUser(user.getEmail());
   }
 }

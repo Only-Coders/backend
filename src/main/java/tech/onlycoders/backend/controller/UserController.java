@@ -607,4 +607,13 @@ public class UserController {
     this.userService.setUserLanguage(canonicalName, languageDto);
     return ResponseEntity.ok().build();
   }
+
+  @ApiResponses(value = { @ApiResponse(responseCode = "200", content = { @Content(mediaType = "application/json") }) })
+  @PreAuthorize("hasAuthority('ADMIN')")
+  @DeleteMapping("{canonicalName}")
+  @Operation(summary = "Delete and Ban a user.")
+  ResponseEntity<?> deleteAndBanUser(@PathVariable String canonicalName) throws ApiException {
+    this.userService.deleteAndBanUser(canonicalName);
+    return ResponseEntity.ok().build();
+  }
 }
