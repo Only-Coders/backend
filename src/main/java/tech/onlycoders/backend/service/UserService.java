@@ -224,7 +224,13 @@ public class UserService {
       user.getLastName()
     );
     this.notificatorService.send(
-        MessageDTO.builder().message(message).to(contact.getEmail()).eventType(EventType.CONTACT_REQUEST).build()
+        MessageDTO
+          .builder()
+          .message(message)
+          .to(contact.getEmail())
+          .eventType(EventType.CONTACT_REQUEST)
+          .from(user.getFullName())
+          .build()
       );
   }
 
@@ -241,6 +247,7 @@ public class UserService {
           .builder()
           .message(user.getFullName() + " ha comenzado a seguirte!")
           .to(followed.getEmail())
+          .from(user.getFullName())
           .eventType(EventType.NEW_FOLLOWER)
           .build()
       );
@@ -493,6 +500,7 @@ public class UserService {
           .builder()
           .message(user.getFullName() + " ha aceptado tu peticion de contacto!")
           .to(requester.getEmail())
+          .from(user.getFullName())
           .eventType(EventType.CONTACT_ACCEPTED)
           .build()
       );

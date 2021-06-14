@@ -16,6 +16,7 @@ public class MessageDTO implements Serializable {
   private EventType eventType;
   private String message;
   private String to;
+  private String from;
 
   @Builder.Default
   private Date createdAt = new Date();

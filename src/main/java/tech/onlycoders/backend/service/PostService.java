@@ -91,7 +91,13 @@ public class PostService {
     mentions.forEach(
       person ->
         this.notificatorService.send(
-            MessageDTO.builder().to(person.getEmail()).eventType(EventType.NEW_MENTION).message(message).build()
+            MessageDTO
+              .builder()
+              .to(person.getEmail())
+              .eventType(EventType.NEW_MENTION)
+              .message(message)
+              .from(publisher.getFullName())
+              .build()
           )
     );
 
@@ -115,6 +121,7 @@ public class PostService {
           .builder()
           .message(publisher.getFullName() + " ha publicado un nuevo post!")
           .to(publisher.getEmail())
+          .from(publisher.getFullName())
           .eventType(EventType.NEW_POST)
           .build()
       );
@@ -465,7 +472,13 @@ public class PostService {
     mentions.forEach(
       person ->
         this.notificatorService.send(
-            MessageDTO.builder().to(person.getEmail()).eventType(EventType.NEW_MENTION).message(message).build()
+            MessageDTO
+              .builder()
+              .to(person.getEmail())
+              .eventType(EventType.NEW_MENTION)
+              .message(message)
+              .from(publisher.getFullName())
+              .build()
           )
     );
 
