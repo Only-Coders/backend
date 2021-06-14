@@ -576,7 +576,7 @@ public class UserService {
       this.userRepository.findByCanonicalName(canonicalName)
         .orElseThrow(() -> new ApiException(HttpStatus.INTERNAL_SERVER_ERROR, "error.user-not-found"));
 
-    return userMapper.partialUserToReadPersonDto(user);
+    return this.getProfile(user.getCanonicalName(), user.getCanonicalName());
   }
 
   public ReadLanguageDto getUserLanguage(String canonicalName) {

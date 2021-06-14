@@ -1,6 +1,5 @@
 package tech.onlycoders.backend.repository;
 
-import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -250,7 +249,7 @@ public interface UserRepository extends Neo4jRepository<User, String> {
 
   @Query(
     "MATCH (u:User{canonicalName:$canonicalName}) " +
-    "SET u += {birthDate: $birthDate, firstName: $firstName, lastName: $lastName, imageURI: $imageURI}"
+    "SET u += {birthDate: $birthDate, firstName: $firstName, lastName: $lastName, imageURI: $imageURI, description: $description, fullName: $fullName}"
   )
   void updateProfile(
     String canonicalName,
@@ -258,7 +257,8 @@ public interface UserRepository extends Neo4jRepository<User, String> {
     String description,
     String firstName,
     String lastName,
-    String imageURI
+    String imageURI,
+    String fullName
   );
 
   @Query(
@@ -273,7 +273,7 @@ public interface UserRepository extends Neo4jRepository<User, String> {
     "MATCH (u:User{canonicalName: $canonicalName}) with u " +
     "MATCH (p:GitPlatform{id: $platformId}) with p,u " +
     "MATCH (u)-[g:USES]->(:GitPlatform) DELETE g with p,u " +
-    "MERGE (u)-[:USES{userName: $userName}]->(p)"
+    "MERGE (u)-[:USES{username: $userName}]->(p)"
   )
   void setGitProfile(String canonicalName, String userName, String platformId);
 
