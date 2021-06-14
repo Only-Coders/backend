@@ -97,6 +97,7 @@ public class PostService {
               .eventType(EventType.NEW_MENTION)
               .message(message)
               .from(publisher.getFullName())
+              .imageURI(publisher.getImageURI())
               .build()
           )
     );
@@ -123,6 +124,7 @@ public class PostService {
           .to(publisher.getEmail())
           .from(publisher.getFullName())
           .eventType(EventType.NEW_POST)
+          .imageURI(publisher.getImageURI())
           .build()
       );
     return listDto.get(0);
