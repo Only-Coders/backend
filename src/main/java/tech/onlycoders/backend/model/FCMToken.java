@@ -12,4 +12,5 @@ import org.springframework.data.neo4j.core.schema.Node;
 public class FCMToken extends BaseEntity {
 
   private String token;
+  private String deviceId;
 }

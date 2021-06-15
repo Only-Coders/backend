@@ -613,8 +613,20 @@ public class UserService {
   }
 
   public void addFCMToken(String canonicalName, AddFCMTokenDto addFCMToken) {
-    var fcmToken = FCMToken.builder().token(addFCMToken.getFcmToken()).build();
-    this.fcmTokenRepository.save(fcmToken);
-    this.fcmTokenRepository.addUserToken(canonicalName, fcmToken.getId());
+    this.fcmTokenRepository.findByDeviceId(addFCMToken.getDeviceId())
+      .ifPresentOrElse(
+        fcmToken -> {
+          fcmToken.setToken(addFCMToken.getFcmToken());
+          this.fcmTokenRepository.save(fcmToken);
+        },
+        () -> {
+          var fcmToken = FCMToken
+            .builder()
+            .token(addFCMToken.getFcmToken())
+            .deviceId(addFCMToken.getDeviceId())
+            .build();
+          this.fcmTokenRepository.addUserToken(canonicalName, fcmToken.getId());
+        }
+      );
   }
 }

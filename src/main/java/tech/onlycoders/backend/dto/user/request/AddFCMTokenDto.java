@@ -14,4 +14,7 @@ public class AddFCMTokenDto {
 
   @NotEmpty(message = "FCM Token is required")
   private String fcmToken;
+
+  @NotEmpty(message = "Device Id")
+  private String deviceId;
 }

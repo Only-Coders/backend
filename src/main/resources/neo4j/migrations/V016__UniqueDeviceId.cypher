@@ -1,0 +1,1 @@
+CREATE CONSTRAINT fcm_token_unique_device IF NOT exists ON (p:FCMToken) ASSERT p.deviceId IS UNIQUE;
