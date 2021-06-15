@@ -227,10 +227,9 @@ public class UserService {
         MessageDTO
           .builder()
           .message(message)
+          .from(user.getEmail())
           .to(contact.getEmail())
           .eventType(EventType.CONTACT_REQUEST)
-          .from(user.getFullName())
-          .imageURI(user.getImageURI())
           .build()
       );
   }
@@ -247,9 +246,8 @@ public class UserService {
         MessageDTO
           .builder()
           .message(user.getFullName() + " ha comenzado a seguirte!")
+          .from(user.getEmail())
           .to(followed.getEmail())
-          .from(user.getFullName())
-          .imageURI(user.getImageURI())
           .eventType(EventType.NEW_FOLLOWER)
           .build()
       );
@@ -501,9 +499,8 @@ public class UserService {
         MessageDTO
           .builder()
           .message(user.getFullName() + " ha aceptado tu peticion de contacto!")
+          .from(user.getEmail())
           .to(requester.getEmail())
-          .from(user.getFullName())
-          .imageURI(user.getImageURI())
           .eventType(EventType.CONTACT_ACCEPTED)
           .build()
       );

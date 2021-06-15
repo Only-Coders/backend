@@ -40,7 +40,6 @@ public class PostService {
   private final WorkPositionMapper workPositionMapper;
 
   private final PostMapper postMapper;
-  private final UserMapper userMapper;
   private final CommentMapper commentMapper;
   private final NotificatorService notificatorService;
 
@@ -70,7 +69,6 @@ public class PostService {
     this.workPositionMapper = workPositionMapper;
 
     this.postMapper = postMapper;
-    this.userMapper = userMapper;
     this.commentMapper = commentMapper;
     this.notificatorService = notificatorService;
   }
@@ -96,8 +94,8 @@ public class PostService {
               .to(person.getEmail())
               .eventType(EventType.NEW_MENTION)
               .message(message)
-              .from(publisher.getFullName())
-              .imageURI(publisher.getImageURI())
+              .from(publisher.getEmail())
+              .to(person.getEmail())
               .build()
           )
     );
@@ -121,10 +119,9 @@ public class PostService {
         MessageDTO
           .builder()
           .message(publisher.getFullName() + " ha publicado un nuevo post!")
+          .from(publisher.getEmail())
           .to(publisher.getEmail())
-          .from(publisher.getFullName())
           .eventType(EventType.NEW_POST)
-          .imageURI(publisher.getImageURI())
           .build()
       );
     return listDto.get(0);
@@ -449,12 +446,6 @@ public class PostService {
 
     var mentions = getPersonList(createPostDto.getMentionCanonicalNames());
 
-    var message = String.format(
-      "%s %s te ha mencionado en un nuevo post.",
-      publisher.getFirstName(),
-      publisher.getLastName()
-    );
-
     postRepository.removePostTags(originalPost.getId());
     postRepository.removePostMentions(originalPost.getId());
 
@@ -470,19 +461,6 @@ public class PostService {
 
     mentions.forEach(partialUser -> postRepository.mentionUser(postId, partialUser.getId()));
     postRepository.linkWithPublisher(originalPost.getId(), publisher.getId());
-
-    mentions.forEach(
-      person ->
-        this.notificatorService.send(
-            MessageDTO
-              .builder()
-              .to(person.getEmail())
-              .eventType(EventType.NEW_MENTION)
-              .message(message)
-              .from(publisher.getFullName())
-              .build()
-          )
-    );
 
     var updatedPost = postRepository.getCreatedPost(originalPost.getId());
 

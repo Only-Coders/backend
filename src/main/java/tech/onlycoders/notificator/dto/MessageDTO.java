@@ -17,8 +17,7 @@ public class MessageDTO implements Serializable {
   private String message;
   private String to;
   private String from;
-  private String imageURI;
 
   @Builder.Default
-  private Date createdAt = new Date();
+  private Long createdAt = new Date().toInstant().toEpochMilli();
 }
