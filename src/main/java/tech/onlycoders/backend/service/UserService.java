@@ -323,19 +323,33 @@ public class UserService {
     String skillName,
     SortContactsBy orderBy
   ) {
-    var userRegex = "(?i)" + partialName + ".*";
-    var countryRegex = "(?i)" + countryName + ".*";
-    var skillNameRegex = "(?i)" + skillName + ".*";
-    var users =
-      this.userRepository.getMyFollows(
-          canonicalName,
-          page * size,
-          size,
-          userRegex,
-          countryRegex,
-          skillNameRegex,
-          orderBy.label
-        );
+    var userRegex = "(?i).*" + partialName + ".*";
+    var countryRegex = "(?i).*" + countryName + ".*";
+    var skillNameRegex = "(?i).*" + skillName + ".*";
+
+    List<User> users;
+    if (orderBy == SortContactsBy.MEDALS) {
+      users =
+        this.userRepository.getMyFollowsSortByMedals(
+            canonicalName,
+            page * size,
+            size,
+            userRegex,
+            countryRegex,
+            skillNameRegex
+          );
+    } else {
+      users =
+        this.userRepository.getMyFollows(
+            canonicalName,
+            page * size,
+            size,
+            userRegex,
+            countryRegex,
+            skillNameRegex,
+            orderBy.label
+          );
+    }
     var totalQuantity = this.userRepository.countFollows(canonicalName, userRegex, countryRegex, skillNameRegex);
 
     return getReadUserLiteDtoPaginateDto(page, size, users, totalQuantity);
@@ -350,19 +364,32 @@ public class UserService {
     String skillName,
     SortContactsBy orderBy
   ) {
-    var userRegex = "(?i)" + partialName + ".*";
-    var countryRegex = "(?i)" + countryName + ".*";
-    var skillNameRegex = "(?i)" + skillName + ".*";
-    var users =
-      this.userRepository.getMyContacts(
-          canonicalName,
-          page * size,
-          size,
-          userRegex,
-          countryRegex,
-          skillNameRegex,
-          orderBy.label
-        );
+    var userRegex = "(?i).*" + partialName + ".*";
+    var countryRegex = "(?i).*" + countryName + ".*";
+    var skillNameRegex = "(?i).*" + skillName + ".*";
+    List<User> users;
+    if (orderBy == SortContactsBy.MEDALS) {
+      users =
+        this.userRepository.getMyContactsSortByMedals(
+            canonicalName,
+            page * size,
+            size,
+            userRegex,
+            countryRegex,
+            skillNameRegex
+          );
+    } else {
+      users =
+        this.userRepository.getMyContacts(
+            canonicalName,
+            page * size,
+            size,
+            userRegex,
+            countryRegex,
+            skillNameRegex,
+            orderBy.label
+          );
+    }
     var totalQuantity = this.userRepository.countContacts(canonicalName, userRegex, countryRegex, skillNameRegex);
 
     return getReadUserLiteDtoPaginateDto(page, size, users, totalQuantity);
@@ -547,9 +574,13 @@ public class UserService {
       this.userRepository.findByCanonicalName(canonicalName)
         .orElseThrow(() -> new ApiException(HttpStatus.INTERNAL_SERVER_ERROR, "error.user-not-found"));
 
+    Long birthDate = null;
+    if (updateUserDto.getBirthDate() != null) {
+      birthDate = updateUserDto.getBirthDate().toInstant().toEpochMilli();
+    }
     userRepository.updateProfile(
       canonicalName,
-      updateUserDto.getBirthDate().toInstant().toEpochMilli(),
+      birthDate,
       updateUserDto.getDescription(),
       updateUserDto.getFirstName(),
       updateUserDto.getLastName(),

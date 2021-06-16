@@ -101,66 +101,6 @@ public interface UserRepository extends Neo4jRepository<User, String> {
   @Query("MATCH (:User{id: $followerId})-[r:FOLLOWS]->(:User{id: $followedId}) delete r")
   void unfollowUser(String followerId, String followedId);
 
-  @Query(
-    " MATCH (User{canonicalName: $canonicalName})-[:IS_CONNECTED]-(u:User) " +
-    "   OPTIONAL MATCH (u)-[:POSSESS]->(s:Skill) " +
-    "   OPTIONAL MATCH (u)-[:LIVES]->(c:Country) " +
-    "   OPTIONAL MATCH (u)-[]->()<-[:TO]-(r:Reaction{type:'APPROVE'}) " +
-    "   WITH u, s, c, r " +
-    " WHERE u.fullName =~ $userName AND c.name =~ $countryName AND COALESCE(s.name, '') =~ $skillName " +
-    " WITH u, COUNT(r) as medals " +
-    " RETURN u{.*, medals: medals} ORDER BY u[$sortField] DESC SKIP $skip LIMIT $size "
-  )
-  List<User> getMyContacts(
-    String canonicalName,
-    int skip,
-    Integer size,
-    String userName,
-    String countryName,
-    String skillName,
-    String sortField
-  );
-
-  @Query(
-    " MATCH (User{canonicalName: $canonicalName})-[:IS_CONNECTED]-(u:User) " +
-    " OPTIONAL MATCH (u)-[:POSSESS]->(s:Skill) " +
-    " OPTIONAL MATCH (u)-[:LIVES]->(c:Country) " +
-    "   WITH u, s, c " +
-    " WHERE u.fullName =~ $userName AND c.name =~ $countryName AND COALESCE(s.name, '') =~ $skillName  " +
-    " RETURN COUNT(DISTINCT(u)) "
-  )
-  Integer countContacts(String canonicalName, String userName, String countryName, String skillName);
-
-  @Query(
-    " MATCH (User{canonicalName: $canonicalName})-[:FOLLOWS]->(u:User) " +
-    "   OPTIONAL MATCH (u)-[:POSSESS]->(s:Skill) " +
-    "   OPTIONAL MATCH (u)-[:LIVES]->(c:Country) " +
-    "   OPTIONAL MATCH (u)-[]->()<-[:TO]-(r:Reaction{type:'APPROVE'}) " +
-    "   WITH u, s, c, r " +
-    " WHERE u.fullName =~ $userName AND c.name =~ $countryName AND COALESCE(s.name, '') =~ $skillName " +
-    " WITH u, COUNT(r) as medals " +
-    " RETURN u{.*, medals: medals} ORDER BY u[$sortField] DESC SKIP $skip LIMIT $size "
-  )
-  List<User> getMyFollows(
-    String canonicalName,
-    int skip,
-    Integer size,
-    String userName,
-    String countryName,
-    String skillName,
-    String sortField
-  );
-
-  @Query(
-    " MATCH (User{canonicalName: $canonicalName})-[:FOLLOWS]->(u:User) " +
-    "   OPTIONAL MATCH (u)-[:POSSESS]->(s:Skill) " +
-    "   OPTIONAL MATCH (u)-[:LIVES]->(c:Country) " +
-    "   WITH u, s, c " +
-    " WHERE u.fullName =~ $userName AND c.name =~ $countryName AND COALESCE(s.name, '') =~ $skillName " +
-    " RETURN COUNT(DISTINCT(u)) "
-  )
-  Integer countFollows(String canonicalName, String userName, String countryName, String skillName);
-
   @Query(" MATCH (User{canonicalName:$canonicalName})-[:IS_CONNECTED]-(u:User) RETURN COUNT(DISTINCT(u))")
   Integer countContactsWithOutFilters(String canonicalName);
 
@@ -246,6 +186,132 @@ public interface UserRepository extends Neo4jRepository<User, String> {
     " RETURN COUNT(DISTINCT(u)) "
   )
   int countWithFilters(String userName, String countryName, String skillName);
+
+  @Query(
+    " MATCH (User{canonicalName: $canonicalName})-[:FOLLOWS]->(u:User)-[:LIVES]->(c:Country) " +
+    " WHERE (u.fullName =~ $userName OR replace(u.fullName,' ','') =~ $userName) AND c.name =~ $countryName " +
+    " OPTIONAL MATCH (u)-[:POSSESS]->(s:Skill) " +
+    " WITH u, s, c " +
+    " WHERE COALESCE(s.name, '') =~ $skillName " +
+    " WITH u, s, c " +
+    " CALL { " +
+    "   WITH u " +
+    "   MATCH (u)-[:PUBLISH]->(:Post)<-[:TO]-(r:Reaction{type:'APPROVE'})<-[:MAKES]-(x:User) " +
+    "   WHERE u <> x " +
+    "   RETURN count(r) as medals " +
+    " } " +
+    " WITH u, s, c, medals  " +
+    " RETURN DISTINCT(u{.*, medals: medals}) " +
+    " ORDER BY toLower(u[$sortField]) ASC SKIP $skip LIMIT $size "
+  )
+  List<User> getMyFollows(
+    String canonicalName,
+    int skip,
+    Integer size,
+    String userName,
+    String countryName,
+    String skillName,
+    String sortField
+  );
+
+  @Query(
+    " MATCH (User{canonicalName: $canonicalName})-[:FOLLOWS]->(u:User)-[:LIVES]->(c:Country) " +
+    " WHERE (u.fullName =~ $userName OR replace(u.fullName,' ','') =~ $userName) AND c.name =~ $countryName " +
+    " OPTIONAL MATCH (u)-[:POSSESS]->(s:Skill) " +
+    " WITH u, s, c " +
+    " WHERE COALESCE(s.name, '') =~ $skillName " +
+    " WITH u, s, c " +
+    " CALL { " +
+    "   WITH u " +
+    "   MATCH (u)-[:PUBLISH]->(:Post)<-[:TO]-(r:Reaction{type:'APPROVE'})<-[:MAKES]-(x:User) " +
+    "   WHERE u <> x " +
+    "   RETURN count(r) as medals " +
+    " } " +
+    " WITH u, s, c, medals  " +
+    " RETURN DISTINCT(u{.*, medals: medals}) " +
+    " ORDER BY u.medals DESC SKIP $skip LIMIT $size "
+  )
+  List<User> getMyFollowsSortByMedals(
+    String canonicalName,
+    int skip,
+    Integer size,
+    String userName,
+    String countryName,
+    String skillName
+  );
+
+  @Query(
+    " MATCH (User{canonicalName: $canonicalName})-[:FOLLOWS]->(u:User) " +
+    " OPTIONAL MATCH (u)-[:POSSESS]->(s:Skill) " +
+    " OPTIONAL MATCH (u)-[:LIVES]->(c:Country) " +
+    "   WITH u, s, c " +
+    " WHERE u.fullName =~ $userName AND c.name =~ $countryName AND COALESCE(s.name, '') =~ $skillName  " +
+    " RETURN COUNT(DISTINCT(u)) "
+  )
+  Integer countFollows(String canonicalName, String userName, String countryName, String skillName);
+
+  @Query(
+    " MATCH (User{canonicalName: $canonicalName})-[:IS_CONNECTED]-(u:User)-[:LIVES]->(c:Country) " +
+    " WHERE (u.fullName =~ $userName OR replace(u.fullName,' ','') =~ $userName) AND c.name =~ $countryName " +
+    " OPTIONAL MATCH (u)-[:POSSESS]->(s:Skill) " +
+    " WITH u, s, c " +
+    " WHERE COALESCE(s.name, '') =~ $skillName " +
+    " WITH u, s, c " +
+    " CALL { " +
+    "   WITH u " +
+    "   MATCH (u)-[:PUBLISH]->(:Post)<-[:TO]-(r:Reaction{type:'APPROVE'})<-[:MAKES]-(x:User) " +
+    "   WHERE u <> x " +
+    "   RETURN count(r) as medals " +
+    " } " +
+    " WITH u, s, c, medals  " +
+    " RETURN DISTINCT(u{.*, medals: medals}) " +
+    " ORDER BY toLower(u[$sortField]) ASC SKIP $skip LIMIT $size "
+  )
+  List<User> getMyContacts(
+    String canonicalName,
+    int skip,
+    Integer size,
+    String userName,
+    String countryName,
+    String skillName,
+    String sortField
+  );
+
+  @Query(
+    " MATCH (User{canonicalName: $canonicalName})-[:IS_CONNECTED]-(u:User)-[:LIVES]->(c:Country) " +
+    " WHERE (u.fullName =~ $userName OR replace(u.fullName,' ','') =~ $userName) AND c.name =~ $countryName " +
+    " OPTIONAL MATCH (u)-[:POSSESS]->(s:Skill) " +
+    " WITH u, s, c " +
+    " WHERE COALESCE(s.name, '') =~ $skillName " +
+    " WITH u, s, c " +
+    " CALL { " +
+    "   WITH u " +
+    "   MATCH (u)-[:PUBLISH]->(:Post)<-[:TO]-(r:Reaction{type:'APPROVE'})<-[:MAKES]-(x:User) " +
+    "   WHERE u <> x " +
+    "   RETURN count(r) as medals " +
+    " } " +
+    " WITH u, s, c, medals  " +
+    " RETURN DISTINCT(u{.*, medals: medals}) " +
+    " ORDER BY u.medals DESC SKIP $skip LIMIT $size "
+  )
+  List<User> getMyContactsSortByMedals(
+    String canonicalName,
+    int skip,
+    Integer size,
+    String userName,
+    String countryName,
+    String skillName
+  );
+
+  @Query(
+    " MATCH (User{canonicalName: $canonicalName})-[:IS_CONNECTED]-(u:User) " +
+    " OPTIONAL MATCH (u)-[:POSSESS]->(s:Skill) " +
+    " OPTIONAL MATCH (u)-[:LIVES]->(c:Country) " +
+    "   WITH u, s, c " +
+    " WHERE u.fullName =~ $userName AND c.name =~ $countryName AND COALESCE(s.name, '') =~ $skillName  " +
+    " RETURN COUNT(DISTINCT(u)) "
+  )
+  Integer countContacts(String canonicalName, String userName, String countryName, String skillName);
 
   @Query(
     "MATCH (u:User{canonicalName:$canonicalName}) " +

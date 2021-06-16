@@ -434,14 +434,14 @@ public class UserServiceTest {
             canonicalName,
             page * size,
             size,
-            "(?i).*",
-            "(?i).*",
-            "(?i).*",
+            "(?i).*.*",
+            "(?i).*.*",
+            "(?i).*.*",
             SortContactsBy.FULLNAME.label
           )
       )
       .thenReturn(usersList);
-    Mockito.when(this.userRepository.countContacts(canonicalName, "(?i).*", "(?i).*", "(?i).*")).thenReturn(1);
+    Mockito.when(this.userRepository.countContacts(canonicalName, "(?i).*.*", "(?i).*.*", "(?i).*.*")).thenReturn(1);
     Mockito
       .when(this.workPositionRepository.getUserCurrentPosition(anyString()))
       .thenReturn(Optional.of(ezRandom.nextObject(WorkPosition.class)));
