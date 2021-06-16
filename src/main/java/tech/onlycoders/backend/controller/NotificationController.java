@@ -35,7 +35,7 @@ public class NotificationController {
   @PreAuthorize("hasAuthority('USER')")
   @PutMapping("/{id}")
   @Operation(summary = "Response Boolean")
-  ResponseEntity<?> NotificationConfiguration(@PathVariable String id, NotificationConfigDto notificationConfigDto)
+  ResponseEntity<?> notificationConfiguration(@PathVariable String id, NotificationConfigDto notificationConfigDto)
     throws ApiException {
     var userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     notificationService.updateStatus(userDetails.getCanonicalName(), notificationConfigDto, id);
