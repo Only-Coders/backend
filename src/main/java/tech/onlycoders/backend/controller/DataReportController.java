@@ -13,6 +13,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import tech.onlycoders.backend.dto.datareport.AttributeValueDto;
+import tech.onlycoders.backend.dto.datareport.PostAndReactionsPerHourDto;
 import tech.onlycoders.backend.dto.datareport.UsersQuantityReportDto;
 import tech.onlycoders.backend.service.DataReportService;
 
@@ -83,5 +84,25 @@ public class DataReportController {
   @Operation(summary = "Return a list of languages and user quantity use that uses it")
   ResponseEntity<List<AttributeValueDto>> getLanguageUse() {
     return ResponseEntity.ok(this.service.getLanguageUse());
+  }
+
+  @PreAuthorize("hasAuthority('ADMIN')")
+  @ApiResponses(
+    value = {
+      @ApiResponse(
+        responseCode = "200",
+        content = {
+          @Content(
+            mediaType = "application/json",
+            array = @ArraySchema(schema = @Schema(implementation = PostAndReactionsPerHourDto.class))
+          )
+        }
+      )
+    }
+  )
+  @GetMapping("posts-and-reactions-per-hour")
+  @Operation(summary = "Return a list of quantity of posts and reactions per hour in the last 30 days")
+  ResponseEntity<List<PostAndReactionsPerHourDto>> getPostsAndReactionsPerHour() {
+    return ResponseEntity.ok(this.service.getPostsAndReactionsPerHour());
   }
 }

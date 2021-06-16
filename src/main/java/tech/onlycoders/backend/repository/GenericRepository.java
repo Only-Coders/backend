@@ -30,4 +30,36 @@ public class GenericRepository {
       "RETURN date, found";
     return neo4jClient.query(query).fetch().all();
   }
+
+  public Collection<Map<String, Object>> getPostsPerHour() {
+    var date = new DateTime(new Date());
+    date = date.minusDays(30);
+
+    var query =
+      "MATCH (p:Post)\n" +
+      "WHERE p.createdAt > " +
+      date.toInstant().getMillis() +
+      "\n" +
+      "WITH apoc.date.format(p.createdAt, \"ms\", \"HH:'00'\") AS hour,\n" +
+      "COUNT(p) as found\n" +
+      "RETURN hour, found\n" +
+      "ORDER BY hour";
+    return neo4jClient.query(query).fetch().all();
+  }
+
+  public Collection<Map<String, Object>> getReactionsPerHour() {
+    var date = new DateTime(new Date());
+    date = date.minusDays(30);
+
+    var query =
+      "MATCH (p:Reaction)\n" +
+      "WHERE p.createdAt > " +
+      date.toInstant().getMillis() +
+      "\n" +
+      "WITH apoc.date.format(p.createdAt, \"ms\", \"HH:'00'\") AS hour,\n" +
+      "COUNT(p) as found\n" +
+      "RETURN hour, found\n" +
+      "ORDER BY hour";
+    return neo4jClient.query(query).fetch().all();
+  }
 }
