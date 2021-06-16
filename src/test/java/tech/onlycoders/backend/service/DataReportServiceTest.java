@@ -69,4 +69,18 @@ public class DataReportServiceTest {
 
     assertNotNull(res);
   }
+
+  @Test
+  public void ShouldGetPostsAndReactionsPerHour() {
+    var list = new ArrayList<Map<String, Object>>();
+    var map = new HashMap<String, Object>();
+    map.put("hour", "22:00");
+    map.put("found", 1L);
+    list.add(map);
+    Mockito.when(genericRepository.getPostsPerHour()).thenReturn(list);
+    Mockito.when(genericRepository.getReactionsPerHour()).thenReturn(list);
+    var res = service.getPostsAndReactionsPerHour();
+
+    assertNotNull(res);
+  }
 }
