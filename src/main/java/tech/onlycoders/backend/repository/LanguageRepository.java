@@ -19,5 +19,5 @@ public interface LanguageRepository extends Neo4jRepository<Language, String> {
   void setUserLanguage(String canonicalName, String code);
 
   @Query("MATCH (u:User)-[:SPEAKS]->(:Language{code:$code}) RETURN count(u)")
-  Integer getLanguageUseQuantity(String code);
+  Long getLanguageUseQuantity(String code);
 }

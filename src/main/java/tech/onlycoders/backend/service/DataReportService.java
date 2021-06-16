@@ -7,6 +7,7 @@ import org.springframework.transaction.annotation.Transactional;
 import tech.onlycoders.backend.dto.datareport.AttributeValueDto;
 import tech.onlycoders.backend.dto.datareport.UsersQuantityReportDto;
 import tech.onlycoders.backend.repository.DataReportRepository;
+import tech.onlycoders.backend.repository.GenericRepository;
 import tech.onlycoders.backend.repository.LanguageRepository;
 
 @Service
@@ -17,9 +18,16 @@ public class DataReportService {
 
   private final LanguageRepository languageRepository;
 
-  public DataReportService(DataReportRepository dataReportRepository, LanguageRepository languageRepository) {
+  private final GenericRepository genericRepository;
+
+  public DataReportService(
+    DataReportRepository dataReportRepository,
+    LanguageRepository languageRepository,
+    GenericRepository genericRepository
+  ) {
     this.dataReportRepository = dataReportRepository;
     this.languageRepository = languageRepository;
+    this.genericRepository = genericRepository;
   }
 
   public UsersQuantityReportDto getUsersQuantity() {
@@ -46,5 +54,21 @@ public class DataReportService {
     }
 
     return report;
+  }
+
+  public List<AttributeValueDto> getPostsPerDay() {
+    var resultList = genericRepository.getPostsPerDay();
+    var result = new ArrayList<AttributeValueDto>();
+
+    resultList
+      .stream()
+      .forEach(
+        row -> {
+          result.add(
+            AttributeValueDto.builder().attribute((String) row.get("date")).value((Long) row.get("found")).build()
+          );
+        }
+      );
+    return result;
   }
 }

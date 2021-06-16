@@ -13,5 +13,5 @@ public class AttributeValueDto {
 
   private String attribute;
 
-  private Integer value;
+  private Long value;
 }
