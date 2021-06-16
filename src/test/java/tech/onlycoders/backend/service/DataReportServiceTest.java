@@ -63,7 +63,7 @@ public class DataReportServiceTest {
     var list = new ArrayList<Language>();
     list.add(Language.builder().code("en").name("English").build());
     Mockito.when(this.languageRepository.findAll()).thenReturn(list);
-    Mockito.when(this.languageRepository.getLanguageUseQuantity(anyString())).thenReturn(1);
+    Mockito.when(this.languageRepository.getLanguageUseQuantity(anyString())).thenReturn(1L);
     var res = service.getLanguageUse();
 
     assertNotNull(res);
