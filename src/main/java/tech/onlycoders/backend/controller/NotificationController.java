@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 import tech.onlycoders.backend.bean.auth.UserDetails;
 import tech.onlycoders.backend.dto.notificationConfiguration.request.NotificationConfigDto;
 import tech.onlycoders.backend.dto.notificationConfiguration.response.ReadNotificationConfigDto;
+import tech.onlycoders.backend.exception.ApiException;
 import tech.onlycoders.backend.service.NotificationService;
 
 @RestController
@@ -32,11 +33,12 @@ public class NotificationController {
 
   @ApiResponses(value = { @ApiResponse(responseCode = "200", content = { @Content(mediaType = "application/json") }) })
   @PreAuthorize("hasAuthority('USER')")
-  @PostMapping
+  @PutMapping("/{id}")
   @Operation(summary = "Response Boolean")
-  ResponseEntity<?> NotificationConfiguration(@RequestBody NotificationConfigDto notificationConfigDto) {
+  ResponseEntity<?> NotificationConfiguration(@PathVariable String id, NotificationConfigDto notificationConfigDto)
+    throws ApiException {
     var userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-    notificationService.updateStatus(userDetails.getCanonicalName(), notificationConfigDto);
+    notificationService.updateStatus(userDetails.getCanonicalName(), notificationConfigDto, id);
     return ResponseEntity.ok().build();
   }
 

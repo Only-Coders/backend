@@ -11,6 +11,7 @@ import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import tech.onlycoders.backend.dto.notificationConfiguration.request.NotificationConfigDto;
+import tech.onlycoders.backend.exception.ApiException;
 import tech.onlycoders.backend.mapper.NotificationMapper;
 import tech.onlycoders.backend.model.NotificationConfig;
 import tech.onlycoders.backend.model.User;
@@ -31,26 +32,16 @@ public class NotificationServiceTest {
   private NotificationMapper notificationMapper;
 
   @Test
-  public void ShouldConfigureNotification() {
+  public void ShouldConfigureNotification() throws ApiException {
     var notificationConfigDto = ezRandom.nextObject(NotificationConfigDto.class);
-
+    var id = ezRandom.nextObject(String.class);
     var user = ezRandom.nextObject(User.class);
 
     Mockito
-      .when(notificationRepository.findByType(Mockito.any(), Mockito.any()))
+      .when(notificationRepository.findById(Mockito.any(), Mockito.any()))
       .thenReturn(Optional.of(NotificationConfig.builder().build()));
 
-    service.updateStatus(user.getCanonicalName(), notificationConfigDto);
-  }
-
-  @Test
-  public void ShouldCreateNotification() {
-    var notificationConfigDto = ezRandom.nextObject(NotificationConfigDto.class);
-    var user = ezRandom.nextObject(User.class);
-
-    Mockito.when(notificationRepository.findByType(Mockito.any(), Mockito.any())).thenReturn(Optional.empty());
-
-    service.updateStatus(user.getCanonicalName(), notificationConfigDto);
+    service.updateStatus(user.getCanonicalName(), notificationConfigDto, id);
   }
 
   @Test
