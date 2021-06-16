@@ -1,9 +1,12 @@
 package tech.onlycoders.backend.service;
 
+import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tech.onlycoders.backend.dto.notificationConfiguration.request.NotificationConfigDto;
+import tech.onlycoders.backend.dto.notificationConfiguration.response.ReadNotificationConfigDto;
+import tech.onlycoders.backend.mapper.NotificationMapper;
 import tech.onlycoders.backend.model.NotificationConfig;
 import tech.onlycoders.backend.repository.NotificationRepository;
 
@@ -13,9 +16,11 @@ import tech.onlycoders.backend.repository.NotificationRepository;
 public class NotificationService {
 
   private final NotificationRepository notificationRepository;
+  private final NotificationMapper notificationMapper;
 
-  public NotificationService(NotificationRepository notificationRepository) {
+  public NotificationService(NotificationRepository notificationRepository, NotificationMapper notificationMapper) {
     this.notificationRepository = notificationRepository;
+    this.notificationMapper = notificationMapper;
   }
 
   public void updateStatus(String canonicalName, NotificationConfigDto notificationConfigDto) {
@@ -37,5 +42,11 @@ public class NotificationService {
       notificationRepository.save(notification);
       notificationRepository.createConfiguration(notification.getId(), canonicalName);
     }
+  }
+
+  public List<ReadNotificationConfigDto> getUserNotificationConfig(String canonicalName) {
+    return this.notificationMapper.listNotificationConfigToReadNotificationConfig(
+        this.notificationRepository.getUserNotificationConfig(canonicalName)
+      );
   }
 }

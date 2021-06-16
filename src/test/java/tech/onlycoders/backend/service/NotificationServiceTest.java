@@ -1,14 +1,7 @@
 package tech.onlycoders.backend.service;
 
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.*;
-
-import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import javax.management.Notification;
 import org.jeasy.random.EasyRandom;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -17,19 +10,11 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.mockito.junit.jupiter.MockitoSettings;
-import org.mockito.quality.Strictness;
-import tech.onlycoders.backend.dto.comment.request.CreateCommentDto;
 import tech.onlycoders.backend.dto.notificationConfiguration.request.NotificationConfigDto;
-import tech.onlycoders.backend.dto.post.request.CreatePostDto;
-import tech.onlycoders.backend.dto.post.request.CreateReactionDto;
-import tech.onlycoders.backend.dto.report.request.CreatePostReportDto;
-import tech.onlycoders.backend.exception.ApiException;
-import tech.onlycoders.backend.mapper.*;
-import tech.onlycoders.backend.model.*;
-import tech.onlycoders.backend.repository.*;
-import tech.onlycoders.backend.utils.PartialPostImpl;
-import tech.onlycoders.backend.utils.PartialUserImpl;
+import tech.onlycoders.backend.mapper.NotificationMapper;
+import tech.onlycoders.backend.model.NotificationConfig;
+import tech.onlycoders.backend.model.User;
+import tech.onlycoders.backend.repository.NotificationRepository;
 
 @ExtendWith(MockitoExtension.class)
 public class NotificationServiceTest {
@@ -43,7 +28,7 @@ public class NotificationServiceTest {
   private final EasyRandom ezRandom = new EasyRandom();
 
   @Spy
-  private WorkPositionMapper workPositionMapper = new WorkPositionMapperImpl(new WorkplaceMapperImpl());
+  private NotificationMapper notificationMapper;
 
   @Test
   public void ShouldConfigureNotification() {
@@ -66,5 +51,15 @@ public class NotificationServiceTest {
     Mockito.when(notificationRepository.findByType(Mockito.any(), Mockito.any())).thenReturn(Optional.empty());
 
     service.updateStatus(user.getCanonicalName(), notificationConfigDto);
+  }
+
+  @Test
+  public void ShouldReturnUserNotificationConfig() {
+    var notificationConfigs = ezRandom.objects(NotificationConfig.class, 10).collect(Collectors.toList());
+    var user = ezRandom.nextObject(User.class);
+    Mockito
+      .when(notificationRepository.getUserNotificationConfig(user.getCanonicalName()))
+      .thenReturn(notificationConfigs);
+    service.getUserNotificationConfig(user.getCanonicalName());
   }
 }

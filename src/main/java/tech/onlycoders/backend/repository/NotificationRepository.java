@@ -1,5 +1,6 @@
 package tech.onlycoders.backend.repository;
 
+import java.util.List;
 import java.util.Optional;
 import org.springframework.data.neo4j.repository.Neo4jRepository;
 import org.springframework.data.neo4j.repository.query.Query;
@@ -19,4 +20,7 @@ public interface NotificationRepository extends Neo4jRepository<NotificationConf
     " CREATE (n)<-[r:CONFIGURES]-(u)"
   )
   void createConfiguration(String id, String canonicalName);
+
+  @Query("MATCH (n:NotificationConfig)<-[r:CONFIGURES]-(u:User{canonicalName:$canonicalName}) RETURN n")
+  List<NotificationConfig> getUserNotificationConfig(String canonicalName);
 }

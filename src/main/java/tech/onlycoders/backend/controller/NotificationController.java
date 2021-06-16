@@ -1,10 +1,13 @@
 package tech.onlycoders.backend.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -12,6 +15,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import tech.onlycoders.backend.bean.auth.UserDetails;
 import tech.onlycoders.backend.dto.notificationConfiguration.request.NotificationConfigDto;
+import tech.onlycoders.backend.dto.notificationConfiguration.response.ReadNotificationConfigDto;
 import tech.onlycoders.backend.service.NotificationService;
 
 @RestController
@@ -34,5 +38,27 @@ public class NotificationController {
     var userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     notificationService.updateStatus(userDetails.getCanonicalName(), notificationConfigDto);
     return ResponseEntity.ok().build();
+  }
+
+  @ApiResponses(
+    value = {
+      @ApiResponse(
+        responseCode = "200",
+        content = {
+          @Content(
+            mediaType = "application/json",
+            array = @ArraySchema(schema = @Schema(implementation = ReadNotificationConfigDto.class))
+          )
+        }
+      )
+    }
+  )
+  @PreAuthorize("hasAuthority('USER')")
+  @GetMapping
+  @Operation(summary = "Response Boolean")
+  ResponseEntity<List<ReadNotificationConfigDto>> listUserNotificationConfig() {
+    var userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    var response = notificationService.getUserNotificationConfig(userDetails.getCanonicalName());
+    return ResponseEntity.ok(response);
   }
 }
