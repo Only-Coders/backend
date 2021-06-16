@@ -59,6 +59,26 @@ public class DataReportController {
       )
     }
   )
+  @GetMapping("posts-per-day")
+  @Operation(summary = "Return a list of quantity of posts per day")
+  ResponseEntity<List<AttributeValueDto>> getPostsPerDay() {
+    return ResponseEntity.ok(this.service.getPostsPerDay());
+  }
+
+  @PreAuthorize("hasAuthority('ADMIN')")
+  @ApiResponses(
+    value = {
+      @ApiResponse(
+        responseCode = "200",
+        content = {
+          @Content(
+            mediaType = "application/json",
+            array = @ArraySchema(schema = @Schema(implementation = AttributeValueDto.class))
+          )
+        }
+      )
+    }
+  )
   @GetMapping("language-use")
   @Operation(summary = "Return a list of languages and user quantity use that uses it")
   ResponseEntity<List<AttributeValueDto>> getLanguageUse() {
