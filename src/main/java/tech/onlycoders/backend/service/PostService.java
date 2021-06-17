@@ -242,6 +242,33 @@ public class PostService {
     return paginated;
   }
 
+  private PaginateDto<ReadCommentDto> expandCommentData(
+    String requesterCanonicalName,
+    List<ReadCommentDto> readCommentDtos
+  ) {
+    HashMap<String, Integer> medalsCache = new HashMap<>();
+    readCommentDtos
+      .parallelStream()
+      .forEach(
+        comment -> {
+          var publisher = comment.getPublisher().getCanonicalName();
+          var currentPosition = this.workPositionRepository.getUserCurrentPosition(publisher);
+          if (currentPosition.isPresent()) {
+            var readWorkPositionDto = this.workPositionMapper.workPositionToReadWorkPositionDto(currentPosition.get());
+            comment.getPublisher().setCurrentPosition(readWorkPositionDto);
+          }
+          comment.setReactions(getCommentReactionQuantity(comment.getId()));
+          comment.setMyReaction(getCommentUserReaction(requesterCanonicalName, comment.getId()));
+          var medals = getAmountOfMedals(medalsCache, comment.getPublisher().getCanonicalName());
+          comment.getPublisher().setAmountOfMedals(medals);
+        }
+      );
+
+    var paginated = new PaginateDto<ReadCommentDto>();
+    paginated.setContent(readCommentDtos);
+    return paginated;
+  }
+
   public PaginateDto<ReadPostDto> getFeedPosts(String canonicalName, Integer page, Integer size) {
     var totalQuantity = postRepository.getFeedPostsQuantity(canonicalName);
     var skip = page * size;
@@ -294,26 +321,18 @@ public class PostService {
       .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "error.post-not-found"));
 
     var comment = Comment.builder().message(createCommentDto.getMessage()).build();
-    commentRepository.save(comment);
+    comment = commentRepository.save(comment);
 
     postRepository.addComment(post.getId(), comment.getId());
     commentRepository.linkWithCommenter(comment.getId(), commenter.getId());
 
-    var commentDto = commentMapper.commentToReadCommentDto(comment);
-    commentDto.setReactions(getCommentReactionQuantity(comment.getId()));
-    commentDto.setMyReaction(getCommentUserReaction(canonicalName, comment.getId()));
+    var createdComment =
+      this.commentRepository.getUserComment(comment.getId(), commenter.getCanonicalName())
+        .orElseThrow(() -> new ApiException(HttpStatus.INTERNAL_SERVER_ERROR, "error.500"));
 
-    //TODO: get post original publisher
-    //    this.notificatorService.send(
-    //            MessageDTO
-    //                    .builder()
-    //                    .message(commenter.getFullName() + " ha publicado un comentario en tu post!")
-    //                    .to(post.get.getEmail())
-    //                    .eventType(EventType.NEW_POST)
-    //                    .build()
-    //    );
-
-    return commentDto;
+    var commentDto = commentMapper.commentToReadCommentDto(createdComment);
+    var result = expandCommentData(commenter.getCanonicalName(), List.of(commentDto));
+    return result.getContent().get(0);
   }
 
   public void removeComment(String canonicalName, String commentId) throws ApiException {
@@ -370,20 +389,7 @@ public class PostService {
     var pageQuantity = PaginationUtils.getPagesQuantity(totalQuantity, size);
     var comments = commentMapper.listCommentToListCommentDto(commentRepository.getPostComments(postId, skip, size));
 
-    var medalsCache = new HashMap<String, Integer>();
-    comments
-      .parallelStream()
-      .forEach(
-        readCommentDto -> {
-          readCommentDto.setReactions(getCommentReactionQuantity(readCommentDto.getId()));
-          readCommentDto.setMyReaction(getCommentUserReaction(requesterCanonicalName, readCommentDto.getId()));
-          var medals = getAmountOfMedals(medalsCache, readCommentDto.getPublisher().getCanonicalName());
-          readCommentDto.getPublisher().setAmountOfMedals(medals);
-        }
-      );
-
-    var pagination = new PaginateDto<ReadCommentDto>();
-    pagination.setContent(comments);
+    var pagination = expandCommentData(requesterCanonicalName, comments);
     pagination.setCurrentPage(page);
     pagination.setTotalPages(pageQuantity);
     pagination.setTotalElements(totalQuantity);

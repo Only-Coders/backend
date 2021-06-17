@@ -12,6 +12,11 @@ import tech.onlycoders.backend.repository.projections.PartialComment;
 public interface CommentRepository extends Neo4jRepository<Comment, String> {
   Optional<PartialComment> getById(String commentId);
 
+  @Query(
+    "MATCH (c:Comment{id: $commentId})<-[w:WRITES]-(u:User{canonicalName: $canonicalName}) RETURN c, COLLECT(w), COLLECT(u) "
+  )
+  Optional<Comment> getUserComment(String commentId, String canonicalName);
+
   @Query("MATCH (:Post{id: $postId})<-[:FOR]-(c:Comment) RETURN count(c)")
   int getPostCommentsQuantity(String postId);
 

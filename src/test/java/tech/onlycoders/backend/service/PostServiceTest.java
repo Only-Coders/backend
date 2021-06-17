@@ -215,12 +215,17 @@ public class PostServiceTest {
     var commentDto = new CreateCommentDto();
     commentDto.setMessage("message");
 
-    Mockito.when(postRepository.getPostPublisherCanonicalName(anyString())).thenReturn("cname");
-    Mockito.when(postRepository.postIsPublic(anyString())).thenReturn(true);
-    Mockito.when(userRepository.areUsersConnected(anyString(), anyString())).thenReturn(true);
+    Mockito.when(this.commentRepository.save(any(Comment.class))).thenReturn(ezRandom.nextObject(Comment.class));
+    Mockito
+      .when(this.commentRepository.getUserComment(anyString(), anyString()))
+      .thenReturn(Optional.of(ezRandom.nextObject(Comment.class)));
+    Mockito.when(this.postRepository.getPostPublisherCanonicalName(anyString())).thenReturn("cname");
+    Mockito.when(this.postRepository.postIsPublic(anyString())).thenReturn(true);
+    Mockito.when(this.userRepository.areUsersConnected(anyString(), anyString())).thenReturn(true);
     Mockito.when(this.userRepository.findByCanonicalName(anyString())).thenReturn(Optional.of(user));
     Mockito.when(this.postRepository.getById(anyString())).thenReturn(Optional.of(post));
-    Mockito.when(this.reactionRepository.getCommentUserReaction(anyString(), anyString())).thenReturn(null);
+    Mockito.when(this.reactionRepository.getCommentUserReaction(anyString(), anyString())).thenReturn(Optional.empty());
+
     Mockito
       .when(this.reactionRepository.getCommentReactionQuantity(anyString(), any(ReactionType.class)))
       .thenReturn(0L);
