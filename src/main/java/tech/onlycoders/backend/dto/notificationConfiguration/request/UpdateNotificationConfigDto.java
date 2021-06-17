@@ -6,7 +6,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import tech.onlycoders.notificator.dto.EventType;
 
 @Data
 @Builder
@@ -14,11 +13,7 @@ import tech.onlycoders.notificator.dto.EventType;
 @NoArgsConstructor
 public class UpdateNotificationConfigDto {
 
-  @NotNull(message = "email is required.")
-  @NotBlank(message = "email is required.")
   private Boolean email;
 
-  @NotNull(message = "push is required.")
-  @NotBlank(message = "push is required.")
   private Boolean push;
 }

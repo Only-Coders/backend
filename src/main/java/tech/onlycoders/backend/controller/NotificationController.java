@@ -37,7 +37,7 @@ public class NotificationController {
   @Operation(summary = "Response Boolean")
   ResponseEntity<?> notificationConfiguration(
     @PathVariable String id,
-    UpdateNotificationConfigDto updateNotificationConfigDto
+    @RequestBody UpdateNotificationConfigDto updateNotificationConfigDto
   ) throws ApiException {
     var userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     notificationService.updateStatus(userDetails.getCanonicalName(), updateNotificationConfigDto, id);
