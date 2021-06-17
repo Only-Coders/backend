@@ -12,11 +12,7 @@ import tech.onlycoders.notificator.dto.EventType;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class NotificationConfigDto {
-
-  @NotNull(message = "type is required.")
-  @NotBlank(message = "type is required.")
-  private EventType type;
+public class UpdateNotificationConfigDto {
 
   @NotNull(message = "email is required.")
   @NotBlank(message = "email is required.")

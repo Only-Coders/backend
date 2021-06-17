@@ -14,7 +14,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import tech.onlycoders.backend.bean.auth.UserDetails;
-import tech.onlycoders.backend.dto.notificationConfiguration.request.NotificationConfigDto;
+import tech.onlycoders.backend.dto.notificationConfiguration.request.UpdateNotificationConfigDto;
 import tech.onlycoders.backend.dto.notificationConfiguration.response.ReadNotificationConfigDto;
 import tech.onlycoders.backend.exception.ApiException;
 import tech.onlycoders.backend.service.NotificationService;
@@ -35,10 +35,12 @@ public class NotificationController {
   @PreAuthorize("hasAuthority('USER')")
   @PutMapping("/{id}")
   @Operation(summary = "Response Boolean")
-  ResponseEntity<?> notificationConfiguration(@PathVariable String id, NotificationConfigDto notificationConfigDto)
-    throws ApiException {
+  ResponseEntity<?> notificationConfiguration(
+    @PathVariable String id,
+    UpdateNotificationConfigDto updateNotificationConfigDto
+  ) throws ApiException {
     var userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-    notificationService.updateStatus(userDetails.getCanonicalName(), notificationConfigDto, id);
+    notificationService.updateStatus(userDetails.getCanonicalName(), updateNotificationConfigDto, id);
     return ResponseEntity.ok().build();
   }
 

@@ -10,7 +10,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
-import tech.onlycoders.backend.dto.notificationConfiguration.request.NotificationConfigDto;
+import tech.onlycoders.backend.dto.notificationConfiguration.request.UpdateNotificationConfigDto;
 import tech.onlycoders.backend.exception.ApiException;
 import tech.onlycoders.backend.mapper.NotificationMapper;
 import tech.onlycoders.backend.model.NotificationConfig;
@@ -33,7 +33,7 @@ public class NotificationServiceTest {
 
   @Test
   public void ShouldConfigureNotification() throws ApiException {
-    var notificationConfigDto = ezRandom.nextObject(NotificationConfigDto.class);
+    var notificationConfigDto = ezRandom.nextObject(UpdateNotificationConfigDto.class);
     var id = ezRandom.nextObject(String.class);
     var user = ezRandom.nextObject(User.class);
 
