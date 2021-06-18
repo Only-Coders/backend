@@ -7,18 +7,14 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import tech.onlycoders.backend.exception.ApiException;
 import tech.onlycoders.backend.service.NotificatorService;
-import tech.onlycoders.notificator.dto.EventType;
-import tech.onlycoders.notificator.dto.MessageDTO;
 
 @Service
 public class FirebaseService {
 
   private final FirebaseAuth firebaseAuth;
-  private final NotificatorService notificatorService;
 
-  public FirebaseService(FirebaseAuth firebaseAuth, NotificatorService notificatorService) {
+  public FirebaseService(FirebaseAuth firebaseAuth) {
     this.firebaseAuth = firebaseAuth;
-    this.notificatorService = notificatorService;
   }
 
   public String verifyFirebaseToken(String firebaseToken) throws ApiException {
@@ -33,20 +29,16 @@ public class FirebaseService {
     }
   }
 
-  public void createUser(String email) throws ApiException {
-    var admin = new UserRecord.CreateRequest();
-    admin.setEmail(email);
-    admin.setEmailVerified(false);
+  public String createUser(String email) throws ApiException {
+    var firebaseUser = new UserRecord.CreateRequest();
+    firebaseUser.setEmail(email);
+    firebaseUser.setEmailVerified(false);
     try {
       var resetPasswordAction = ActionCodeSettings.builder().setUrl("https://onlycoders.tech").build();
-      this.firebaseAuth.createUser(admin);
+      this.firebaseAuth.createUser(firebaseUser);
       var passwordLink = this.firebaseAuth.generatePasswordResetLink(email, resetPasswordAction);
       var activateAccountAction = ActionCodeSettings.builder().setUrl(passwordLink).build();
-      var activateLink = this.firebaseAuth.generateEmailVerificationLink(email, activateAccountAction);
-
-      this.notificatorService.send(
-          MessageDTO.builder().eventType(EventType.NEW_ADMIN_ACCOUNT).to(email).message(activateLink).build()
-        );
+      return this.firebaseAuth.generateEmailVerificationLink(email, activateAccountAction);
     } catch (FirebaseAuthException e) {
       var code = e.getAuthErrorCode();
       if (code.equals(EMAIL_ALREADY_EXISTS)) {

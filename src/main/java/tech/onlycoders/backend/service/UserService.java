@@ -162,6 +162,7 @@ public class UserService {
       user.setConfigs(
         Arrays
           .stream(EventType.values())
+          .filter(eventType -> eventType != EventType.NEW_ADMIN_ACCOUNT)
           .map(eventType -> NotificationConfig.builder().push(true).email(true).type(eventType).build())
           .collect(Collectors.toSet())
       );

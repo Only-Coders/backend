@@ -17,6 +17,8 @@ import tech.onlycoders.backend.repository.AdminRepository;
 import tech.onlycoders.backend.repository.PersonRepository;
 import tech.onlycoders.backend.repository.RoleRepository;
 import tech.onlycoders.backend.utils.PaginationUtils;
+import tech.onlycoders.notificator.dto.EventType;
+import tech.onlycoders.notificator.dto.MessageDTO;
 
 @Service
 @Transactional
@@ -27,19 +29,22 @@ public class AdminService {
   private final AdminRepository adminRepository;
   private final FirebaseService firebaseService;
   private final RoleRepository roleRepository;
+  private final NotificatorService notificatorService;
 
   public AdminService(
     PersonRepository personRepository,
     AdminMapper adminMapper,
     AdminRepository adminRepository,
     FirebaseService firebaseService,
-    RoleRepository roleRepository
+    RoleRepository roleRepository,
+    NotificatorService notificatorService
   ) {
     this.personRepository = personRepository;
     this.adminMapper = adminMapper;
     this.adminRepository = adminRepository;
     this.firebaseService = firebaseService;
     this.roleRepository = roleRepository;
+    this.notificatorService = notificatorService;
   }
 
   public ReadAdminDto createAdmin(CreateAdminDto createAdminDto) throws ApiException {
@@ -50,13 +55,21 @@ public class AdminService {
     if (optionalPerson.isPresent()) {
       throw new ApiException(HttpStatus.CONFLICT, "error.email-taken");
     } else {
-      this.firebaseService.createUser(createAdminDto.getEmail());
       var admin = this.adminMapper.createAdminDtoToPerson(createAdminDto);
       var role =
         this.roleRepository.findById("ADMIN")
           .orElseThrow(() -> new ApiException(HttpStatus.INTERNAL_SERVER_ERROR, "error.500"));
       admin.setRole(role);
       adminRepository.save(admin);
+      var activationLink = this.firebaseService.createUser(createAdminDto.getEmail());
+      this.notificatorService.send(
+          MessageDTO
+            .builder()
+            .eventType(EventType.NEW_ADMIN_ACCOUNT)
+            .to(admin.getEmail())
+            .message(activationLink)
+            .build()
+        );
       return adminMapper.adminToReadAdminDto(admin);
     }
   }
