@@ -364,4 +364,7 @@ public interface UserRepository extends Neo4jRepository<User, String> {
     "contactRequest, report, degree, workPosition, post, target;"
   )
   void deleteUser(String email);
+
+  @Query("MATCH (u:User{id: $userId}) SET u += {imageURI: $imageURI}")
+  void updateUserImage(String userId, String imageURI);
 }

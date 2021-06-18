@@ -571,6 +571,25 @@ public class UserController {
     return ResponseEntity.ok(persistedPerson);
   }
 
+  @ApiResponses(
+    value = {
+      @ApiResponse(
+        responseCode = "200",
+        content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ReadUserDto.class)) }
+      )
+    }
+  )
+  @PreAuthorize("hasAuthority('USER')")
+  @PatchMapping("image")
+  @Operation(summary = "Patch user profile image")
+  ResponseEntity<ReadUserDto> patchUserProfileImage(@RequestBody @Valid PatchUserImageDto patchUserImageDto)
+    throws ApiException {
+    var userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    var canonicalName = userDetails.getCanonicalName();
+    var persistedPerson = this.userService.patchUserImage(canonicalName, patchUserImageDto);
+    return ResponseEntity.ok(persistedPerson);
+  }
+
   @ApiResponses(value = { @ApiResponse(responseCode = "200", content = { @Content(mediaType = "application/json") }) })
   @PreAuthorize("hasAuthority('USER')")
   @PutMapping("/institutes/{id}")

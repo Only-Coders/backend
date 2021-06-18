@@ -16,10 +16,7 @@ import tech.onlycoders.backend.dto.language.request.UpdateUserLanguageDto;
 import tech.onlycoders.backend.dto.language.response.ReadLanguageDto;
 import tech.onlycoders.backend.dto.user.GitPlatform;
 import tech.onlycoders.backend.dto.user.GitProfileDto;
-import tech.onlycoders.backend.dto.user.request.AddFCMTokenDto;
-import tech.onlycoders.backend.dto.user.request.CreateUserDto;
-import tech.onlycoders.backend.dto.user.request.UpdateUserBlockedStatusDto;
-import tech.onlycoders.backend.dto.user.request.UpdateUserDto;
+import tech.onlycoders.backend.dto.user.request.*;
 import tech.onlycoders.backend.dto.user.response.ReadUserDto;
 import tech.onlycoders.backend.dto.user.response.ReadUserLiteDto;
 import tech.onlycoders.backend.dto.user.response.ReadUserToDeleteDto;
@@ -660,5 +657,14 @@ public class UserService {
           this.fcmTokenRepository.addUserToken(canonicalName, fcmToken.getId());
         }
       );
+  }
+
+  public ReadUserDto patchUserImage(String canonicalName, PatchUserImageDto patchUserImageDto) throws ApiException {
+    var user =
+      this.userRepository.findByCanonicalName(canonicalName)
+        .orElseThrow(() -> new ApiException(HttpStatus.INTERNAL_SERVER_ERROR, "error.user-not-found"));
+
+    userRepository.updateUserImage(user.getId(), patchUserImageDto.getImageURI());
+    return this.getProfile(user.getCanonicalName(), user.getCanonicalName());
   }
 }
