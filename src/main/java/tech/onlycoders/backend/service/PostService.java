@@ -178,8 +178,8 @@ public class PostService {
       return getReadPostDtoPaginateDto(requesterCanonicalName, page, size, posts, totalQuantity);
     } else {
       var skip = page * size;
-      var posts = postRepository.getUserPublicPosts(targetCanonicalName, skip, size);
-      var totalQuantity = postRepository.countUserPublicPosts(targetCanonicalName);
+      var posts = postRepository.getUserPublicPosts(requesterCanonicalName, targetCanonicalName, skip, size);
+      var totalQuantity = postRepository.countUserPublicPosts(requesterCanonicalName, targetCanonicalName);
       return getReadPostDtoPaginateDto(requesterCanonicalName, page, size, posts, totalQuantity);
     }
   }

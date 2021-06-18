@@ -43,16 +43,41 @@ public interface PostRepository extends Neo4jRepository<Post, String> {
   Integer countUserPosts(String canonicalName);
 
   @Query(
-    "MATCH (u:User{canonicalName:$canonicalName})-[r:PUBLISH]->(p:Post{isPublic:true}) " +
+    " MATCH (target:User{canonicalName: $canonicalName}) " +
+    " WITH target " +
+    " CALL{ " +
+    "    WITH target " +
+    "    MATCH (target)-[r:PUBLISH]->(p:Post{isPublic: true }) " +
+    "    RETURN p, r " +
+    "  UNION " +
+    "    WITH target " +
+    "    MATCH (:User{canonicalName: $requesterCanonicalName})<-[:MENTIONS]-(p:Post)<-[r:PUBLISH]-(target) " +
+    "    RETURN p, r " +
+    " } " +
     " OPTIONAL MATCH (p)-[rt:HAS]->(t:Tag) " +
     " OPTIONAL MATCH (p)-[rm:MENTIONS]->(m:User) " +
-    " RETURN p, collect(r), collect(u), collect(rm), collect(m), collect(rt), collect(t) " +
-    "ORDER BY p.createdAt DESC SKIP $skip LIMIT $size"
+    " RETURN DISTINCT(p), collect(r), collect(target), collect(rm), collect(m), collect(rt), collect(t) " +
+    " ORDER BY p.createdAt DESC " +
+    " SKIP $skip " +
+    " LIMIT $size "
   )
-  Set<Post> getUserPublicPosts(String canonicalName, Integer skip, Integer size);
+  Set<Post> getUserPublicPosts(String requesterCanonicalName, String canonicalName, Integer skip, Integer size);
 
-  @Query("MATCH (u:User{canonicalName:$canonicalName})-[:PUBLISH]->(p:Post{isPublic:true}) RETURN count(p)")
-  Integer countUserPublicPosts(String canonicalName);
+  @Query(
+    " MATCH (target:User{canonicalName: $canonicalName}) " +
+    " WITH target " +
+    " CALL{ " +
+    "    WITH target " +
+    "    MATCH (target)-[r:PUBLISH]->(p:Post{isPublic: true }) " +
+    "    RETURN p, r " +
+    "  UNION " +
+    "    WITH target " +
+    "    MATCH (:User{canonicalName: $requesterCanonicalName})<-[:MENTIONS]-(p:Post)<-[r:PUBLISH]-(target) " +
+    "    RETURN p, r " +
+    " } " +
+    " RETURN COUNT(DISTINCT(p))"
+  )
+  Integer countUserPublicPosts(String requesterCanonicalName, String canonicalName);
 
   @Query(
     " MATCH (target:User{canonicalName: $canonicalName}) " +

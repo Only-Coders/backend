@@ -165,9 +165,11 @@ public class PostServiceTest {
     var page = 0;
     Mockito.when(this.userRepository.areUsersConnected(requesterCanonicalName, targetCanonicalName)).thenReturn(false);
     Mockito
-      .when(this.postRepository.getUserPublicPosts(requesterCanonicalName, page, size))
+      .when(this.postRepository.getUserPublicPosts(requesterCanonicalName, requesterCanonicalName, page, size))
       .thenReturn(ezRandom.objects(Post.class, 10).collect(Collectors.toSet()));
-    Mockito.when(this.postRepository.countUserPublicPosts(requesterCanonicalName)).thenReturn(ezRandom.nextInt());
+    Mockito
+      .when(this.postRepository.countUserPublicPosts(requesterCanonicalName, requesterCanonicalName))
+      .thenReturn(ezRandom.nextInt());
 
     var result = this.service.getUserPosts(requesterCanonicalName, targetCanonicalName, page, size);
     assertNotNull(result);
