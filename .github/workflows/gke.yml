@@ -38,6 +38,9 @@ jobs:
           input: src/main/resources/application-prod.properties
           output: src/main/resources/application-prod.properties
 
+      - name: Start Redis
+        uses: supercharge/redis-github-action@1.2.0
+
       - name: Build with Gradle
         run: |
           echo $FB_SECRET_KEY > src/main/resources/serviceAccount.json
