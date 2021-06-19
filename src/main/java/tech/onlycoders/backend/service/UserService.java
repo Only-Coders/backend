@@ -599,7 +599,7 @@ public class UserService {
         .findById(updateUserDto.getGitProfile().getPlatform().toString())
         .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "error.git-platform-not-found"));
       userRepository.setGitProfile(canonicalName, updateUserDto.getGitProfile().getUserName(), gitPlatform.getId());
-    } else if (updateUserDto.getGitProfile() == null && user.getGitProfile() != null) {
+    } else if (updateUserDto.getGitProfile() == null) {
       //Se elimino el usuario de git
       userRepository.removeGitProfile(canonicalName);
     } else if (
