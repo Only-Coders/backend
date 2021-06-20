@@ -214,17 +214,18 @@ public interface PostRepository extends Neo4jRepository<Post, String> {
     " CALL {  " +
     "     WITH tag, me " +
     "     MATCH (me)-[:IS_CONNECTED]-(u:User)-[r:PUBLISH]->(p:Post{isPublic:false})-[rt:HAS]->(tag) " +
-    "     RETURN p,r,u,rt,tag as t " +
+    "     RETURN p,r,u" +
     "   UNION " +
     "     WITH tag " +
     "     MATCH (tag)<-[rt:HAS]-(p:Post{isPublic:true})<-[r:PUBLISH]-(u:User) " +
-    "     RETURN p,r,u,rt,tag as t " +
+    "     RETURN p,r,u" +
     "   UNION " +
     "     WITH tag, me " +
     "     MATCH (tag)<-[rt:HAS]-(p:Post)<-[r:PUBLISH]-(me) " +
-    "     RETURN p,r,me as u,rt,tag as t " +
+    "     RETURN p,r,me as u " +
     " }  " +
     " OPTIONAL MATCH (p)-[rm:MENTIONS]->(m:User) " +
+    " OPTIONAL MATCH (p)-[rt:HAS]->(t:Tag) " +
     " RETURN p, collect(r), collect(u), collect(rm), collect(m), collect(rt), collect(t)  " +
     " ORDER BY p.createdAt DESC " +
     " SKIP $skip LIMIT $size "
