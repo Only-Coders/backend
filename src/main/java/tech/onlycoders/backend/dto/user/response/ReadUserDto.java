@@ -25,6 +25,7 @@ public class ReadUserDto {
   private Boolean defaultPrivacyIsPublic;
   private GitProfileDto gitProfile;
   private Integer medalQty;
+  private Integer followingQty;
   private Integer followerQty;
   private Integer contactQty;
   private Integer postQty;

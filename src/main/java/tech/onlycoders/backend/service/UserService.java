@@ -102,6 +102,7 @@ public class UserService {
     var medals = this.userRepository.countUserMedals(targetCanonicalName);
 
     var followers = this.userRepository.countUserFollowers(targetCanonicalName);
+    var following = this.userRepository.countUserFollowing(targetCanonicalName);
     var contacts = this.userRepository.countContactsWithOutFilters(targetCanonicalName);
 
     var posts = this.postRepository.countUserPosts(targetCanonicalName);
@@ -109,6 +110,7 @@ public class UserService {
     var dto = userMapper.partialUserToReadPersonDto(partialUser);
     dto.setMedalQty(medals);
     dto.setFollowerQty(followers);
+    dto.setFollowingQty(following);
     dto.setContactQty(contacts);
     dto.setPostQty(posts);
     if (partialUser.getGitProfile() != null) {

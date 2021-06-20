@@ -367,4 +367,7 @@ public interface UserRepository extends Neo4jRepository<User, String> {
 
   @Query("MATCH (u:User{id: $userId}) SET u += {imageURI: $imageURI}")
   void updateUserImage(String userId, String imageURI);
+
+  @Query(" MATCH (User{canonicalName: $targetCanonicalName})-[:FOLLOWS]->(u:User) RETURN COUNT(DISTINCT(u)) ")
+  Integer countUserFollowing(String targetCanonicalName);
 }
