@@ -64,6 +64,7 @@ public class RecentSearchService {
       )
       .collect(Collectors.toList());
     Collections.reverse(result);
+    Collections.sort(result);
     return result;
   }
 
