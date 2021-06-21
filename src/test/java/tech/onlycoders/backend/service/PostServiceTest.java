@@ -225,6 +225,7 @@ public class PostServiceTest {
     Mockito.when(this.postRepository.postIsPublic(anyString())).thenReturn(true);
     Mockito.when(this.userRepository.areUsersConnected(anyString(), anyString())).thenReturn(true);
     Mockito.when(this.userRepository.findByCanonicalName(anyString())).thenReturn(Optional.of(user));
+    Mockito.when(this.userRepository.getPostOwner(post.getId())).thenReturn(user);
     Mockito.when(this.postRepository.getById(anyString())).thenReturn(Optional.of(post));
     Mockito.when(this.reactionRepository.getCommentUserReaction(anyString(), anyString())).thenReturn(Optional.empty());
 

@@ -9,6 +9,7 @@ import org.springframework.stereotype.Repository;
 import tech.onlycoders.backend.model.Post;
 import tech.onlycoders.backend.model.PostType;
 import tech.onlycoders.backend.repository.projections.PartialPost;
+import tech.onlycoders.backend.repository.projections.PartialUser;
 
 @Repository
 public interface PostRepository extends Neo4jRepository<Post, String> {

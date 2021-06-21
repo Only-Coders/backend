@@ -15,7 +15,6 @@ import tech.onlycoders.backend.dto.report.request.CreatePostReportDto;
 import tech.onlycoders.backend.exception.ApiException;
 import tech.onlycoders.backend.mapper.CommentMapper;
 import tech.onlycoders.backend.mapper.PostMapper;
-import tech.onlycoders.backend.mapper.UserMapper;
 import tech.onlycoders.backend.mapper.WorkPositionMapper;
 import tech.onlycoders.backend.model.*;
 import tech.onlycoders.backend.repository.*;
@@ -54,7 +53,6 @@ public class PostService {
     WorkPositionRepository workPositionRepository,
     WorkPositionMapper workPositionMapper,
     PostMapper postMapper,
-    UserMapper userMapper,
     CommentMapper commentMapper,
     NotificatorService notificatorService
   ) {
@@ -329,6 +327,18 @@ public class PostService {
     var createdComment =
       this.commentRepository.getUserComment(comment.getId(), commenter.getCanonicalName())
         .orElseThrow(() -> new ApiException(HttpStatus.INTERNAL_SERVER_ERROR, "error.500"));
+
+    var owner = this.userRepository.getPostOwner(post.getId());
+
+    this.notificatorService.send(
+        MessageDTO
+          .builder()
+          .message(commenter.getFullName() + " ha comentado tu post!")
+          .to(owner.getEmail())
+          .eventType(EventType.NEW_COMMENT)
+          .from(commenter.getEmail())
+          .build()
+      );
 
     var commentDto = commentMapper.commentToReadCommentDto(createdComment);
     var result = expandCommentData(commenter.getCanonicalName(), List.of(commentDto));

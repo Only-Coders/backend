@@ -370,4 +370,7 @@ public interface UserRepository extends Neo4jRepository<User, String> {
 
   @Query(" MATCH (User{canonicalName: $targetCanonicalName})-[:FOLLOWS]->(u:User) RETURN COUNT(DISTINCT(u)) ")
   Integer countUserFollowing(String targetCanonicalName);
+
+  @Query("MATCH (:Post{id:$postId})<-[:PUBLISH]-(owner:User) return owner")
+  PartialUser getPostOwner(String postId);
 }
