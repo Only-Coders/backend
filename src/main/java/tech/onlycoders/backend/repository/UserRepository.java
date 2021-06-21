@@ -338,7 +338,7 @@ public interface UserRepository extends Neo4jRepository<User, String> {
   @Query(
     "MATCH (u:User{canonicalName: $canonicalName}) with u " +
     "MATCH (p:GitPlatform{id: $platformId}) with p,u " +
-    "MATCH (u)-[g:USES]->(:GitPlatform) DELETE g with p,u " +
+    "OPTIONAL MATCH (u)-[g:USES]->(:GitPlatform) DELETE g with p,u " +
     "MERGE (u)-[:USES{username: $userName}]->(p)"
   )
   void setGitProfile(String canonicalName, String userName, String platformId);
