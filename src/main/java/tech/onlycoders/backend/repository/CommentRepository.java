@@ -10,6 +10,12 @@ import tech.onlycoders.backend.repository.projections.PartialComment;
 
 @Repository
 public interface CommentRepository extends Neo4jRepository<Comment, String> {
+  @Query(
+    " MATCH (:Post{id: $postId})<-[:FOR]-(c:Comment{id: $commentId})<-[w:WRITES]-(u:User) " +
+    " RETURN c, collect(w), collect(u) "
+  )
+  Optional<Comment> getCommentWithPost(String commentId, String postId);
+
   Optional<PartialComment> getById(String commentId);
 
   @Query(

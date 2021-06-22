@@ -417,7 +417,9 @@ public class PostService {
   }
 
   private void validateIsAuthorized(String requesterCanonicalName, String postId) throws ApiException {
-    var publisherCanonicalName = postRepository.getPostPublisherCanonicalName(postId);
+    var publisherCanonicalName = postRepository
+      .getPostPublisherCanonicalName(postId)
+      .orElseThrow(() -> new ApiException(HttpStatus.FORBIDDEN, "error.not-authorized"));
     if (
       !publisherCanonicalName.equals(requesterCanonicalName) &&
       !userRepository.areUsersConnected(requesterCanonicalName, requesterCanonicalName) &&

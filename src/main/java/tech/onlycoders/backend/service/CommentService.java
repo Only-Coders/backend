@@ -7,6 +7,7 @@ import tech.onlycoders.backend.dto.post.request.CreateReactionDto;
 import tech.onlycoders.backend.exception.ApiException;
 import tech.onlycoders.backend.model.Reaction;
 import tech.onlycoders.backend.repository.CommentRepository;
+import tech.onlycoders.backend.repository.PostRepository;
 import tech.onlycoders.backend.repository.ReactionRepository;
 import tech.onlycoders.backend.repository.UserRepository;
 
@@ -17,15 +18,18 @@ public class CommentService {
   private final CommentRepository commentRepository;
   private final UserRepository userRepository;
   private final ReactionRepository reactionRepository;
+  private final PostRepository postRepository;
 
   public CommentService(
     CommentRepository commentRepository,
     UserRepository userRepository,
-    ReactionRepository reactionRepository
+    ReactionRepository reactionRepository,
+    PostRepository postRepository
   ) {
     this.commentRepository = commentRepository;
     this.userRepository = userRepository;
     this.reactionRepository = reactionRepository;
+    this.postRepository = postRepository;
   }
 
   public void reactToComment(String canonicalName, String commentId, CreateReactionDto createReactionDto)
@@ -52,5 +56,23 @@ public class CommentService {
 
   public void deleteCommentReaction(String canonicalName, String commentId) {
     this.reactionRepository.removeCommentReaction(canonicalName, commentId);
+  }
+
+  public void deleteComment(String canonicalName, String postId, String commentId) throws ApiException {
+    var comment =
+      this.commentRepository.getCommentWithPost(commentId, postId)
+        .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "error.comment-not-found"));
+    if (comment.getPublisher().getCanonicalName().equalsIgnoreCase(canonicalName)) {
+      this.commentRepository.deleteById(commentId);
+    } else {
+      var publisherCanonicalName = postRepository
+        .getPostPublisherCanonicalName(postId)
+        .orElseThrow(() -> new ApiException(HttpStatus.FORBIDDEN, "error.not-authorized"));
+      if (canonicalName.equalsIgnoreCase(publisherCanonicalName)) {
+        this.commentRepository.deleteById(commentId);
+      } else {
+        throw new ApiException(HttpStatus.FORBIDDEN, "error.not-authorized");
+      }
+    }
   }
 }

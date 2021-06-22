@@ -161,7 +161,7 @@ public interface PostRepository extends Neo4jRepository<Post, String> {
   void removeReports(String canonicalName, String postId);
 
   @Query("MATCH (u:User)-[:PUBLISH]->(:Post{id: $postId}) RETURN u.canonicalName")
-  String getPostPublisherCanonicalName(String postId);
+  Optional<String> getPostPublisherCanonicalName(String postId);
 
   @Query("MATCH (p:Post{id: $postId}) RETURN p.isPublic")
   boolean postIsPublic(String postId);

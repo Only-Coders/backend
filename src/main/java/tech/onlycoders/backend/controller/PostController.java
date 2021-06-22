@@ -23,6 +23,7 @@ import tech.onlycoders.backend.dto.post.request.CreateReactionDto;
 import tech.onlycoders.backend.dto.post.response.ReadPostDto;
 import tech.onlycoders.backend.dto.report.request.CreatePostReportDto;
 import tech.onlycoders.backend.exception.ApiException;
+import tech.onlycoders.backend.service.CommentService;
 import tech.onlycoders.backend.service.PostService;
 
 @RestController
@@ -31,9 +32,11 @@ import tech.onlycoders.backend.service.PostService;
 public class PostController {
 
   private final PostService postService;
+  private final CommentService commentService;
 
-  public PostController(PostService postService) {
+  public PostController(PostService postService, CommentService commentService) {
     this.postService = postService;
+    this.commentService = commentService;
   }
 
   @PostMapping
@@ -194,5 +197,15 @@ public class PostController {
     var userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     var updatedPost = postService.updatePost(postId, userDetails.getCanonicalName(), createPostDto);
     return ResponseEntity.ok(updatedPost);
+  }
+
+  @DeleteMapping("/{postId}/comments/{commentId}")
+  @Operation(summary = "Deletes a comment")
+  @ApiResponses(value = { @ApiResponse(responseCode = "200", content = { @Content(mediaType = "application/json") }) })
+  @PreAuthorize("hasAuthority('USER')")
+  ResponseEntity<?> deleteComment(@PathVariable String commentId, @PathVariable String postId) throws ApiException {
+    var userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    commentService.deleteComment(userDetails.getCanonicalName(), postId, commentId);
+    return ResponseEntity.ok().build();
   }
 }

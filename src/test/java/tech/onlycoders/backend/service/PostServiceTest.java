@@ -221,7 +221,7 @@ public class PostServiceTest {
     Mockito
       .when(this.commentRepository.getUserComment(anyString(), anyString()))
       .thenReturn(Optional.of(ezRandom.nextObject(Comment.class)));
-    Mockito.when(this.postRepository.getPostPublisherCanonicalName(anyString())).thenReturn("cname");
+    Mockito.when(this.postRepository.getPostPublisherCanonicalName(anyString())).thenReturn(Optional.of("cname"));
     Mockito.when(this.postRepository.postIsPublic(anyString())).thenReturn(true);
     Mockito.when(this.userRepository.areUsersConnected(anyString(), anyString())).thenReturn(true);
     Mockito.when(this.userRepository.findByCanonicalName(anyString())).thenReturn(Optional.of(user));
@@ -262,7 +262,7 @@ public class PostServiceTest {
     Mockito
       .when(this.reactionRepository.getCommentReactionQuantity(anyString(), any(ReactionType.class)))
       .thenReturn(0L);
-    Mockito.when(postRepository.getPostPublisherCanonicalName(anyString())).thenReturn("cname");
+    Mockito.when(postRepository.getPostPublisherCanonicalName(anyString())).thenReturn(Optional.of("cname"));
     Mockito.when(postRepository.postIsPublic(anyString())).thenReturn(true);
     Mockito.when(userRepository.areUsersConnected(anyString(), anyString())).thenReturn(true);
 
@@ -274,7 +274,7 @@ public class PostServiceTest {
   @Test
   @MockitoSettings(strictness = Strictness.LENIENT)
   public void ShouldFailReturnPostCommentsWhenUserIsNotAllowed() {
-    Mockito.when(postRepository.getPostPublisherCanonicalName(anyString())).thenReturn("cname");
+    Mockito.when(postRepository.getPostPublisherCanonicalName(anyString())).thenReturn(Optional.of("cname"));
     Mockito.when(postRepository.postIsPublic(anyString())).thenReturn(false);
     Mockito.when(userRepository.areUsersConnected(anyString(), anyString())).thenReturn(false);
 
