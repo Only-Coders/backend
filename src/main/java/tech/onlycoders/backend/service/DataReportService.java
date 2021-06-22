@@ -60,15 +60,13 @@ public class DataReportService {
     var resultList = genericRepository.getPostsPerDay();
     var result = new ArrayList<AttributeValueDto>();
 
-    resultList
-      .stream()
-      .forEach(
-        row -> {
-          result.add(
-            AttributeValueDto.builder().attribute((String) row.get("date")).value((Long) row.get("found")).build()
-          );
-        }
-      );
+    resultList.forEach(
+      row -> {
+        result.add(
+          AttributeValueDto.builder().attribute((String) row.get("date")).value((Long) row.get("found")).build()
+        );
+      }
+    );
     return result;
   }
 
@@ -79,24 +77,20 @@ public class DataReportService {
       resultMap.put(key, PostAndReactionsPerHourDto.builder().hour(key).posts(0L).reactions(0L).build());
     }
     var postsList = genericRepository.getPostsPerHour();
-    postsList
-      .stream()
-      .forEach(
-        row -> {
-          var item = resultMap.get((String) row.get("hour"));
-          item.setPosts((Long) row.get("found"));
-        }
-      );
+    postsList.forEach(
+      row -> {
+        var item = resultMap.get((String) row.get("hour"));
+        item.setPosts((Long) row.get("found"));
+      }
+    );
 
     var reactionsList = genericRepository.getReactionsPerHour();
-    reactionsList
-      .stream()
-      .forEach(
-        row -> {
-          var item = resultMap.get((String) row.get("hour"));
-          item.setReactions((Long) row.get("found"));
-        }
-      );
+    reactionsList.forEach(
+      row -> {
+        var item = resultMap.get((String) row.get("hour"));
+        item.setReactions((Long) row.get("found"));
+      }
+    );
 
     var result = new ArrayList<PostAndReactionsPerHourDto>();
     resultMap

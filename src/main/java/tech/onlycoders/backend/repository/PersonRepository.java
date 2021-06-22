@@ -12,19 +12,22 @@ public interface PersonRepository extends Neo4jRepository<Person, String> {
   Optional<Person> findByEmail(String email);
 
   @Query(
-    "MATCH (u:Person)-[h:HAS]-(r:Role) WHERE u.fullName =~ $likeName RETURN u, collect(h), collect(r) ORDER BY u.id DESC SKIP $skip LIMIT $size"
+    " MATCH (u:Person)-[h:HAS]-(r:Role) WHERE u.fullName =~ $likeName RETURN u, collect(h), collect(r) " +
+    " ORDER BY u[$sortBy] DESC SKIP $skip LIMIT $size"
   )
-  List<Person> paginateAllPeople(String likeName, Integer skip, Integer size);
+  List<Person> paginateAllPeople(String likeName, String sortBy, Integer skip, Integer size);
 
   @Query(
-    "MATCH (u:Person)-[h:HAS]-(r:Role{name: 'ADMIN'}) WHERE u.fullName =~ $likeName RETURN u, collect(h), collect(r) ORDER BY u.id DESC SKIP $skip LIMIT $size"
+    " MATCH (u:Person)-[h:HAS]-(r:Role{name: 'ADMIN'}) WHERE u.fullName =~ $likeName RETURN u, collect(h), collect(r) " +
+    " ORDER BY u.id DESC SKIP $skip LIMIT $size"
   )
   List<Person> paginateAllAdmins(String likeName, Integer skip, Integer size);
 
   @Query(
-    "MATCH (u:Person)-[h:HAS]-(r:Role{name: 'USER'}) WHERE u.fullName =~ $likeName RETURN u, collect(h), collect(r) ORDER BY u.id DESC SKIP $skip LIMIT $size"
+    " MATCH (u:Person)-[h:HAS]-(r:Role{name: 'USER'}) WHERE u.fullName =~ $likeName RETURN u, collect(h), collect(r) " +
+    " ORDER BY u[$sortBy] DESC SKIP $skip LIMIT $size"
   )
-  List<Person> paginateAllUsers(String likeName, Integer skip, Integer size);
+  List<Person> paginateAllUsers(String likeName, String sortBy, Integer skip, Integer size);
 
   @Query("MATCH (u:Person) WHERE u.fullName =~ $likeName RETURN count(u)")
   int countAllPeople(String likeName);

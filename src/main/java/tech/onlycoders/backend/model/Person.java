@@ -20,6 +20,7 @@ public class Person extends BaseEntity {
   private String email;
   private String imageURI;
   private String canonicalName;
+  private Boolean blocked = false;
 
   @DateLong
   private Date securityUpdate;

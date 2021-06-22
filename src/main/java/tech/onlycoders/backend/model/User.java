@@ -16,7 +16,6 @@ public class User extends Person {
 
   private Boolean defaultPrivacyIsPublic = false;
 
-  private Boolean blocked = false;
   private String description;
 
   @DateLong

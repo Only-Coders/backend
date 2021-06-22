@@ -1,19 +1,21 @@
 package tech.onlycoders.backend.service;
 
-import java.util.List;
+import java.util.ArrayList;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tech.onlycoders.backend.bean.FirebaseService;
+import tech.onlycoders.backend.dto.OrderBy;
 import tech.onlycoders.backend.dto.PaginateDto;
 import tech.onlycoders.backend.dto.RoleEnum;
+import tech.onlycoders.backend.dto.SortAllUsersBy;
 import tech.onlycoders.backend.dto.admin.request.CreateAdminDto;
 import tech.onlycoders.backend.dto.admin.response.ReadAdminDto;
 import tech.onlycoders.backend.dto.admin.response.ReadGenericUserDto;
 import tech.onlycoders.backend.exception.ApiException;
 import tech.onlycoders.backend.mapper.AdminMapper;
-import tech.onlycoders.backend.model.Person;
 import tech.onlycoders.backend.repository.AdminRepository;
+import tech.onlycoders.backend.repository.GenericRepository;
 import tech.onlycoders.backend.repository.PersonRepository;
 import tech.onlycoders.backend.repository.RoleRepository;
 import tech.onlycoders.backend.utils.PaginationUtils;
@@ -30,6 +32,7 @@ public class AdminService {
   private final FirebaseService firebaseService;
   private final RoleRepository roleRepository;
   private final NotificatorService notificatorService;
+  private final GenericRepository genericRepository;
 
   public AdminService(
     PersonRepository personRepository,
@@ -37,7 +40,8 @@ public class AdminService {
     AdminRepository adminRepository,
     FirebaseService firebaseService,
     RoleRepository roleRepository,
-    NotificatorService notificatorService
+    NotificatorService notificatorService,
+    GenericRepository genericRepository
   ) {
     this.personRepository = personRepository;
     this.adminMapper = adminMapper;
@@ -45,6 +49,7 @@ public class AdminService {
     this.firebaseService = firebaseService;
     this.roleRepository = roleRepository;
     this.notificatorService = notificatorService;
+    this.genericRepository = genericRepository;
   }
 
   public ReadAdminDto createAdmin(CreateAdminDto createAdminDto) throws ApiException {
@@ -77,26 +82,28 @@ public class AdminService {
   public PaginateDto<ReadGenericUserDto> paginateAllUsers(
     String partialName,
     RoleEnum role,
+    SortAllUsersBy sortBy,
+    OrderBy orderBy,
     Integer page,
     Integer size
   ) {
-    List<Person> people;
     var totalQuantity = 0;
 
-    var regex = "(?i)" + partialName + ".*";
+    var regex = "(?i).*" + partialName + ".*";
+    var roleRegex = role == null ? "(?i).*" : role.name();
+
+    var genericUserDtoList = new ArrayList<>(
+      this.genericRepository.paginateAllPeople(regex, sortBy.label, orderBy.name(), roleRegex, page * size, size)
+    );
 
     if (role == null) {
-      people = this.personRepository.paginateAllPeople(regex, page, size);
       totalQuantity = this.personRepository.countAllPeople(regex);
     } else if (role.equals(RoleEnum.ADMIN)) {
-      people = this.personRepository.paginateAllAdmins(regex, page, size);
       totalQuantity = this.personRepository.countAllAdmins(regex);
     } else {
-      people = this.personRepository.paginateAllUsers(regex, page, size);
       totalQuantity = this.personRepository.countAllUsers(regex);
     }
 
-    var genericUserDtoList = this.adminMapper.peopleToReadGenericUsers(people);
     var pageQuantity = PaginationUtils.getPagesQuantity(totalQuantity, size);
 
     var dto = new PaginateDto<ReadGenericUserDto>();

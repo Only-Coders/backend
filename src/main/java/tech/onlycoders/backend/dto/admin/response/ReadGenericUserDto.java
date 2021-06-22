@@ -15,5 +15,6 @@ public class ReadGenericUserDto {
   public String firstName;
   public String lastName;
   public String imageURI;
+  public Boolean blocked;
   public ReadRoleDto role;
 }

@@ -10,8 +10,10 @@ import javax.validation.constraints.Min;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import tech.onlycoders.backend.dto.OrderBy;
 import tech.onlycoders.backend.dto.PaginateDto;
 import tech.onlycoders.backend.dto.RoleEnum;
+import tech.onlycoders.backend.dto.SortAllUsersBy;
 import tech.onlycoders.backend.dto.admin.request.CreateAdminDto;
 import tech.onlycoders.backend.dto.admin.response.ReadAdminDto;
 import tech.onlycoders.backend.dto.admin.response.ReadGenericUserDto;
@@ -59,9 +61,11 @@ public class AdminController {
   ResponseEntity<PaginateDto<ReadGenericUserDto>> getAllUsers(
     @RequestParam(defaultValue = "", required = false) String partialName,
     @RequestParam(defaultValue = "", required = false) RoleEnum role,
+    @RequestParam(defaultValue = "FULLNAME", required = false) SortAllUsersBy sortBy,
+    @RequestParam(defaultValue = "DESC", required = false) OrderBy orderBy,
     @RequestParam(defaultValue = "0") @Min(0) Integer page,
     @RequestParam(defaultValue = "20") @Min(1) Integer size
   ) {
-    return ResponseEntity.ok(adminService.paginateAllUsers(partialName, role, page, size));
+    return ResponseEntity.ok(adminService.paginateAllUsers(partialName, role, sortBy, orderBy, page, size));
   }
 }

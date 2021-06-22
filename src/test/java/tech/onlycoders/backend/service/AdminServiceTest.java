@@ -16,15 +16,17 @@ import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import tech.onlycoders.backend.bean.FirebaseService;
+import tech.onlycoders.backend.dto.OrderBy;
 import tech.onlycoders.backend.dto.RoleEnum;
+import tech.onlycoders.backend.dto.SortAllUsersBy;
 import tech.onlycoders.backend.dto.admin.request.CreateAdminDto;
+import tech.onlycoders.backend.dto.admin.response.ReadGenericUserDto;
 import tech.onlycoders.backend.exception.ApiException;
 import tech.onlycoders.backend.mapper.AdminMapper;
 import tech.onlycoders.backend.model.Admin;
-import tech.onlycoders.backend.model.Person;
 import tech.onlycoders.backend.model.Role;
-import tech.onlycoders.backend.model.User;
 import tech.onlycoders.backend.repository.AdminRepository;
+import tech.onlycoders.backend.repository.GenericRepository;
 import tech.onlycoders.backend.repository.PersonRepository;
 import tech.onlycoders.backend.repository.RoleRepository;
 import tech.onlycoders.notificator.dto.MessageDTO;
@@ -43,6 +45,9 @@ public class AdminServiceTest {
 
   @Mock
   private RoleRepository roleRepository;
+
+  @Mock
+  private GenericRepository genericRepository;
 
   @Mock
   private FirebaseService firebaseService;
@@ -93,30 +98,66 @@ public class AdminServiceTest {
 
   @Test
   public void ShouldPaginatePeople() {
-    var users = ezRandom.objects(Person.class, 10).collect(Collectors.toList());
-    Mockito.when(this.personRepository.paginateAllPeople(anyString(), anyInt(), anyInt())).thenReturn(users);
+    var users = ezRandom.objects(ReadGenericUserDto.class, 10).collect(Collectors.toList());
+    Mockito
+      .when(
+        this.genericRepository.paginateAllPeople(anyString(), anyString(), anyString(), anyString(), anyInt(), anyInt())
+      )
+      .thenReturn(users);
     Mockito.when(this.personRepository.countAllPeople(anyString())).thenReturn(users.size());
-    var result = this.service.paginateAllUsers(ezRandom.nextObject(String.class), null, 1, 1);
+    var result =
+      this.service.paginateAllUsers(
+          ezRandom.nextObject(String.class),
+          null,
+          SortAllUsersBy.FULLNAME,
+          OrderBy.ASC,
+          1,
+          1
+        );
     assertEquals(10, result.getTotalElements());
     assertEquals(10, result.getContent().size());
   }
 
   @Test
   public void ShouldPaginateUsers() {
-    var users = ezRandom.objects(Person.class, 10).collect(Collectors.toList());
-    Mockito.when(this.personRepository.paginateAllUsers(anyString(), anyInt(), anyInt())).thenReturn(users);
+    var users = ezRandom.objects(ReadGenericUserDto.class, 10).collect(Collectors.toList());
+    Mockito
+      .when(
+        this.genericRepository.paginateAllPeople(anyString(), anyString(), anyString(), anyString(), anyInt(), anyInt())
+      )
+      .thenReturn(users);
     Mockito.when(this.personRepository.countAllUsers(anyString())).thenReturn(users.size());
-    var result = this.service.paginateAllUsers(ezRandom.nextObject(String.class), RoleEnum.USER, 1, 1);
+    var result =
+      this.service.paginateAllUsers(
+          ezRandom.nextObject(String.class),
+          RoleEnum.USER,
+          SortAllUsersBy.FULLNAME,
+          OrderBy.ASC,
+          1,
+          1
+        );
     assertEquals(10, result.getTotalElements());
     assertEquals(10, result.getContent().size());
   }
 
   @Test
   public void ShouldPaginateAdmins() {
-    var users = ezRandom.objects(Person.class, 10).collect(Collectors.toList());
-    Mockito.when(this.personRepository.paginateAllAdmins(anyString(), anyInt(), anyInt())).thenReturn(users);
+    var users = ezRandom.objects(ReadGenericUserDto.class, 10).collect(Collectors.toList());
+    Mockito
+      .when(
+        this.genericRepository.paginateAllPeople(anyString(), anyString(), anyString(), anyString(), anyInt(), anyInt())
+      )
+      .thenReturn(users);
     Mockito.when(this.personRepository.countAllAdmins(anyString())).thenReturn(users.size());
-    var result = this.service.paginateAllUsers(ezRandom.nextObject(String.class), RoleEnum.ADMIN, 1, 1);
+    var result =
+      this.service.paginateAllUsers(
+          ezRandom.nextObject(String.class),
+          RoleEnum.ADMIN,
+          SortAllUsersBy.FULLNAME,
+          OrderBy.ASC,
+          1,
+          1
+        );
     assertEquals(10, result.getTotalElements());
     assertEquals(10, result.getContent().size());
   }
