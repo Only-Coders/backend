@@ -6,6 +6,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 import org.jeasy.random.EasyRandom;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -13,11 +14,11 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.neo4j.core.Neo4jClient;
 import tech.onlycoders.backend.model.Language;
 import tech.onlycoders.backend.repository.DataReportRepository;
 import tech.onlycoders.backend.repository.GenericRepository;
 import tech.onlycoders.backend.repository.LanguageRepository;
+import tech.onlycoders.backend.repository.projections.HourAmount;
 
 @ExtendWith(MockitoExtension.class)
 public class DataReportServiceTest {
@@ -72,13 +73,10 @@ public class DataReportServiceTest {
 
   @Test
   public void ShouldGetPostsAndReactionsPerHour() {
-    var list = new ArrayList<Map<String, Object>>();
-    var map = new HashMap<String, Object>();
-    map.put("hour", "22:00");
-    map.put("found", 1L);
-    list.add(map);
-    Mockito.when(genericRepository.getPostsPerHour()).thenReturn(list);
-    Mockito.when(genericRepository.getReactionsPerHour()).thenReturn(list);
+    var postPerHour = ezRandom.objects(HourAmount.class, 10).collect(Collectors.toList());
+    postPerHour.forEach(hourAmount -> hourAmount.setHour(String.format("%02d", ezRandom.nextInt(24)) + ":00"));
+    Mockito.when(genericRepository.getPostsPerHour()).thenReturn(postPerHour);
+    Mockito.when(genericRepository.getReactionsPerHour()).thenReturn(postPerHour);
     var res = service.getPostsAndReactionsPerHour();
 
     assertNotNull(res);

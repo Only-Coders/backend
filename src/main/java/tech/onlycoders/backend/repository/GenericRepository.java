@@ -2,9 +2,8 @@ package tech.onlycoders.backend.repository;
 
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Map;
-import lombok.AllArgsConstructor;
-import lombok.Data;
 import org.joda.time.DateTime;
 import org.neo4j.driver.Record;
 import org.neo4j.driver.types.TypeSystem;
@@ -12,6 +11,7 @@ import org.springframework.data.neo4j.core.Neo4jClient;
 import org.springframework.stereotype.Repository;
 import tech.onlycoders.backend.dto.admin.response.ReadGenericUserDto;
 import tech.onlycoders.backend.dto.admin.response.ReadRoleDto;
+import tech.onlycoders.backend.repository.projections.HourAmount;
 
 @Repository
 public class GenericRepository {
@@ -41,6 +41,11 @@ public class GenericRepository {
       .build();
   }
 
+  private static HourAmount hourAmountMapper(TypeSystem typeSystem, Record record) {
+    System.out.println(record);
+    return HourAmount.builder().hour(record.get("hour").asString()).amount(record.get("found").asLong(0L)).build();
+  }
+
   public Collection<Map<String, Object>> getPostsPerDay() {
     var date = new DateTime(new Date());
     date = date.minusMonths(3);
@@ -56,7 +61,7 @@ public class GenericRepository {
     return neo4jClient.query(query).fetch().all();
   }
 
-  public Collection<Map<String, Object>> getPostsPerHour() {
+  public Collection<HourAmount> getPostsPerHour() {
     var date = new DateTime(new Date());
     date = date.minusDays(30);
 
@@ -69,10 +74,11 @@ public class GenericRepository {
       "COUNT(p) as found\n" +
       "RETURN hour, found\n" +
       "ORDER BY hour";
-    return neo4jClient.query(query).fetch().all();
+
+    return neo4jClient.query(query).fetchAs(HourAmount.class).mappedBy(GenericRepository::hourAmountMapper).all();
   }
 
-  public Collection<Map<String, Object>> getReactionsPerHour() {
+  public Collection<HourAmount> getReactionsPerHour() {
     var date = new DateTime(new Date());
     date = date.minusDays(30);
 
@@ -85,7 +91,7 @@ public class GenericRepository {
       "COUNT(p) as found\n" +
       "RETURN hour, found\n" +
       "ORDER BY hour";
-    return neo4jClient.query(query).fetch().all();
+    return neo4jClient.query(query).fetchAs(HourAmount.class).mappedBy(GenericRepository::hourAmountMapper).all();
   }
 
   public Collection<ReadGenericUserDto> paginateAllPeople(
@@ -97,18 +103,20 @@ public class GenericRepository {
     Integer size
   ) {
     var query = String.format(
-      " MATCH (u:Person)-[h:HAS]-(r:Role) WHERE u.fullName =~ \"%s\" AND r.name =~ \"%s\" " +
+      " MATCH (u:Person)-[h:HAS]-(r:Role) WHERE u.fullName =~ \"$likeName\" AND r.name =~ \"$likeRole\" " +
       " RETURN u{.*, role: r.name} " +
-      " ORDER BY u[\"%s\"] %s SKIP %d LIMIT %d",
-      likeName,
-      role,
-      sortBy,
-      orderBy,
-      skip,
-      size
+      " ORDER BY u[\"$sortBy\"] %s SKIP $skip LIMIT $size",
+      orderBy
     );
+    HashMap<String, Object> params = new HashMap<>();
+    params.put("likeName", likeName);
+    params.put("likeRole", role);
+    params.put("sortBy", sortBy);
+    params.put("skip", skip);
+    params.put("size", size);
     return neo4jClient
       .query(query)
+      .bindAll(params)
       .fetchAs(ReadGenericUserDto.class)
       .mappedBy(GenericRepository::ReadGenericUserDtoMapper)
       .all();
