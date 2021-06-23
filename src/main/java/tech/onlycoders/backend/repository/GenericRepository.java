@@ -42,7 +42,6 @@ public class GenericRepository {
   }
 
   private static HourAmount hourAmountMapper(TypeSystem typeSystem, Record record) {
-    System.out.println(record);
     return HourAmount.builder().hour(record.get("hour").asString()).amount(record.get("found").asLong(0L)).build();
   }
 
