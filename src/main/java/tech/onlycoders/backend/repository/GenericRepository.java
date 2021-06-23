@@ -22,7 +22,7 @@ public class GenericRepository {
     this.neo4jClient = neo4jClient;
   }
 
-  private static ReadGenericUserDto ReadGenericUserDtoMapper(TypeSystem typeSystem, Record record) {
+  private static ReadGenericUserDto readGenericUserDtoMapper(TypeSystem typeSystem, Record record) {
     var user = record.get("u").asMap();
     var firstName = (String) user.get("firstName");
     var userRole = (String) user.get("role");
@@ -103,9 +103,9 @@ public class GenericRepository {
     Integer size
   ) {
     var query = String.format(
-      " MATCH (u:Person)-[h:HAS]-(r:Role) WHERE u.fullName =~ \"$likeName\" AND r.name =~ \"$likeRole\" " +
+      " MATCH (u:Person)-[h:HAS]-(r:Role) WHERE u.fullName =~ $likeName AND r.name =~ $likeRole " +
       " RETURN u{.*, role: r.name} " +
-      " ORDER BY u[\"$sortBy\"] %s SKIP $skip LIMIT $size",
+      " ORDER BY u[$sortBy] %s SKIP $skip LIMIT $size",
       orderBy
     );
     HashMap<String, Object> params = new HashMap<>();
@@ -118,7 +118,7 @@ public class GenericRepository {
       .query(query)
       .bindAll(params)
       .fetchAs(ReadGenericUserDto.class)
-      .mappedBy(GenericRepository::ReadGenericUserDtoMapper)
+      .mappedBy(GenericRepository::readGenericUserDtoMapper)
       .all();
   }
 }
