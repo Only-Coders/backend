@@ -29,7 +29,7 @@ public interface CommentRepository extends Neo4jRepository<Comment, String> {
   @Query(
     "MATCH (:Post{id: $postId})<-[:FOR]-(c:Comment)<-[w:WRITES]-(u:User) " +
     "RETURN c, collect(w), collect(u) " +
-    "ORDER BY c.createdAt DESC SKIP $skip LIMIT $size"
+    "ORDER BY c.createdAt ASC SKIP $skip LIMIT $size"
   )
   List<Comment> getPostComments(String postId, int skip, Integer size);
 
