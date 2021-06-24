@@ -94,7 +94,7 @@ public class AuthService {
     var pairEmailIAT = this.jwtService.verifyTTL(token);
     var email = pairEmailIAT.getFirst();
     var claims = new HashMap<String, Object>();
-    if (email.endsWith("onlycoders.tech")) {
+    if (email.contains("onlycoders.tech")) {
       claims = this.adminAuthentication(email);
     } else {
       claims = this.userAuthentication(email);
