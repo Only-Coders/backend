@@ -101,12 +101,19 @@ public class GenericRepository {
     Integer skip,
     Integer size
   ) {
+    var sort = "u[$sortBy]";
+    if (sortBy.equalsIgnoreCase("fullName")) {
+      sort = "toLower(u[$sortBy])";
+    }
+
     var query = String.format(
       " MATCH (u:Person)-[h:HAS]-(r:Role) WHERE u.fullName =~ $likeName AND r.name =~ $likeRole " +
       " RETURN u{.*, role: r.name} " +
-      " ORDER BY u[$sortBy] %s SKIP $skip LIMIT $size",
+      " ORDER BY %s %s SKIP $skip LIMIT $size",
+      sort,
       orderBy
     );
+
     HashMap<String, Object> params = new HashMap<>();
     params.put("likeName", likeName);
     params.put("likeRole", role);
