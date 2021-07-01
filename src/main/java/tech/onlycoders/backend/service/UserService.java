@@ -656,6 +656,7 @@ public class UserService {
             .token(addFCMToken.getFcmToken())
             .deviceId(addFCMToken.getDeviceId())
             .build();
+          this.fcmTokenRepository.save(fcmToken);
           this.fcmTokenRepository.addUserToken(canonicalName, fcmToken.getId());
         }
       );

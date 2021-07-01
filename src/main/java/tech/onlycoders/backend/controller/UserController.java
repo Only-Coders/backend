@@ -642,7 +642,7 @@ public class UserController {
   @PreAuthorize("hasAuthority('USER')")
   @PostMapping("fcm-token")
   @Operation(summary = "Add a FCM token to the user account.")
-  ResponseEntity<?> addFCMToken(@RequestBody AddFCMTokenDto addFCMTokenDto) throws ApiException {
+  ResponseEntity<?> addFCMToken(@RequestBody AddFCMTokenDto addFCMTokenDto) {
     var userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     var canonicalName = userDetails.getCanonicalName();
     this.userService.addFCMToken(canonicalName, addFCMTokenDto);
