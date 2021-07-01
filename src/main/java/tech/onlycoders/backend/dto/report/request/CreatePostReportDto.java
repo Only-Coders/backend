@@ -13,8 +13,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class CreatePostReportDto {
 
-  @NotNull(message = "Reason is required.")
-  @NotBlank(message = "Reason is required.")
   private String reason;
 
   @NotNull(message = "type is required.")
