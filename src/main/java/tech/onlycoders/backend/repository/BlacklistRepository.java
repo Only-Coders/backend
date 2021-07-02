@@ -8,7 +8,7 @@ import tech.onlycoders.backend.model.BlackList;
 
 @Repository
 public interface BlacklistRepository extends Neo4jRepository<BlackList, String> {
-  @Query("MATCH (b:BlackList) WHERE b.email =~ $likeEmail RETURN b ORDER BY b.id DESC SKIP $skip LIMIT $size")
+  @Query("MATCH (b:BlackList) WHERE b.email =~ $likeEmail RETURN b ORDER BY b.createdAt DESC SKIP $skip LIMIT $size")
   List<BlackList> paginateAllBlackListedUsers(String likeEmail, Integer skip, Integer size);
 
   @Query("MATCH (b:BlackList) WHERE b.email =~ $likeEmail RETURN COUNT(b)")

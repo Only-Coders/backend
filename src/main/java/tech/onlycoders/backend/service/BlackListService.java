@@ -20,7 +20,7 @@ public class BlackListService {
 
   public PaginateDto<ReadBlackListDto> paginateBlackList(String partialEmail, Integer page, Integer size) {
     var regex = "(?i)" + partialEmail + ".*";
-    var blackLists = this.blacklistRepository.paginateAllBlackListedUsers(regex, page, size);
+    var blackLists = this.blacklistRepository.paginateAllBlackListedUsers(regex, page * size, size);
     var totalQuantity = this.blacklistRepository.countAllBlackListedUsers(regex);
 
     var genericUserDtoList = this.blackListMapper.blackListToReadBlackLists(blackLists);
