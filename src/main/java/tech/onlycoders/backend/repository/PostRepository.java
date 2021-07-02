@@ -9,7 +9,6 @@ import org.springframework.stereotype.Repository;
 import tech.onlycoders.backend.model.Post;
 import tech.onlycoders.backend.model.PostType;
 import tech.onlycoders.backend.repository.projections.PartialPost;
-import tech.onlycoders.backend.repository.projections.PartialUser;
 
 @Repository
 public interface PostRepository extends Neo4jRepository<Post, String> {
@@ -257,4 +256,7 @@ public interface PostRepository extends Neo4jRepository<Post, String> {
     "MATCH (p:Post{id:$postId})  SET p += {message: $newMessage, type: $newType, url: $newUrl, isPublic: $newIsPublic }"
   )
   void updatePost(String postId, String newMessage, Boolean newIsPublic, String newUrl, PostType newType);
+
+  @Query("MATCH (:Post{id:$postId})-[x:MENTIONS]->(:User{canonicalName: $canonicalName}) RETURN COUNT(x)>0 ")
+  boolean userIsMentioned(String postId, String canonicalName);
 }

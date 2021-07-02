@@ -417,14 +417,22 @@ public class PostService {
   }
 
   private void validateIsAuthorized(String requesterCanonicalName, String postId) throws ApiException {
-    var publisherCanonicalName = postRepository
-      .getPostPublisherCanonicalName(postId)
-      .orElseThrow(() -> new ApiException(HttpStatus.FORBIDDEN, "error.not-authorized"));
-    if (
-      !publisherCanonicalName.equals(requesterCanonicalName) &&
-      !userRepository.areUsersConnected(requesterCanonicalName, requesterCanonicalName) &&
-      !postRepository.postIsPublic(postId)
-    ) throw new ApiException(HttpStatus.FORBIDDEN, "error.not-authorized");
+    var requesterIsMentioned = postRepository.userIsMentioned(postId, requesterCanonicalName);
+    var postIsPublic = postRepository.postIsPublic(postId);
+    if (!postIsPublic) {
+      if (!requesterIsMentioned) {
+        var publisherCanonicalName = postRepository
+          .getPostPublisherCanonicalName(postId)
+          .orElseThrow(() -> new ApiException(HttpStatus.FORBIDDEN, "error.not-authorized"));
+        var publisherIsRequester = publisherCanonicalName.equals(requesterCanonicalName);
+        if (!publisherIsRequester) {
+          var userAreConnected = userRepository.areUsersConnected(publisherCanonicalName, requesterCanonicalName);
+          if (!userAreConnected) {
+            throw new ApiException(HttpStatus.FORBIDDEN, "error.not-authorized");
+          }
+        }
+      }
+    }
   }
 
   public void reactToPost(String canonicalName, String postId, CreateReactionDto createReactionDto)
@@ -437,9 +445,7 @@ public class PostService {
         .orElseThrow(() -> new ApiException(HttpStatus.INTERNAL_SERVER_ERROR, "error.500"));
     this.reactionRepository.getPostUserReaction(canonicalName, post.getId())
       .ifPresentOrElse(
-        reaction -> {
-          this.reactionRepository.updateReaction(reaction.getId(), createReactionDto.getReactionType());
-        },
+        reaction -> this.reactionRepository.updateReaction(reaction.getId(), createReactionDto.getReactionType()),
         () -> {
           var reaction = Reaction.builder().type(createReactionDto.getReactionType()).build();
           this.reactionRepository.save(reaction);
