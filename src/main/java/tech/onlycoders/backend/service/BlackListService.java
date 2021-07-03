@@ -1,9 +1,12 @@
 package tech.onlycoders.backend.service;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import tech.onlycoders.backend.dto.PaginateDto;
 import tech.onlycoders.backend.dto.blacklist.response.ReadBlackListDto;
+import tech.onlycoders.backend.exception.ApiException;
 import tech.onlycoders.backend.mapper.BlackListMapper;
+import tech.onlycoders.backend.model.BlackList;
 import tech.onlycoders.backend.repository.BlacklistRepository;
 import tech.onlycoders.backend.utils.PaginationUtils;
 
@@ -36,5 +39,21 @@ public class BlackListService {
 
   public void removeUser(String email) {
     blacklistRepository.removeByEmail(email);
+  }
+
+  public ReadBlackListDto addUser(String email) throws ApiException {
+    var exist = blacklistRepository.findById(email);
+    if (exist.isPresent()) {
+      throw new ApiException(HttpStatus.CONFLICT, "error.user-already-exist");
+    } else {
+      var blackList = new BlackList();
+      blackList.setEmail(email);
+
+      blacklistRepository.save(blackList);
+
+      var readBlackListDto = new ReadBlackListDto();
+      readBlackListDto.setEmail(email);
+      return readBlackListDto;
+    }
   }
 }

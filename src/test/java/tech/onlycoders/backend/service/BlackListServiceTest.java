@@ -1,9 +1,11 @@
 package tech.onlycoders.backend.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 
+import java.util.Optional;
 import java.util.stream.Collectors;
 import org.jeasy.random.EasyRandom;
 import org.junit.jupiter.api.Test;
@@ -14,6 +16,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import tech.onlycoders.backend.exception.ApiException;
 import tech.onlycoders.backend.mapper.BlackListMapper;
 import tech.onlycoders.backend.model.BlackList;
 import tech.onlycoders.backend.repository.BlacklistRepository;
@@ -47,5 +50,18 @@ public class BlackListServiceTest {
   @Test
   public void ShouldDelete() {
     this.service.removeUser("asd");
+  }
+
+  @Test
+  public void ShouldNotAddUser() {
+    Mockito.when(this.blacklistRepository.findById("asd")).thenReturn(Optional.of(new BlackList()));
+    assertThrows(ApiException.class, () -> this.service.addUser("asd"));
+  }
+
+  @Test
+  public void ShouldAddUser() throws ApiException {
+    Mockito.when(this.blacklistRepository.findById("asd")).thenReturn(Optional.empty());
+    var result = this.service.addUser("asd");
+    assertEquals(result.getEmail(), "asd");
   }
 }
