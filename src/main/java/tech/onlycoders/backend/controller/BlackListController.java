@@ -82,7 +82,7 @@ public class BlackListController {
       )
     }
   )
-  @PreAuthorize("hasAuthority('USER')")
+  @PreAuthorize("hasAuthority('ADMIN')")
   ResponseEntity<ReadBlackListDto> newUserInBlacKList(@RequestBody CreateBlackListDto createBlackListDto)
     throws ApiException {
     return ResponseEntity.ok(this.blackListService.addUser(createBlackListDto.getEmail()));
