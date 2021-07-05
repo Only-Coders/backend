@@ -12,6 +12,7 @@ import tech.onlycoders.backend.dto.post.request.CreatePostDto;
 import tech.onlycoders.backend.dto.post.request.CreateReactionDto;
 import tech.onlycoders.backend.dto.post.response.ReadPostDto;
 import tech.onlycoders.backend.dto.report.request.CreatePostReportDto;
+import tech.onlycoders.backend.dto.workposition.response.ReadWorkPositionDto;
 import tech.onlycoders.backend.exception.ApiException;
 import tech.onlycoders.backend.mapper.CommentMapper;
 import tech.onlycoders.backend.mapper.PostMapper;
@@ -216,14 +217,14 @@ public class PostService {
 
   private PaginateDto<ReadPostDto> expandPostData(String requesterCanonicalName, List<ReadPostDto> readPostDtoList) {
     HashMap<String, Integer> medalsCache = new HashMap<>();
+    HashMap<String, ReadWorkPositionDto> workPositionCache = new HashMap<>();
     readPostDtoList
       .parallelStream()
       .forEach(
         post -> {
           var publisher = post.getPublisher().getCanonicalName();
-          var currentPosition = this.workPositionRepository.getUserCurrentPosition(publisher);
-          if (currentPosition.isPresent()) {
-            var readWorkPositionDto = this.workPositionMapper.workPositionToReadWorkPositionDto(currentPosition.get());
+          var readWorkPositionDto = getUserCurrentPosition(workPositionCache, publisher);
+          if (readWorkPositionDto != null) {
             post.getPublisher().setCurrentPosition(readWorkPositionDto);
           }
           post.setReactions(getPostReactionQuantity(post.getId()));
@@ -238,6 +239,20 @@ public class PostService {
     var paginated = new PaginateDto<ReadPostDto>();
     paginated.setContent(readPostDtoList);
     return paginated;
+  }
+
+  private ReadWorkPositionDto getUserCurrentPosition(
+    HashMap<String, ReadWorkPositionDto> workPositionCache,
+    String publisher
+  ) {
+    if (!workPositionCache.containsKey(publisher)) {
+      var currentPosition = this.workPositionRepository.getUserCurrentPosition(publisher);
+      if (currentPosition.isPresent()) {
+        var readWorkPositionDto = this.workPositionMapper.workPositionToReadWorkPositionDto(currentPosition.get());
+        workPositionCache.put(publisher, readWorkPositionDto);
+      }
+    }
+    return workPositionCache.get(publisher);
   }
 
   private PaginateDto<ReadCommentDto> expandCommentData(
