@@ -260,14 +260,14 @@ public class PostService {
     List<ReadCommentDto> readCommentDtos
   ) {
     HashMap<String, Integer> medalsCache = new HashMap<>();
+    HashMap<String, ReadWorkPositionDto> workPositionCache = new HashMap<>();
     readCommentDtos
       .parallelStream()
       .forEach(
         comment -> {
           var publisher = comment.getPublisher().getCanonicalName();
-          var currentPosition = this.workPositionRepository.getUserCurrentPosition(publisher);
-          if (currentPosition.isPresent()) {
-            var readWorkPositionDto = this.workPositionMapper.workPositionToReadWorkPositionDto(currentPosition.get());
+          var readWorkPositionDto = getUserCurrentPosition(workPositionCache, publisher);
+          if (readWorkPositionDto != null) {
             comment.getPublisher().setCurrentPosition(readWorkPositionDto);
           }
           comment.setReactions(getCommentReactionQuantity(comment.getId()));
@@ -508,12 +508,10 @@ public class PostService {
 
   public void reportPost(String canonicalName, String postId, CreatePostReportDto createPostReportDto)
     throws ApiException {
-    var post =
-      this.postRepository.getById(postId)
-        .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "error.post-not-found"));
-    var user =
-      this.userRepository.findByCanonicalName(canonicalName)
-        .orElseThrow(() -> new ApiException(HttpStatus.INTERNAL_SERVER_ERROR, "error.500"));
+    this.postRepository.getById(postId)
+      .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "error.post-not-found"));
+    this.userRepository.findByCanonicalName(canonicalName)
+      .orElseThrow(() -> new ApiException(HttpStatus.INTERNAL_SERVER_ERROR, "error.500"));
 
     var reportType =
       this.reportTypeRepository.findById(createPostReportDto.getTypeID())
