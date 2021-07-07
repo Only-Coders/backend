@@ -552,7 +552,7 @@ public class UserService {
     calendar.add(Calendar.DAY_OF_YEAR, GlobalVariables.DAYS_TO_DELETE_USERS);
     var eliminationDate = calendar.getTime();
     this.userRepository.setEliminationDate(email, eliminationDate.getTime());
-    return ReadUserToDeleteDto.builder().eliminationDate(eliminationDate).build();
+    return ReadUserToDeleteDto.builder().eliminationDate(eliminationDate.getTime()).build();
   }
 
   public void removeContact(String requesterCanonicalName, String canonicalName) throws ApiException {
