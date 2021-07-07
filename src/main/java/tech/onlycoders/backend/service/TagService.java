@@ -3,6 +3,7 @@ package tech.onlycoders.backend.service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.regex.Pattern;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -52,7 +53,7 @@ public class TagService {
       totalQuantity = this.tagRepository.getTagQuantity();
       tags = this.tagRepository.getTagsPaginated(page * size, size);
     } else {
-      var regex = "(?i).*" + tagName.toLowerCase() + ".*";
+      var regex = "(?i).*" + Pattern.quote(tagName.toLowerCase()) + ".*";
       totalQuantity = this.tagRepository.getTagQuantityByName(regex);
       tags = new ArrayList<>(this.tagRepository.getTagsByNamePaginated(regex, page * size, size));
     }
