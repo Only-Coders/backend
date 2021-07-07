@@ -47,7 +47,9 @@ public class TagServiceTest {
 
     Mockito.when(this.tagRepository.getTagQuantity()).thenReturn(10);
     Mockito.when(this.tagRepository.getTagsPaginated(anyInt(), anyInt())).thenReturn(tags);
-    var result = this.service.listTags(null, 1, 10);
+    Mockito.when(this.tagRepository.userFollowsTag(anyString(), anyString())).thenReturn(true);
+
+    var result = this.service.listTags(null, 1, 10, "canonicalName");
     assertEquals(10, result.getTotalElements());
   }
 
@@ -57,7 +59,8 @@ public class TagServiceTest {
 
     Mockito.when(this.tagRepository.getTagQuantityByName(anyString())).thenReturn(10);
     Mockito.when(this.tagRepository.getTagsByNamePaginated(anyString(), anyInt(), anyInt())).thenReturn(tags);
-    var result = this.service.listTags("asd", 1, 10);
+    Mockito.when(this.tagRepository.userFollowsTag(anyString(), anyString())).thenReturn(true);
+    var result = this.service.listTags("asd", 1, 10, "canonicalName");
     assertEquals(10, result.getTotalElements());
   }
 

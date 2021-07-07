@@ -93,4 +93,10 @@ public interface TagRepository extends Neo4jRepository<Tag, String> {
     " LIMIT $limit "
   )
   Set<Tag> findSuggestedTags(String canonicalName, Integer limit);
+
+  @Query(
+    " MATCH (t:Tag{canonicalName: $tagCanonicalName})<-[r:IS_INTERESTED]-(:Person{canonicalName: $userCanonicalName}) " +
+    " RETURN count(r)>0 "
+  )
+  boolean userFollowsTag(String tagCanonicalName, String userCanonicalName);
 }

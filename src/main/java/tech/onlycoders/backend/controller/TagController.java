@@ -52,7 +52,9 @@ public class TagController {
     @RequestParam(defaultValue = "0") @Min(0) Integer page,
     @RequestParam(defaultValue = "20") @Min(1) Integer size
   ) {
-    var pagination = this.tagService.listTags(tagName, page, size);
+    var userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    var requesterCanonicalName = userDetails.getCanonicalName();
+    var pagination = this.tagService.listTags(tagName, page, size, requesterCanonicalName);
     return ResponseEntity.ok(pagination);
   }
 

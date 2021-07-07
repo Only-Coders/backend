@@ -3,7 +3,6 @@ package tech.onlycoders.backend.service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -46,7 +45,7 @@ public class TagService {
     return this.tagMapper.tagToReadTagDto(persistedTag);
   }
 
-  public PaginateDto<ReadTagDto> listTags(String tagName, Integer page, Integer size) {
+  public PaginateDto<ReadTagDto> listTags(String tagName, Integer page, Integer size, String canonicalName) {
     int totalQuantity;
     List<Tag> tags;
     if (tagName == null) {
@@ -58,7 +57,7 @@ public class TagService {
       tags = new ArrayList<>(this.tagRepository.getTagsByNamePaginated(regex, page * size, size));
     }
 
-    return getReadTagDtoPaginateDto(page, size, tags, totalQuantity);
+    return getReadTagDtoPaginateDto(page, size, tags, totalQuantity, canonicalName);
   }
 
   public void addTagToUser(String email, String canonicalName) throws ApiException {
@@ -90,20 +89,23 @@ public class TagService {
     var partialCanonicalName = "(?i).*" + tagCanonicalName.toLowerCase() + ".*";
     Set<Tag> tags = this.tagRepository.getFollowedTags(userCanonicalName, partialCanonicalName, page * size, size);
     var totalQuantity = this.tagRepository.getAmountOfFollowedTags(userCanonicalName, partialCanonicalName);
-    return getReadTagDtoPaginateDto(page, size, new ArrayList<>(tags), totalQuantity);
+    return getReadTagDtoPaginateDto(page, size, new ArrayList<>(tags), totalQuantity, userCanonicalName);
   }
 
   private PaginateDto<ReadTagDto> getReadTagDtoPaginateDto(
     Integer page,
     Integer size,
     List<Tag> tags,
-    Integer totalQuantity
+    Integer totalQuantity,
+    String canonicalName
   ) {
     var pageQuantity = PaginationUtils.getPagesQuantity(totalQuantity, size);
 
     var readTagDtos = tagMapper.listTagsToListReadTagDto(tags);
     for (ReadTagDto tag : readTagDtos) {
       tag.setFollowerQuantity(this.tagRepository.getFollowerQuantity(tag.getCanonicalName()));
+      var following = tagRepository.userFollowsTag(tag.getCanonicalName(), canonicalName);
+      tag.setIsFollowing(following);
     }
 
     var pagination = new PaginateDto<ReadTagDto>();

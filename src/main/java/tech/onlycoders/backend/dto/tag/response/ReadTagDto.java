@@ -16,4 +16,6 @@ public class ReadTagDto {
   private String name;
 
   private Long followerQuantity;
+
+  private Boolean isFollowing;
 }
