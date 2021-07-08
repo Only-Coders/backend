@@ -94,10 +94,12 @@ public class PostServiceTest {
 
   @Test
   public void ShouldCreatePostAndTagWhenTagDoesntExist() throws ApiException {
+    var tag = ezRandom.nextObject(Tag.class);
     var newPost = ezRandom.nextObject(Post.class);
     var requestDto = ezRandom.nextObject(CreatePostDto.class);
     var publisher = ezRandom.nextObject(PartialUserImpl.class);
 
+    Mockito.when(tagRepository.findByCanonicalName(anyString())).thenReturn(Optional.of(tag));
     Mockito.when(userRepository.findByCanonicalName(anyString())).thenReturn(Optional.of(publisher));
     Mockito.when(postRepository.save(any(Post.class))).thenReturn(newPost);
     Mockito.when(postRepository.getCreatedPost(newPost.getId())).thenReturn(newPost);

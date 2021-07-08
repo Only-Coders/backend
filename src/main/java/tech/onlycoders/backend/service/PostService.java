@@ -135,11 +135,13 @@ public class PostService {
           .findByCanonicalName(canonicalName)
           .orElseGet(
             () -> {
-              var newTag = Tag.builder().canonicalName(canonicalName).build();
+              var newTag = Tag.builder().canonicalName(canonicalName).name(displayName).build();
               newTag = tagRepository.save(newTag);
               return newTag;
             }
           );
+        tag.setName(displayName);
+        tagRepository.save(tag);
         tagList.add(DisplayedTag.builder().displayName(displayName).tag(tag).build());
       }
     }
