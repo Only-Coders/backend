@@ -5,6 +5,7 @@ import java.util.stream.Collectors;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import tech.onlycoders.backend.bean.FirebaseService;
 import tech.onlycoders.backend.dto.PaginateDto;
 import tech.onlycoders.backend.dto.SortContactsBy;
 import tech.onlycoders.backend.dto.SortUsersBy;
@@ -48,6 +49,7 @@ public class UserService {
   private final ContactRequestRepository contactRequestRepository;
   private final LanguageRepository languageRepository;
   private final BlacklistRepository blacklistRepository;
+  private final FirebaseService firebaseService;
 
   private final AuthService authService;
   private final NotificatorService notificatorService;
@@ -73,6 +75,7 @@ public class UserService {
     ContactRequestMapper contactRequestMapper,
     LanguageRepository languageRepository,
     BlacklistRepository blacklistRepository,
+    FirebaseService firebaseService,
     LanguageMapper languageMapper,
     FCMTokenRepository fcmTokenRepository
   ) {
@@ -90,6 +93,7 @@ public class UserService {
     this.notificatorService = notificatorService;
     this.contactRequestMapper = contactRequestMapper;
     this.languageRepository = languageRepository;
+    this.firebaseService = firebaseService;
     this.languageMapper = languageMapper;
     this.blacklistRepository = blacklistRepository;
     this.fcmTokenRepository = fcmTokenRepository;
@@ -142,6 +146,7 @@ public class UserService {
   }
 
   public AuthResponseDto createUser(String email, CreateUserDto createUserDto) throws ApiException {
+    // TODO: we should verify if the user is in the blacklist
     var optionalPerson = this.personRepository.findByEmail(email);
     if (optionalPerson.isPresent()) {
       throw new ApiException(HttpStatus.CONFLICT, "error.email-taken");
@@ -640,6 +645,7 @@ public class UserService {
       .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "error.user-not-found"));
     var ban = BlackList.builder().email(user.getEmail()).build();
     blacklistRepository.save(ban);
+    firebaseService.deleteAccount(user.getEmail());
     userRepository.deleteUser(user.getEmail());
   }
 

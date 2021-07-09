@@ -7,10 +7,8 @@ import tech.onlycoders.backend.bean.FirebaseService;
 import tech.onlycoders.backend.dto.auth.request.AuthRequestDto;
 import tech.onlycoders.backend.dto.auth.response.AuthResponseDto;
 import tech.onlycoders.backend.exception.ApiException;
-import tech.onlycoders.backend.model.Admin;
 import tech.onlycoders.backend.model.User;
 import tech.onlycoders.backend.repository.AdminRepository;
-import tech.onlycoders.backend.repository.PersonRepository;
 import tech.onlycoders.backend.repository.UserRepository;
 import tech.onlycoders.backend.repository.WorkPositionRepository;
 import tech.onlycoders.backend.repository.projections.PartialUser;
@@ -26,7 +24,6 @@ public class AuthService {
   private final WorkPositionRepository workPositionRepository;
 
   public AuthService(
-    PersonRepository personRepository,
     UserRepository userRepository,
     JwtService jwtService,
     FirebaseService firebaseService,

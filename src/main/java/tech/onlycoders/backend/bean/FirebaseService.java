@@ -17,6 +17,15 @@ public class FirebaseService {
     this.firebaseAuth = firebaseAuth;
   }
 
+  public void deleteAccount(String email) {
+    try {
+      var userRecord = firebaseAuth.getUserByEmail(email);
+      firebaseAuth.deleteUser(userRecord.getUid());
+    } catch (FirebaseAuthException e) {
+      System.out.println("[E] Error removing user " + email + " from firebase auth");
+    }
+  }
+
   public String verifyFirebaseToken(String firebaseToken) throws ApiException {
     try {
       FirebaseToken token = firebaseAuth.verifyIdToken(firebaseToken);

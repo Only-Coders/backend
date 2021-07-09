@@ -19,6 +19,7 @@ import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
+import tech.onlycoders.backend.bean.FirebaseService;
 import tech.onlycoders.backend.dto.SortContactsBy;
 import tech.onlycoders.backend.dto.SortUsersBy;
 import tech.onlycoders.backend.dto.auth.response.AuthResponseDto;
@@ -48,6 +49,9 @@ public class UserServiceTest {
 
   @Mock
   private AuthService authService;
+
+  @Mock
+  private FirebaseService firebaseService;
 
   @Mock
   private UserRepository userRepository;
