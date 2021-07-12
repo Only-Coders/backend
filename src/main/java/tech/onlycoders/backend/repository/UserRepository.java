@@ -64,6 +64,12 @@ public interface UserRepository extends Neo4jRepository<User, String> {
     "     WHERE p <> me AND NOT p IN myContacts " +
     "     RETURN p, count(r)/(2^64) AS priority " +
     "     LIMIT $size " +
+    "   UNION " +
+    "     WITH me, myContacts " +
+    "     MATCH (p:User) " +
+    "     WHERE p <> me AND NOT p IN myContacts " +
+    "     RETURN p, count(r)/(2^128) AS priority " +
+    "     LIMIT $size " +
     " } " +
     " RETURN DISTINCT (p), priority ORDER BY priority DESC " +
     " LIMIT $size; "
