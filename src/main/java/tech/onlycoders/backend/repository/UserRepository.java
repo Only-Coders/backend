@@ -26,12 +26,18 @@ public interface UserRepository extends Neo4jRepository<User, String> {
     "     WITH me, c, tag, myContacts " +
     "     MATCH (c)<-[:LIVES]-(p:User)-[t:IS_CONNECTED*2..2]-(me) " +
     "     WHERE p <> me AND NOT p IN myContacts " +
-    "     RETURN p, count(t)*(2^128) AS priority " +
+    "     RETURN p, count(t)*(2^256) AS priority " +
     "     LIMIT $size " +
     "   UNION " +
     "     WITH me, c, myContacts " +
     "     MATCH (p:User)-[t:IS_CONNECTED*2..2]-(me) " +
     "     WHERE p <> me AND  NOT p IN myContacts " +
+    "     RETURN p, count(t)*(2^128) AS priority " +
+    "     LIMIT $size " +
+    "   UNION " +
+    "     WITH me, c, tag, myContacts " +
+    "     MATCH (c)<-[:LIVES]-(p:User)-[t:IS_CONNECTED*3..3]-(me) " +
+    "     WHERE p <> me AND NOT p IN myContacts " +
     "     RETURN p, count(t)*(2^64) AS priority " +
     "     LIMIT $size " +
     "   UNION " +
@@ -68,7 +74,7 @@ public interface UserRepository extends Neo4jRepository<User, String> {
     "     WITH me, myContacts " +
     "     MATCH (p:User) " +
     "     WHERE p <> me AND NOT p IN myContacts " +
-    "     RETURN p, count(r)/(2^128) AS priority " +
+    "     RETURN p, 1/(2^128) AS priority " +
     "     LIMIT $size " +
     " } " +
     " RETURN DISTINCT (p), priority ORDER BY priority DESC " +
