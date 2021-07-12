@@ -6,11 +6,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tech.onlycoders.backend.dto.PaginateDto;
 import tech.onlycoders.backend.dto.institute.request.CreateInstituteDto;
-import tech.onlycoders.backend.dto.institute.request.UpdateDegreeDto;
 import tech.onlycoders.backend.dto.institute.response.ReadDegreeDto;
 import tech.onlycoders.backend.dto.institute.response.ReadInstituteDto;
 import tech.onlycoders.backend.dto.user.request.EducationExperienceDto;
-import tech.onlycoders.backend.dto.workposition.request.UpdateWorkPositionDto;
 import tech.onlycoders.backend.exception.ApiException;
 import tech.onlycoders.backend.mapper.InstituteMapper;
 import tech.onlycoders.backend.model.Degree;
@@ -98,13 +96,18 @@ public class InstituteService {
     degreeRepository.remove(degreeId);
   }
 
-  public void updateDegree(String email, String degreeId, UpdateDegreeDto updateDegreeDto) throws ApiException {
+  public void updateDegree(String email, String degreeId, EducationExperienceDto educationExperienceDto)
+    throws ApiException {
     var degree = degreeRepository
       .findUserDegree(email, degreeId)
-      .orElseThrow(() -> new ApiException(HttpStatus.FORBIDDEN, "error.degree-not-found"));
-    degree.setDegree(updateDegreeDto.getDegree());
-    degree.setSince(updateDegreeDto.getSince());
-    degree.setUntil(updateDegreeDto.getUntil());
+      .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "error.degree-not-found"));
+    var institute =
+      this.instituteRepository.findById(educationExperienceDto.getId())
+        .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "error.workplace-not-found"));
+    degree.setDegree(educationExperienceDto.getDegree());
+    degree.setSince(educationExperienceDto.getSince());
+    degree.setUntil(educationExperienceDto.getUntil());
+    degree.setInstitute(institute);
     degreeRepository.save(degree);
   }
 }

@@ -28,6 +28,8 @@ public interface DegreeRepository extends Neo4jRepository<Degree, String> {
   @Query(" MATCH (d:Degree{id: $degreeId}) DETACH DELETE d")
   void remove(String degreeId);
 
-  @Query(" MATCH (d:Degree{id: $degreeId})<-[:STUDIES]-(u:User{email: $email}) RETURN d")
-  Optional<Degree> findUserDegree(String email, String id);
+  @Query(
+    " MATCH (i:Institute)<-[at:AT]-(d:Degree{id: $degreeId})<-[:STUDIES]-(u:User{email: $email}) RETURN d, collect(at), collect(i)"
+  )
+  Optional<Degree> findUserDegree(String email, String degreeId);
 }

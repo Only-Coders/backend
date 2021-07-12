@@ -534,11 +534,16 @@ public class UserController {
   @PreAuthorize("hasAuthority('USER')")
   @PutMapping("/workplaces/{id}")
   @Operation(summary = "Updates a user work experience")
-  ResponseEntity<?> updateWorkingExperience(@PathVariable String id, UpdateWorkPositionDto updateWorkPositionDto)
+  ResponseEntity<?> updateWorkingExperience(@PathVariable String id, WorkExperienceDto workExperienceDto)
     throws ApiException {
     var userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     var email = userDetails.getEmail();
-    this.workplaceService.updateWorkExperience(email, id, updateWorkPositionDto);
+    if (workExperienceDto.getId() == null) {
+      var newOrganization =
+        this.workplaceService.createWorkplace(CreateWorkplaceDto.builder().name(workExperienceDto.getName()).build());
+      workExperienceDto.setId(newOrganization.getId());
+    }
+    this.workplaceService.updateWorkExperience(email, id, workExperienceDto);
     return ResponseEntity.ok().build();
   }
 
@@ -594,10 +599,20 @@ public class UserController {
   @PreAuthorize("hasAuthority('USER')")
   @PutMapping("/institutes/{id}")
   @Operation(summary = "Updates a user degree")
-  ResponseEntity<?> updateDegree(@PathVariable String id, UpdateDegreeDto updateDegreeDto) throws ApiException {
+  ResponseEntity<?> updateDegree(@PathVariable String id, @RequestBody EducationExperienceDto educationExperienceDto)
+    throws ApiException {
     var userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     var email = userDetails.getEmail();
-    this.instituteService.updateDegree(email, id, updateDegreeDto);
+
+    if (educationExperienceDto.getId() == null) {
+      var newOrganization =
+        this.instituteService.createInstitute(
+            CreateInstituteDto.builder().name(educationExperienceDto.getName()).build()
+          );
+      educationExperienceDto.setId(newOrganization.getId());
+    }
+
+    this.instituteService.updateDegree(email, id, educationExperienceDto);
     return ResponseEntity.ok().build();
   }
 

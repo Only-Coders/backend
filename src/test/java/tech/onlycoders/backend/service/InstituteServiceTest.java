@@ -142,11 +142,13 @@ public class InstituteServiceTest {
 
   @Test
   public void ShouldUpdateDegree() throws ApiException {
+    var institute = ezRandom.nextObject(Institute.class);
     var degree = ezRandom.nextObject(Degree.class);
-    var updateDto = ezRandom.nextObject(UpdateDegreeDto.class);
+    var updateDto = ezRandom.nextObject(EducationExperienceDto.class);
     var degreeId = ezRandom.nextObject(String.class);
     var email = ezRandom.nextObject(String.class);
     Mockito.when(this.degreeRepository.findUserDegree(email, degreeId)).thenReturn(Optional.of(degree));
+    Mockito.when(this.instituteRepository.findById(updateDto.getId())).thenReturn(Optional.of(institute));
 
     this.service.updateDegree(email, degreeId, updateDto);
     assertEquals(degree.getDegree(), updateDto.getDegree());
@@ -156,7 +158,7 @@ public class InstituteServiceTest {
 
   @Test
   public void ShouldFailToUpdateDegree() {
-    var updateDto = ezRandom.nextObject(UpdateDegreeDto.class);
+    var updateDto = ezRandom.nextObject(EducationExperienceDto.class);
     var degreeId = ezRandom.nextObject(String.class);
     var email = ezRandom.nextObject(String.class);
     Mockito.when(this.degreeRepository.findUserDegree(email, degreeId)).thenReturn(Optional.empty());

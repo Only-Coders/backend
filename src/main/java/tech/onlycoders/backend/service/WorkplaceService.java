@@ -8,7 +8,6 @@ import tech.onlycoders.backend.dto.PaginateDto;
 import tech.onlycoders.backend.dto.user.request.WorkExperienceDto;
 import tech.onlycoders.backend.dto.workplace.request.CreateWorkplaceDto;
 import tech.onlycoders.backend.dto.workplace.response.ReadWorkplaceDto;
-import tech.onlycoders.backend.dto.workposition.request.UpdateWorkPositionDto;
 import tech.onlycoders.backend.dto.workposition.response.ReadWorkPositionDto;
 import tech.onlycoders.backend.exception.ApiException;
 import tech.onlycoders.backend.mapper.WorkPositionMapper;
@@ -100,14 +99,18 @@ public class WorkplaceService {
     workPositionRepository.remove(workPositionId);
   }
 
-  public void updateWorkExperience(String email, String workExperienceId, UpdateWorkPositionDto updateWorkPositionDto)
+  public void updateWorkExperience(String email, String workExperienceId, WorkExperienceDto updateWorkPositionDto)
     throws ApiException {
     var workPosition = workPositionRepository
       .findUserWorkExperience(email, workExperienceId)
       .orElseThrow(() -> new ApiException(HttpStatus.FORBIDDEN, "error.user-not-owner"));
+    var workplace =
+      this.workplaceRepository.findById(updateWorkPositionDto.getId())
+        .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "error.workplace-not-found"));
     workPosition.setPosition(updateWorkPositionDto.getPosition());
     workPosition.setSince(updateWorkPositionDto.getSince());
     workPosition.setUntil(updateWorkPositionDto.getUntil());
+    workPosition.setWorkplace(workplace);
     workPositionRepository.save(workPosition);
   }
 }

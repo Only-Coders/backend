@@ -146,13 +146,15 @@ public class WorkplaceServiceTest {
 
   @Test
   public void ShouldUpdateWorkExperience() throws ApiException {
+    var workplace = ezRandom.nextObject(Workplace.class);
     var workPosition = ezRandom.nextObject(WorkPosition.class);
-    var updateDto = ezRandom.nextObject(UpdateWorkPositionDto.class);
+    var updateDto = ezRandom.nextObject(WorkExperienceDto.class);
     var workPositionId = ezRandom.nextObject(String.class);
     var email = ezRandom.nextObject(String.class);
     Mockito
       .when(this.workPositionRepository.findUserWorkExperience(email, workPositionId))
       .thenReturn(Optional.of(workPosition));
+    Mockito.when(this.workplaceRepository.findById(updateDto.getId())).thenReturn(Optional.of(workplace));
 
     this.service.updateWorkExperience(email, workPositionId, updateDto);
     assertEquals(workPosition.getPosition(), updateDto.getPosition());
@@ -162,7 +164,7 @@ public class WorkplaceServiceTest {
 
   @Test
   public void ShouldFailToUpdateWorkExperience() {
-    var updateDto = ezRandom.nextObject(UpdateWorkPositionDto.class);
+    var updateDto = ezRandom.nextObject(WorkExperienceDto.class);
     var workPositionId = ezRandom.nextObject(String.class);
     var email = ezRandom.nextObject(String.class);
     Mockito
