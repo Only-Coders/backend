@@ -99,8 +99,11 @@ public class WorkplaceService {
     workPositionRepository.remove(workPositionId);
   }
 
-  public void updateWorkExperience(String email, String workExperienceId, WorkExperienceDto updateWorkPositionDto)
-    throws ApiException {
+  public ReadWorkPositionDto updateWorkExperience(
+    String email,
+    String workExperienceId,
+    WorkExperienceDto updateWorkPositionDto
+  ) throws ApiException {
     var workPosition = workPositionRepository
       .findUserWorkExperience(email, workExperienceId)
       .orElseThrow(() -> new ApiException(HttpStatus.FORBIDDEN, "error.user-not-owner"));
@@ -112,5 +115,6 @@ public class WorkplaceService {
     workPosition.setUntil(updateWorkPositionDto.getUntil());
     workPosition.setWorkplace(workplace);
     workPositionRepository.save(workPosition);
+    return this.workPositionMapper.workPositionToReadWorkPositionDto(workPosition);
   }
 }

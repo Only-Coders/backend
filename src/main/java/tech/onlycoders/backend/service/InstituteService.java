@@ -96,7 +96,7 @@ public class InstituteService {
     degreeRepository.remove(degreeId);
   }
 
-  public void updateDegree(String email, String degreeId, EducationExperienceDto educationExperienceDto)
+  public ReadDegreeDto updateDegree(String email, String degreeId, EducationExperienceDto educationExperienceDto)
     throws ApiException {
     var degree = degreeRepository
       .findUserDegree(email, degreeId)
@@ -109,5 +109,7 @@ public class InstituteService {
     degree.setUntil(educationExperienceDto.getUntil());
     degree.setInstitute(institute);
     degreeRepository.save(degree);
+
+    return instituteMapper.degreeToReadDegreeDto(degree);
   }
 }

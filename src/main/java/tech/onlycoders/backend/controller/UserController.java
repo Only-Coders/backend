@@ -21,7 +21,6 @@ import tech.onlycoders.backend.dto.contactrequest.request.CreateContactRequestDt
 import tech.onlycoders.backend.dto.contactrequest.request.ResponseContactRequestDto;
 import tech.onlycoders.backend.dto.contactrequest.response.ReadContactRequestDto;
 import tech.onlycoders.backend.dto.institute.request.CreateInstituteDto;
-import tech.onlycoders.backend.dto.institute.request.UpdateDegreeDto;
 import tech.onlycoders.backend.dto.institute.response.ReadDegreeDto;
 import tech.onlycoders.backend.dto.language.request.UpdateUserLanguageDto;
 import tech.onlycoders.backend.dto.language.response.ReadLanguageDto;
@@ -35,7 +34,6 @@ import tech.onlycoders.backend.dto.user.response.ReadUserDto;
 import tech.onlycoders.backend.dto.user.response.ReadUserLiteDto;
 import tech.onlycoders.backend.dto.user.response.ReadUserToDeleteDto;
 import tech.onlycoders.backend.dto.workplace.request.CreateWorkplaceDto;
-import tech.onlycoders.backend.dto.workposition.request.UpdateWorkPositionDto;
 import tech.onlycoders.backend.dto.workposition.response.ReadWorkPositionDto;
 import tech.onlycoders.backend.exception.ApiException;
 import tech.onlycoders.backend.service.*;
@@ -530,12 +528,23 @@ public class UserController {
     return ResponseEntity.ok().build();
   }
 
-  @ApiResponses(value = { @ApiResponse(responseCode = "200", content = { @Content(mediaType = "application/json") }) })
+  @ApiResponses(
+    value = {
+      @ApiResponse(
+        responseCode = "200",
+        content = {
+          @Content(mediaType = "application/json", schema = @Schema(implementation = ReadWorkPositionDto.class))
+        }
+      )
+    }
+  )
   @PreAuthorize("hasAuthority('USER')")
   @PutMapping("/workplaces/{id}")
   @Operation(summary = "Updates a user work experience")
-  ResponseEntity<?> updateWorkingExperience(@PathVariable String id, WorkExperienceDto workExperienceDto)
-    throws ApiException {
+  ResponseEntity<ReadWorkPositionDto> updateWorkingExperience(
+    @PathVariable String id,
+    @RequestBody WorkExperienceDto workExperienceDto
+  ) throws ApiException {
     var userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     var email = userDetails.getEmail();
     if (workExperienceDto.getId() == null) {
@@ -543,8 +552,8 @@ public class UserController {
         this.workplaceService.createWorkplace(CreateWorkplaceDto.builder().name(workExperienceDto.getName()).build());
       workExperienceDto.setId(newOrganization.getId());
     }
-    this.workplaceService.updateWorkExperience(email, id, workExperienceDto);
-    return ResponseEntity.ok().build();
+    var result = this.workplaceService.updateWorkExperience(email, id, workExperienceDto);
+    return ResponseEntity.ok(result);
   }
 
   @ApiResponses(value = { @ApiResponse(responseCode = "200", content = { @Content(mediaType = "application/json") }) })
@@ -595,12 +604,21 @@ public class UserController {
     return ResponseEntity.ok(persistedPerson);
   }
 
-  @ApiResponses(value = { @ApiResponse(responseCode = "200", content = { @Content(mediaType = "application/json") }) })
+  @ApiResponses(
+    value = {
+      @ApiResponse(
+        responseCode = "200",
+        content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ReadDegreeDto.class)) }
+      )
+    }
+  )
   @PreAuthorize("hasAuthority('USER')")
   @PutMapping("/institutes/{id}")
   @Operation(summary = "Updates a user degree")
-  ResponseEntity<?> updateDegree(@PathVariable String id, @RequestBody EducationExperienceDto educationExperienceDto)
-    throws ApiException {
+  ResponseEntity<ReadDegreeDto> updateDegree(
+    @PathVariable String id,
+    @RequestBody EducationExperienceDto educationExperienceDto
+  ) throws ApiException {
     var userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     var email = userDetails.getEmail();
 
@@ -612,8 +630,8 @@ public class UserController {
       educationExperienceDto.setId(newOrganization.getId());
     }
 
-    this.instituteService.updateDegree(email, id, educationExperienceDto);
-    return ResponseEntity.ok().build();
+    var result = this.instituteService.updateDegree(email, id, educationExperienceDto);
+    return ResponseEntity.ok(result);
   }
 
   @ApiResponses(
