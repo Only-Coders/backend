@@ -14,7 +14,7 @@ public interface WorkPositionRepository extends Neo4jRepository<WorkPosition, St
 
   @Query(
     "MATCH (u:User{canonicalName: $canonicalName})-[:WORKS]->(p:WorkPosition)-[o:ON]->(w) " +
-    "WHERE NOT EXISTS(p.until) RETURN p, collect(o), collect(w) ORDER BY p.since DESC"
+    "WHERE NOT EXISTS(p.until) RETURN p, collect(o), collect(w) ORDER BY COALESCE(p.until,99999999999) DESC"
   )
   List<WorkPosition> getUserCurrentPositions(String canonicalName);
 
