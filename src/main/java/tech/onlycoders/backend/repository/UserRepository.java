@@ -374,11 +374,12 @@ public interface UserRepository extends Neo4jRepository<User, String> {
     "    OPTIONAL MATCH (target)-[:STUDIES]->(degree:Degree)\n" +
     "    OPTIONAL MATCH (target)-[:CREATES]->(report:Report) \n" +
     "    OPTIONAL MATCH (target)-[:SENDS|:TO]-(contactRequest:ContactRequest)\n" +
+    "    OPTIONAL MATCH (target)-[:WRITES]->(userComment:Comment)\n" +
     "    OPTIONAL MATCH (post)<-[:TO]-(postReaction:Reaction)\n" +
     "    OPTIONAL MATCH (post)<-[:FOR]-(postComment:Comment) \n" +
     "    OPTIONAL MATCH (post)<-[:HAS]-(postReport:Report) \n" +
-    "    OPTIONAL MATCH (postReaction)<-[:TO]-(commentReaction:Reaction) \n" +
-    "detach delete commentReaction, postReport, postComment, postReaction,\n" +
+    "    OPTIONAL MATCH (postComment)<-[:TO]-(commentReaction:Reaction) \n" +
+    "detach delete commentReaction, postReport, userComment, postComment, postReaction,\n" +
     "contactRequest, report, degree, workPosition, post, target;"
   )
   void deleteUser(String email);
