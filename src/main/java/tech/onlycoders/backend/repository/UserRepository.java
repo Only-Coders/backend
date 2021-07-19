@@ -369,6 +369,7 @@ public interface UserRepository extends Neo4jRepository<User, String> {
 
   @Query(
     "MATCH (target:User{email: $email})\n" +
+    "    OPTIONAL MATCH (target)-[:OWNS]->(fcmToken:FCMToken)\n" +
     "    OPTIONAL MATCH (target)-[:PUBLISH]->(post:Post)\n" +
     "    OPTIONAL MATCH (target)-[:WORKS]->(workPosition:WorkPosition)\n" +
     "    OPTIONAL MATCH (target)-[:STUDIES]->(degree:Degree)\n" +
@@ -379,7 +380,7 @@ public interface UserRepository extends Neo4jRepository<User, String> {
     "    OPTIONAL MATCH (post)<-[:FOR]-(postComment:Comment) \n" +
     "    OPTIONAL MATCH (post)<-[:HAS]-(postReport:Report) \n" +
     "    OPTIONAL MATCH (postComment)<-[:TO]-(commentReaction:Reaction) \n" +
-    "detach delete commentReaction, postReport, userComment, postComment, postReaction,\n" +
+    "detach delete fcmToken, commentReaction, postReport, userComment, postComment, postReaction,\n" +
     "contactRequest, report, degree, workPosition, post, target;"
   )
   void deleteUser(String email);
