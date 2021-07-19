@@ -681,4 +681,15 @@ public class UserController {
     this.userService.addFCMToken(canonicalName, addFCMTokenDto);
     return ResponseEntity.ok().build();
   }
+
+  @ApiResponses(value = { @ApiResponse(responseCode = "200", content = { @Content(mediaType = "application/json") }) })
+  @PreAuthorize("hasAuthority('USER')")
+  @DeleteMapping("fcm-token/{deviceId}")
+  @Operation(summary = "Delete a FCM token from the user account.")
+  ResponseEntity<?> removeFCMToken(@PathVariable String deviceId) throws ApiException {
+    var userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    var canonicalName = userDetails.getCanonicalName();
+    this.userService.deleteFCMToken(deviceId, canonicalName);
+    return ResponseEntity.ok().build();
+  }
 }

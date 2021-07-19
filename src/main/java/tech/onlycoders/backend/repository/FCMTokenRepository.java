@@ -8,10 +8,10 @@ import tech.onlycoders.backend.model.FCMToken;
 
 @Repository
 public interface FCMTokenRepository extends Neo4jRepository<FCMToken, String> {
-  @Query("MATCH (t:FCMToken{id: $id}) DETACH DELETE t;")
-  void deleteById(String id);
-
   Optional<FCMToken> findByDeviceId(String deviceId);
+
+  @Query(" MATCH (t:FCMToken{id: $tokenId})<-[owns:OWNS]-(u:User{canonicalName: $canonicalName}) return count(owns)>0;")
+  Boolean verifyIfTokenBelongsToUser(String tokenId, String canonicalName);
 
   @Query(
     " MATCH (t:FCMToken{id: $tokenId}) WITH t " +

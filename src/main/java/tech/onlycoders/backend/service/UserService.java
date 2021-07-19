@@ -676,4 +676,16 @@ public class UserService {
     userRepository.updateUserImage(user.getId(), patchUserImageDto.getImageURI());
     return this.getProfile(user.getCanonicalName(), user.getCanonicalName());
   }
+
+  public void deleteFCMToken(String deviceId, String canonicalName) throws ApiException {
+    var fcmToken =
+      this.fcmTokenRepository.findByDeviceId(deviceId)
+        .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "error.device-not-found"));
+    var tokenBelongToUser = this.fcmTokenRepository.verifyIfTokenBelongsToUser(fcmToken.getId(), canonicalName);
+    if (tokenBelongToUser) {
+      this.fcmTokenRepository.delete(fcmToken);
+    } else {
+      throw new ApiException(HttpStatus.FORBIDDEN, "error.not-authorized");
+    }
+  }
 }
