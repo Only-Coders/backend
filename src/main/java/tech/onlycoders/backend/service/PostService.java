@@ -347,15 +347,17 @@ public class PostService {
 
     var owner = this.userRepository.getPostOwner(post.getId());
 
-    this.notificatorService.send(
-        MessageDTO
-          .builder()
-          .message(commenter.getFullName() + " ha comentado tu post!")
-          .to(owner.getEmail())
-          .eventType(EventType.NEW_COMMENT)
-          .from(commenter.getEmail())
-          .build()
-      );
+    if (!owner.getEmail().equalsIgnoreCase(commenter.getEmail())) {
+      this.notificatorService.send(
+          MessageDTO
+            .builder()
+            .message(commenter.getFullName() + " ha comentado tu post!")
+            .to(owner.getEmail())
+            .eventType(EventType.NEW_COMMENT)
+            .from(commenter.getEmail())
+            .build()
+        );
+    }
 
     var commentDto = commentMapper.commentToReadCommentDto(createdComment);
     var result = expandCommentData(commenter.getCanonicalName(), List.of(commentDto));
