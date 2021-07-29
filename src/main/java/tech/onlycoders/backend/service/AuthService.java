@@ -110,6 +110,7 @@ public class AuthService {
     claims.put("fullName", person.getFirstName() + " " + person.getLastName());
     claims.put("defaultPrivacy", person.getDefaultPrivacyIsPublic());
     claims.put("language", (person.getLanguage() != null ? person.getLanguage().getCode() : null));
+    claims.put("eliminationDate", null);
     var newToken = this.jwtService.createToken(claims, person.getEmail());
     return AuthResponseDto.builder().token(newToken).build();
   }
